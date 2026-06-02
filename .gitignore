@@ -11,6 +11,9 @@
 /[Uu]ser[Ss]ettings/
 /[Mm]emoryCaptures/
 
+# IL2CPP / native build intermediates
+/.utmp/
+
 # Recordings can get excessive in size
 /[Rr]ecordings/
 
