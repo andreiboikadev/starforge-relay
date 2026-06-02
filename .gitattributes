@@ -1,0 +1,52 @@
+# =============================================================
+#  Unity .gitattributes (lean, safe)
+#  - LF for all TEXT so machines don't fight over line endings.
+#  - `text=auto` AUTO-DETECTS binary, so binary assets (baked
+#    LightingData.asset, NavMesh, etc.) are NEVER EOL-converted
+#    => no corruption. Do NOT replace this with explicit `*.asset text`.
+#  - Binary media marked explicitly as a belt-and-suspenders.
+#  - Git LFS is intentionally deferred until art packs land (see note).
+# =============================================================
+
+# Normalize: text -> LF (repo + working tree); binary auto-detected & left untouched.
+* text=auto eol=lf
+
+# Nicer C# diffs
+*.cs diff=csharp
+
+# ---- Binary media: never EOL-convert, no text diff ----
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.bmp  binary
+*.tif  binary
+*.tiff binary
+*.tga  binary
+*.psd  binary
+*.exr  binary
+*.hdr  binary
+*.fbx  binary
+*.obj  binary
+*.blend binary
+*.glb  binary
+*.gltf binary
+*.wav  binary
+*.mp3  binary
+*.ogg  binary
+*.aif  binary
+*.aiff binary
+*.mp4  binary
+*.mov  binary
+*.ttf  binary
+*.otf  binary
+*.dll  binary
+*.unitypackage binary
+*.cubemap binary
+*.bytes binary
+
+# NOTE — Git LFS (deferred on purpose):
+# We already pushed + cloned, so converting now would mean a history rewrite
+# (git lfs migrate + force-push + re-clone on the other machine). Do it
+# deliberately when we import Kenney art (textures/audio), like pocket-grove:
+#   git lfs track "*.png" "*.tga" "*.psd" "*.fbx" "*.wav" "*.mp3" "*.ogg" "*.ttf" "*.otf"
