@@ -37,10 +37,9 @@ Editor. Headless CLI alternative (close the Editor or use a second Unity instanc
 
 ## Test VR in the Editor (no headset) — simulators
 
-> **Setup note (important):** the in-Editor headset paths below (simulators **and** Quest Link) need
-> OpenXR enabled for the **Standalone** target in XR Plug-in Management. So far only the **Android**
-> target has OpenXR enabled (Part B), so until Standalone is enabled the **validated path is a device
-> Build And Run** (below). Enabling Standalone OpenXR is a quick follow-up for fast iteration.
+> **Note:** OpenXR is enabled for **both Android and Standalone**, so the in-Editor paths below (XR
+> Device Simulator and Quest Link) work. A device **Build And Run** (below) remains the final
+> validation for real tracking / controllers / grab feel.
 
 - **XR Device Simulator** (XRI Samples → import "XR Device Simulator"): keyboard/mouse drive the HMD +
   controllers in Play mode. The fast loop for grab / socket / UI interaction logic, no extra runtime.

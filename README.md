@@ -30,8 +30,9 @@ launching on a Quest 2. Latest detailed state:
 3. **Test on device (the validated path):** make sure the active platform is **Android**
    (`File → Build Profiles → Switch Platform` — the active target is *not* version-controlled), then
    **Build And Run** to a Quest in Developer Mode.
-4. **Faster in-Editor iteration (optional, one setup step):** Quest Link Play and the XR Device
-   Simulator need OpenXR enabled for the **Standalone** target — only **Android** is enabled so far. See
+4. **Faster in-Editor iteration:** OpenXR is enabled for **both Android and Standalone**, so with
+   **Meta Quest Link** running (active OpenXR runtime = Meta) you can press **Play** and the scene
+   renders in the headset; the **XR Device Simulator** (XRI Samples) also works without a headset. See
    [docs/development/build-and-test.md](docs/development/build-and-test.md).
 
 ## Build and test

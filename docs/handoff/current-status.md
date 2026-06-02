@@ -75,7 +75,6 @@ writes (Bash and PowerShell) — propose a commit message, don't commit. Strip t
 at the first interaction slice. Verify any XR API against the installed XRI 3.3.0 / OpenXR 1.16 packages
 before relying on it.
 
-**Known setup gap:** OpenXR is enabled for the **Android** target only — not Standalone. So in-Editor
-headset testing (Quest Link Play, XR Device Simulator) is **not wired yet**; the validated test path is
-a device **Build And Run**. Enabling OpenXR for Standalone is a quick follow-up that unlocks fast
-in-Editor iteration.
+**In-Editor testing enabled:** OpenXR is now enabled for **both Android and Standalone**, so Quest Link
+Play and the XR Device Simulator work in the Editor for fast iteration. A device **Build And Run**
+remains the final validation (real tracking / controllers / grab feel).
