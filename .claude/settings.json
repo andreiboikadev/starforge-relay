@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git restore:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git clean:*)",
+      "Bash(git rebase:*)",
+      "Bash(git merge:*)",
+      "PowerShell(git add:*)",
+      "PowerShell(git commit:*)",
+      "PowerShell(git push:*)",
+      "PowerShell(git reset:*)",
+      "PowerShell(git restore:*)",
+      "PowerShell(git checkout:*)",
+      "PowerShell(git switch:*)",
+      "PowerShell(git clean:*)",
+      "PowerShell(git rebase:*)",
+      "PowerShell(git merge:*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./**/*.keystore)",
+      "Read(./**/*.jks)"
+    ],
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git lfs ls-files:*)",
+      "PowerShell(git status:*)",
+      "PowerShell(git diff:*)",
+      "PowerShell(git log:*)",
+      "PowerShell(git show:*)",
+      "PowerShell(git lfs ls-files:*)"
+    ]
+  }
+}
