@@ -16,7 +16,8 @@ primitives, following the GDD development order and the per-mechanic test gate.
   Oculus Touch interaction profile; Render Mode = Single Pass Instanced; platform Android + ASTC; Player
   settings Linear / Vulkan-only / IL2CPP / ARM64 / min API 32 / target API 34 / package
   `com.innowise.starforgerelay`; Project Validation (Android) clean (0 errors). Minimal VR scene
-  `Assets/Scenes/SampleScene.unity`: **XR Origin (XR Rig)** with tracking origin **Floor**, an
+  `Assets/Scenes/SampleScene.unity` (relocated to `_Project/Scenes/` this session — see below): **XR Origin
+  (XR Rig)** with tracking origin **Floor**, an
   **XR Interaction Manager**, and the rig's Input Action Manager; default Main Camera removed; scene in
   the Build list. **Verified on a real Quest 2** — built, installed, launched, OpenXR session reached
   FOCUSED, Vulkan render, Touch controllers tracked, no crash.
@@ -34,16 +35,27 @@ primitives, following the GDD development order and the per-mechanic test gate.
   — fixed stale "foundation docs at repo root" wording and broken `VR-Game-Concept-GDD.md` references →
   `docs/product/game-design.md`, and tightened the git-deny example (added `switch`/`merge`; prefix
   `checkout`). Added, then **resolved**, GDD §34 — the 5 design ambiguities decided (recommendation each) and fixed in §12/§14/§16/§28 (§34 is now a decisions log); MVP behaviour unchanged (4 shards, 20-req, standing, 14→12 s).
+- **Done — project structure tidy (this session, uncommitted):** created `Assets/_Project/` (first-party
+  root, by-type per guardrails §4) and moved the VR scene there → `Assets/_Project/Scenes/SampleScene.unity`
+  (GUID preserved; build list + scene-path docs updated). Deleted URP-template cruft (`TutorialInfo/`,
+  `Readme.asset`). Left package/template config (`XR/ XRI/ Settings/ Samples/`) and the referenced
+  `InputSystem_Actions.inputactions` in place. `ProjectSettings.asset templateDefaultScene` still points at
+  the old path (vestigial template field — no build/gameplay impact). Console clean; no gameplay code yet.
 - **Not started:** all gameplay code. No scripts under `Assets/_Project/` yet. No ScriptableObject
   configs, prefabs, or tests yet. No DI container (manual DI by ADR 0001). The rig still includes the
   Starter Assets **Locomotion** branch — to be stripped during implementation (no locomotion in MVP).
 
 ## Files changed recently
 
-- Engine config (committed earlier): `ProjectSettings/*`, `Assets/XR/*`, `Assets/Settings/*`,
-  `Assets/Scenes/SampleScene.unity`, `Assets/XRI/Settings/Resources/InteractionLayerSettings.asset`.
-- Docs bootstrap (this session, uncommitted): `CLAUDE.md`, `README.md`, `.claude/settings.json`,
-  `.claude/rules/*`, `docs/**`.
+- Engine config (committed earlier): `ProjectSettings/*`, `Assets/XR/*`, `Assets/Settings/*`, the VR scene
+  (committed under `Assets/Scenes/`, **relocated to `Assets/_Project/Scenes/SampleScene.unity` this session**),
+  `Assets/XRI/Settings/Resources/InteractionLayerSettings.asset`.
+- Docs bootstrap (committed earlier): `CLAUDE.md`, `README.md`, `.claude/settings.json`, `.claude/rules/*`,
+  `docs/**`.
+- Project structure tidy (this session, uncommitted): new `Assets/_Project/` first-party root + moved scene
+  (above); deleted URP-template `Assets/TutorialInfo/` + `Assets/Readme.asset`; updated
+  `ProjectSettings/EditorBuildSettings.asset` and scene-path refs in `README.md` +
+  `docs/{development/build-and-test,architecture/adr/0001-tech-baseline,handoff/current-status}.md`.
 
 ## Checks run
 

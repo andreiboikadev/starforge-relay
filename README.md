@@ -26,7 +26,7 @@ launching on a Quest 2. Latest detailed state:
 ## Quick start
 
 1. Open this folder in Unity 6.3 LTS via Unity Hub; let it restore packages on first open.
-2. Open `Assets/Scenes/SampleScene.unity`.
+2. Open `Assets/_Project/Scenes/SampleScene.unity`.
 3. **Test on device (the validated path):** make sure the active platform is **Android**
    (`File → Build Profiles → Switch Platform` — the active target is *not* version-controlled), then
    **Build And Run** to a Quest in Developer Mode.

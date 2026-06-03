@@ -62,7 +62,7 @@ switch platform first.
 1. Switch the active platform to **Android** if needed: `File → Build Profiles → Android → Switch
    Platform` (Texture Compression = **ASTC**).
 2. Connect a Quest in Developer Mode over USB; confirm it is visible: `adb devices`.
-3. `File → Build Profiles → Build And Run`. The only build scene is `Assets/Scenes/SampleScene.unity`.
+3. `File → Build Profiles → Build And Run`. The only build scene is `Assets/_Project/Scenes/SampleScene.unity`.
 4. Verify on device: stereo render, head 6DoF, controllers track. Inspect the OpenXR session / app
    process via logcat if needed: `adb logcat -d -s Unity` (look for `XR_SESSION_STATE_FOCUSED`).
 
