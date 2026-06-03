@@ -7,7 +7,7 @@
 | Design ref | GDD §12 (heat, victory); guardrails §16–17 |
 | Depends on | T01 (RoundConfig) |
 | Touches scenes/prefabs | no |
-| Status | ▫ not started |
+| Status | ✅ done |
 
 ## Goal
 
@@ -44,4 +44,19 @@ The two meters that drive the round's end states: `HeatService` (overload) and `
 
 ## What was actually done
 
-—
+Built on `feature/heat-stabilization` (2026-06-03); **full EditMode suite 24/24 green** (MCP Test Runner;
+12 prior + 12 new), no Console errors. Commit proposed (human commits).
+
+- `HeatService` (pure C#) — `Assets/_Project/Scripts/Gameplay/HeatService.cs`: +1 on wrong insert, +1 on
+  expired shard; `RelieveAtMilestone()` removes `comboHeatRelief` only when heat > 0; `IsOverloaded` at
+  exactly `heatCap` (8); never below 0. `heatCap`/`comboHeatRelief` injected via ctor.
+- `StabilizationProgress` (pure C#) — `…/StabilizationProgress.cs`: +1 per correct; `IsComplete` at exactly
+  `stabilizationRequirement` (20). Requirement injected via ctor.
+- Overload / victory exposed as **queryable state** (`IsOverloaded` / `IsComplete`); end-state priority is
+  deferred to `RoundController` (T06) per the brief.
+- Tests: `HeatServiceTests` (8) + `StabilizationProgressTests` (4) — incl. overload at 8 not 7, victory at
+  20 not 19, relief only when heat > 0, no underflow.
+
+No new asmdef/config — reused T01's `StarforgeRelay.Runtime` + EditMode test asmdef and `RoundConfig`
+fields (`heatCap`, `comboHeatRelief`, `stabilizationRequirement`). Heat gain (+1/event) is the fixed GDD
+rule (no RoundConfig field for it). No guardrail deviations.
