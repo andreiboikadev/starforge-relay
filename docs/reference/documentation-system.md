@@ -393,7 +393,7 @@ One or two sentences.
 ## Status
 Done / partially done / not started.
 
-## Files Changed Recently
+## Files Changed Recently  *(this session only — replace each update; not a running per-task log)*
 - `path/to/file`
 
 ## Checks Run
@@ -411,7 +411,7 @@ Done / partially done / not started.
 1. …  2. …  3. …
 ````
 
-Rules: update at the end of every session; keep current, not historical; no full logs; absolute dates; no unverified test claims.
+Rules: **`current-status.md` is a state snapshot, not a changelog** — it records only the *current* objective / status / blockers / next actions. **Do not accumulate a per-task history or track commit/PR state in it:** git owns commit/merge history, the task matrix (`docs/tasks/`) owns per-task status, and each brief's *"What was actually done"* owns the as-built record. **Refresh** it (don't append) at the end of every session; keep current, not historical; no full logs; absolute dates; no unverified test claims.
 
 ### 14.7 `docs/architecture/adr/0000-template.md`
 
