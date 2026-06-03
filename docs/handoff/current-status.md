@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-03
-Updated by: Claude Code (T03 — round timer; status doc slimmed)
-Branch/context: `feature/round-timer` (off `dev`; human reviews and commits)
+Updated by: Claude Code (T04 — port validation)
+Branch/context: `feature/port-validation` (off `dev`; human reviews and commits)
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -12,10 +12,10 @@ Branch/context: `feature/round-timer` (off `dev`; human reviews and commits)
 
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
-- **M1 — pure rules:** `T01` ✅ · `T02` ✅ · `T03` ✅ → **next `T04` PortValidationService** → `T05` · `T06`.
+- **M1 — pure rules:** `T01` ✅ · `T02` ✅ · `T03` ✅ · `T04` ✅ → **next `T05` ShardSpawnPlanner** → `T06`.
 - **M2–M6:** not started (VR slice → wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
-- EditMode suite **green (33/33)** at last close. All gameplay so far is **pure C# under `Assets/_Project/`**
+- EditMode suite **green (45/45)** at last close. All gameplay so far is **pure C# under `Assets/_Project/`**
   (`StarforgeRelay.Runtime` + `StarforgeRelay.Tests.EditMode` asmdefs); no scene gameplay / MonoBehaviours yet.
 
 ## Still to build / watch

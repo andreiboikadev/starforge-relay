@@ -66,7 +66,7 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 | T01 | RoundConfig + ScoreService + ComboTracker | `feature/round-config-scoring` | M1 rules | — | no | ✓ | ✅ |
 | T02 | HeatService + StabilizationProgress | `feature/heat-stabilization` | M1 rules | T01 | no | ✓ | ✅ |
 | T03 | RoundTimer | `feature/round-timer` | M1 rules | T01 | no | ✓ | ✅ |
-| T04 | PortValidationService (color match in code) | `feature/port-validation` | M1 rules | T01 | no | ✓ | ▫ |
+| T04 | PortValidationService (color match in code) | `feature/port-validation` | M1 rules | T01 | no | ✓ | ✅ |
 | T05 | ShardSpawnPlanner (seeded RNG) | `feature/shard-spawn-planner` | M1 rules | T01 | no | ✓ | ▫ |
 | T06 | RoundController (end-state priority, star rating) | `feature/round-controller` | M1 rules | T01–T05 | no | ✓ | ▫ |
 | T07 | Strip Locomotion; rename scene off `SampleScene` default; confirm rig | `chore/strip-locomotion` | M2 slice | — | yes (rig) | · | ▫ |
