@@ -65,11 +65,11 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 |---|---|---|---|---|---|---|---|
 | T01 | RoundConfig + ScoreService + ComboTracker | `feature/round-config-scoring` | M1 rules | — | no | ✓ | ✅ |
 | T02 | HeatService + StabilizationProgress | `feature/heat-stabilization` | M1 rules | T01 | no | ✓ | ✅ |
-| T03 | RoundTimer | `feature/round-timer` | M1 rules | T01 | no | ✓ | ▫ |
+| T03 | RoundTimer | `feature/round-timer` | M1 rules | T01 | no | ✓ | ✅ |
 | T04 | PortValidationService (color match in code) | `feature/port-validation` | M1 rules | T01 | no | ✓ | ▫ |
 | T05 | ShardSpawnPlanner (seeded RNG) | `feature/shard-spawn-planner` | M1 rules | T01 | no | ✓ | ▫ |
 | T06 | RoundController (end-state priority, star rating) | `feature/round-controller` | M1 rules | T01–T05 | no | ✓ | ▫ |
-| T07 | Strip Locomotion branch; confirm rig | `chore/strip-locomotion` | M2 slice | — | yes (rig) | · | ▫ |
+| T07 | Strip Locomotion; rename scene off `SampleScene` default; confirm rig | `chore/strip-locomotion` | M2 slice | — | yes (rig) | · | ▫ |
 | T08 | Shard prefab + grab (Grip) + ShardPool | `feature/shard-grab` | M2 slice | T01 | yes (prefab) | · | ▫ |
 | T09 | Ports as accept-any sockets → validate in code | `feature/port-socket` | M2 slice | T04, T08 | yes | · | ▫ |
 | T10 | Reactor core + feeder pads + spawner + lerp-back | `feature/reactor-spawn` | M2 slice | T05, T08 | yes | · | ▫ |
@@ -97,8 +97,10 @@ traceability.
   acceptance criteria against the cited GDD / guardrails section; set Status `🟡`; note it in
   `current-status.md`.
 - **Close** (on merge): set the brief Status `✅` and **fill "What was actually done"**; update the matrix
-  row here; update `current-status.md`. Keep these locations consistent — see
-  [`agent-verification.md`](../development/agent-verification.md).
+  row here; refresh `current-status.md`. Keep these consistent — see
+  [`agent-verification.md`](../development/agent-verification.md). **`current-status.md` is a state snapshot**
+  (where-we-are / blockers / next): refresh it; do **not** append per-task file lists or commit/PR status —
+  git, the matrix, and the brief's *What was actually done* own those.
 
 ## Scaling up (only when the need is real)
 

@@ -7,7 +7,7 @@
 | Design ref | GDD §12 (90 s round, time-out); guardrails §11, §16–17 |
 | Depends on | T01 (RoundConfig) |
 | Touches scenes/prefabs | no |
-| Status | ▫ not started |
+| Status | ✅ done |
 
 ## Goal
 
@@ -42,4 +42,17 @@ A pure, testable countdown that the Playing state ticks. No dependence on `Time.
 
 ## What was actually done
 
-—
+Built on `feature/round-timer` (2026-06-03); **full EditMode suite 33/33 green** (24 prior + 9 new), no
+Console errors. Commit proposed (human commits).
+
+- `RoundTimer` (pure C#) — `Assets/_Project/Scripts/Gameplay/RoundTimer.cs`: starts at
+  `roundDurationSeconds` (90, injected from RoundConfig); `Tick(deltaTime)` counts down and clamps at 0
+  (never negative); `Pause()`/`Resume()` hold and restore remaining without losing/double-counting the
+  toggle frame; ticking while paused is a no-op; non-positive deltas ignored (no time travel); `IsTimedOut`
+  at exactly 0; `Remaining` exposed for the victory time-bonus (`ScoreService`).
+- Tests: `RoundTimerTests` (9) — count-down, accumulate, pause-holds / resume-continues, paused-no-op,
+  time-out at 0 (and not at 0.5 s left), no underflow, negative-delta guard.
+
+No new asmdef/config — reused T01's `StarforgeRelay.Runtime` + EditMode test asmdef and `RoundConfig`'s
+`roundDurationSeconds`. No `Time.*` inside the rule (deltaTime injected; guardrails §11/§17); the per-frame
+`Tick(Time.deltaTime)` driver belongs to the Playing state (M2/M3), not here. No guardrail deviations.
