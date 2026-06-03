@@ -7,7 +7,7 @@
 | Design ref | GDD §10 (ports), §12 (wrong insert); guardrails §6 (critical note), §13, §16–17 |
 | Depends on | T01 (shard/port color identity) |
 | Touches scenes/prefabs | no |
-| Status | ▫ not started |
+| Status | ✅ done |
 
 ## Goal
 
@@ -47,4 +47,20 @@ what makes a mismatch actually register.
 
 ## What was actually done
 
-—
+Built on `feature/port-validation` (2026-06-03); **full EditMode suite 45/45 green** (33 prior + 12 new),
+no Console errors. Commit proposed (human commits).
+
+- `PortValidationService` (pure C#) — `Assets/_Project/Scripts/Gameplay/PortValidationService.cs`:
+  `Validate(ShardColor shard, ShardColor? port)` → `InsertOutcome.Correct` (match), `Wrong` (mismatch),
+  `NoPenalty` (`port == null`, empty-space drop). Pure decision, no side effects.
+- `InsertOutcome` enum — `Assets/_Project/Scripts/Gameplay/InsertOutcome.cs` (`Correct` / `Wrong` /
+  `NoPenalty`); shared decision type for `RoundController` (T06) and the port-socket adapter (T09).
+- Reuses the shared `ShardColor` (T01) for both shard and port color; **no socket color-gate added**
+  (guardrails §6 / ADR 0001 — the wrong-insert path must stay selectable; XR socket wiring is T09).
+- Tests: `PortValidationServiceTests` (12) — 3 matches (all colors), 6 cross-pair mismatches, 3 null-port.
+
+No new asmdef/config. No guardrail deviations. **Naming note (deviation from the brief's wording):** the
+enum values are `Correct` / `Wrong` / `NoPenalty`; the acceptance text above phrased the first two as
+`CorrectInsert` / `WrongInsert`. Shortened deliberately so the *decision* value isn't confused with the
+§15 `CorrectInsert` / `WrongInsert` *events* (raised later by `RoundController`). Behavior is identical and
+the 12 tests assert it.
