@@ -1110,3 +1110,29 @@ This design has been checked for common first-VR-project problems:
 - **No hidden campaign scope:** Progression, enemies, multiplayer, and extra modes are explicitly out of MVP.
 
 The final intended MVP is a compact, polished VR arcade toy: stand at a reactor, grab glowing shards, match them to ports, stabilize a star, replay for a better score.
+
+---
+
+## 34. Open design questions (resolve when the relevant feature is built)
+
+Internal design ambiguities surfaced in a 2026-06-03 consistency review. **None affect the MVP** (active
+shards = 4, standing-only, 20-shard requirement), so they are deferred — resolve each in the task brief
+that implements the feature it touches; until then the MVP behaviour defined above is authoritative.
+
+1. **Active-shard escalation (5–6) vs. "target 4".** §12 escalates to 5 (after 8 accepts) / 6 (after 15)
+   "only if extra feeder slots exist," but the spawn rule and §6/§26 treat the target as 4, and the extra
+   "upper" pads are optional (§10) and would sit above the §9/§27 reach ceiling. In the 4-pad MVP the
+   escalation never fires. On implementation, either confirm 4-only, or define upper pads within reach and
+   make the escalation target explicit in the spawn loop.
+2. **Balance lever "20 → 24" vs. star bands.** §14's "raise the stabilization requirement to 24" would
+   leave the §13 star bands (0–5 / 6–11 / 12–19 / 20) unscaled (20–23 unmapped). If ever used, rescale the
+   bands to the requirement. MVP stays at 20.
+3. **Lifetime lever "14 → 12".** §14's "reduce starting lifetime to 12" collides with the existing §12
+   ramp (14 → 12 after 10 accepts). When tuning, clarify whether it lowers the *start* (flattening the
+   ramp) or the late value.
+4. **Seated wording.** UI copy "Stand or sit comfortably" (§16/§28) implies seated support, but §9/§24
+   make standing the MVP posture and say to strip seated wording if seated isn't shipped. Use "Stand
+   comfortably and face forward" until seated mode is actually implemented.
+5. **Time-out wording.** §12 Time-out says "stop spawning" but — unlike Victory/Overload — doesn't say
+   "stop timer"; harmless (the timer is already 0), but for parity say "stop timer (already 0) and
+   spawning."

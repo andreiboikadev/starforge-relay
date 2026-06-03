@@ -29,6 +29,11 @@ primitives, following the GDD development order and the per-mechanic test gate.
   demo-ready — matrix M0–M6 + per-task briefs; full briefs written for M1 `T01`–`T06`) and
   `docs/development/agent-verification.md` (anti-false-claim discipline, distilled from a larger project's
   protocol). Both linked from `docs/INDEX.md`. No gameplay code yet — docs only.
+- **Done — reference-doc consistency sweep (2026-06-03):** corrected the consolidated in-repo docs
+  (`docs/architecture/implementation-guardrails.md`, `docs/reference/{claude-code-rules,documentation-system}.md`)
+  — fixed stale "foundation docs at repo root" wording and broken `VR-Game-Concept-GDD.md` references →
+  `docs/product/game-design.md`, and tightened the git-deny example (added `switch`/`merge`; prefix
+  `checkout`). Added GDD **§34 "Open design questions"** (deferred; MVP behaviour stays authoritative).
 - **Not started:** all gameplay code. No scripts under `Assets/_Project/` yet. No ScriptableObject
   configs, prefabs, or tests yet. No DI container (manual DI by ADR 0001). The rig still includes the
   Starter Assets **Locomotion** branch — to be stripped during implementation (no locomotion in MVP).

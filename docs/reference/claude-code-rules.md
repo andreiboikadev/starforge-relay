@@ -122,7 +122,7 @@ Settings file locations:
 Shell commands that run at lifecycle events "ensuring certain actions always happen rather than relying on the LLM." Events include `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Notification`, `SubagentStop`, `Stop`, `PreCompact`, `SessionEnd` (and more).
 
 A **`PreToolUse`** hook blocks a tool call in one of two verified ways:
-- **Exit code 2** — blocking error. `stderr` is fed back to Claude; the call is prevented *before* permission rules are evaluated (so it overrides allow rules). Any stdout/JSON is ignored.
+- **Exit code 2** — blocking error. `stderr` is fed back to Claude; the call is prevented *before* permission rules are evaluated (so a hook can **block** a call an `allow` rule would otherwise have permitted — it adds restriction; it cannot grant past a `deny`, see below). Any stdout/JSON is ignored.
 - **Exit code 0 + JSON** with a deny decision:
   ```json
   {
@@ -178,7 +178,7 @@ This is the exact setup we want: the assistant does the work via direct file edi
 
 ## What this is
 Stationary VR arcade for Meta Quest 2/3. Unity 6.3 + OpenXR + XR Interaction Toolkit (URP).
-Design: VR-Game-Concept-GDD.md. Engineering contract: implementation-guardrails.md.
+Design: docs/product/game-design.md. Engineering contract: docs/architecture/implementation-guardrails.md.
 
 ## Division of labor
 - You (assistant): edit C#/text/asset files directly (clean `git diff`); do Editor operations
@@ -208,7 +208,9 @@ Design: VR-Game-Concept-GDD.md. Engineering contract: implementation-guardrails.
       "Bash(git reset *)",     "PowerShell(git reset *)",
       "Bash(git rebase *)",    "PowerShell(git rebase *)",
       "Bash(git restore *)",   "PowerShell(git restore *)",
-      "Bash(git checkout -- *)","PowerShell(git checkout -- *)",
+      "Bash(git checkout *)",  "PowerShell(git checkout *)",
+      "Bash(git switch *)",    "PowerShell(git switch *)",
+      "Bash(git merge *)",     "PowerShell(git merge *)",
       "Bash(git clean *)",     "PowerShell(git clean *)",
       "Read(./.env)", "Read(./.env.*)", "Read(./secrets/**)"
     ]

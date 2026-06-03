@@ -4,7 +4,7 @@
 >
 > **Status.** This is the *blueprint* (the "why" and the templates). The **live** system is the repo's actual `CLAUDE.md`, `.claude/`, and `docs/` once they are created from this file. Where a template here differs from the real files, **the real files win**.
 >
-> **Foundation docs already at the repo root** (these seed the live docs and are referenced throughout): `VR-Game-Concept-GDD.md` (design source of truth), `implementation-guardrails.md` (engineering contract), `claude-code-rules.md` (how Claude Code rules work — verified). The live `docs/` tree **links to these; it does not duplicate them.**
+> **Foundation docs** (these seed the live docs and are referenced throughout): the GDD (design source of truth), the engineering guardrails, and the Claude Code rules reference. They are **consolidated in-repo** under `docs/` — `docs/product/game-design.md`, `docs/architecture/implementation-guardrails.md`, `docs/reference/` — linked from `docs/INDEX.md` (one source of truth per fact, not duplicated).
 >
 > **Verification & language.** Claude Code facts here were checked against the official docs (June 2026). All project Markdown is written in **English**.
 >
@@ -16,7 +16,7 @@
 
 The chat that sets up the docs must:
 
-1. Read this file and the three foundation docs first.
+1. Read this file and the other foundation docs first (the GDD, the engineering guardrails, and the Claude Code rules reference).
 2. Confirm the actual Unity repository root before creating files (the Unity project may not exist yet — see the setup plan).
 3. Stop and ask if another agent is actively working in the repo.
 4. Create the **bootstrap minimum** (§5) only; do not pre-create empty stubs.
@@ -76,10 +76,6 @@ README.md
 CLAUDE.md
 AGENTS.md                          optional, only for non-Claude agents
 CHANGELOG.md                       optional until there are notable changes
-VR-Game-Concept-GDD.md             (root) design source of truth
-implementation-guardrails.md       (root) engineering contract
-claude-code-rules.md               (root) Claude Code rules reference
-documentation-system.md            (root) this blueprint
 .github/
   pull_request_template.md         recommended for PR-style review
 .claude/
@@ -92,16 +88,22 @@ documentation-system.md            (root) this blueprint
 docs/
   INDEX.md
   product/
-    scope.md                       optional if scope fits the GDD
+    game-design.md                 the GDD — consolidated in-repo as the design source of truth
+    scope.md                       optional if scope outgrows the GDD
   architecture/
+    implementation-guardrails.md   the engineering contract — consolidated in-repo
     overview.md                    optional if guardrails already explain the shape
     adr/
       0000-template.md             when the first ADR is added
+  reference/
+    claude-code-rules.md           how Claude Code rules work (background, not live config)
+    documentation-system.md        this blueprint (background)
   development/
     setup.md
     build-and-test.md
     unity-workflow.md              XR + MCP for Unity habits
     ai-workflow.md                 optional if CLAUDE.md is enough
+    agent-verification.md          verify state before claiming it (add with tasks/; template: agent-verification.md)
   quality/
     test-strategy.md
     performance-budget.md          VR FPS / draw-call budget
@@ -109,9 +111,12 @@ docs/
     asset-ledger.md
   handoff/
     current-status.md
+  tasks/                           graduate-to when the backlog outgrows current-status's "next actions"
+    README.md                      matrix (plan to ship) + brief template (template: task-system.md)
+    Tnn-….md                       one self-contained brief per task (+ a "what was actually done" field)
 ```
 
-Game design and the engineering guardrails are **not** copied into `docs/`; `docs/INDEX.md` links to the root `VR-Game-Concept-GDD.md` and `implementation-guardrails.md`. Do not create optional files as empty stubs.
+The GDD and the engineering guardrails are **consolidated in-repo** — GDD → `docs/product/game-design.md`, guardrails → `docs/architecture/implementation-guardrails.md`, the two reference docs → `docs/reference/` — and `docs/INDEX.md` links them (one source of truth per fact, no duplication). Do not create optional files as empty stubs.
 
 ---
 
@@ -127,9 +132,11 @@ For the first setup pass, create only what makes the next coding session safe an
 - `docs/handoff/current-status.md`
 - `docs/assets/asset-ledger.md`
 
-Already present at root and just linked from `INDEX.md`: `VR-Game-Concept-GDD.md`, `implementation-guardrails.md`, `claude-code-rules.md`.
+Consolidated in-repo and linked from `INDEX.md`: the GDD → `docs/product/game-design.md`, guardrails → `docs/architecture/implementation-guardrails.md`, the reference docs → `docs/reference/` (link, don't duplicate).
 
 Create if immediately useful: `docs/development/setup.md` (if setup needs more than the README), `.github/pull_request_template.md`, `.claude/rules/unity-code.md`. Create skills/subagents/hooks only after the basic docs exist and a real need appears — not in the first pass.
+
+**Graduate-when-needed (not bootstrap):** a **task system** (`docs/tasks/` — a matrix planning the arc to ship + self-contained per-task briefs, each with a *"what was actually done"* field) and a **verification protocol** (`docs/development/agent-verification.md` — how to confirm work is really done before claiming it). Add them the moment the backlog outgrows `current-status.md`'s "next actions" bullets, or a second contributor appears. They are **portable assets** — copy the `task-system.md` and `agent-verification.md` templates and grow them, don't re-derive each project.
 
 ---
 
@@ -141,11 +148,11 @@ Every important fact has one home:
 |---|---|
 | Project summary and quick start | `README.md` |
 | Claude Code session rules | `CLAUDE.md` |
-| How Claude Code rules work (reference) | `claude-code-rules.md` (root) |
+| How Claude Code rules work (reference) | `docs/reference/claude-code-rules.md` |
 | Documentation map | `docs/INDEX.md` |
-| Game rules, UX, content, MVP | `VR-Game-Concept-GDD.md` (root) |
-| MVP cuts and non-goals | `VR-Game-Concept-GDD.md` (or `docs/product/scope.md` if it grows) |
-| Engineering guardrails | `implementation-guardrails.md` (root) |
+| Game rules, UX, content, MVP | `docs/product/game-design.md` |
+| MVP cuts and non-goals | `docs/product/game-design.md` (or `docs/product/scope.md` if it grows) |
+| Engineering guardrails | `docs/architecture/implementation-guardrails.md` |
 | Architecture decisions | `docs/architecture/adr/` |
 | Setup steps | `docs/development/setup.md` |
 | Build and test commands | `docs/development/build-and-test.md` |
@@ -154,6 +161,8 @@ Every important fact has one home:
 | Performance targets (VR FPS budget) | `docs/quality/performance-budget.md` |
 | Asset sources and licenses | `docs/assets/asset-ledger.md` |
 | Current active state | `docs/handoff/current-status.md` |
+| Task plan + per-task briefs (when the backlog grows) | `docs/tasks/` — matrix + `Tnn-*.md` |
+| State-claim verification discipline | `docs/development/agent-verification.md` |
 | Release notes | `CHANGELOG.md` |
 
 If the same command or rule appears in more than one place, pick one home and replace the duplicates with links.
@@ -171,7 +180,7 @@ Recommended `CLAUDE.md`:
 
 ## Project Snapshot
 Stationary VR arcade for Meta Quest 2/3. Unity 6.3 + OpenXR + XR Interaction Toolkit (URP),
-automated via MCP for Unity. Design: `VR-Game-Concept-GDD.md`. Engineering: `implementation-guardrails.md`.
+automated via MCP for Unity. Design: `docs/product/game-design.md`. Engineering: `docs/architecture/implementation-guardrails.md`.
 
 ## Start Every Session
 1. Read `docs/INDEX.md` and `docs/handoff/current-status.md`.
@@ -180,8 +189,8 @@ automated via MCP for Unity. Design: `VR-Game-Concept-GDD.md`. Engineering: `imp
 4. State what you are about to change before broad edits.
 
 ## Must-Read Docs
-- `VR-Game-Concept-GDD.md`
-- `implementation-guardrails.md`
+- `docs/product/game-design.md`
+- `docs/architecture/implementation-guardrails.md`
 - `docs/development/build-and-test.md`
 - `docs/handoff/current-status.md`
 
@@ -269,7 +278,9 @@ Hard safety boundaries and shared config. Permission rules are enforced by Claud
       "Bash(git reset *)",      "PowerShell(git reset *)",
       "Bash(git rebase *)",     "PowerShell(git rebase *)",
       "Bash(git restore *)",    "PowerShell(git restore *)",
-      "Bash(git checkout -- *)","PowerShell(git checkout -- *)",
+      "Bash(git checkout *)",  "PowerShell(git checkout *)",
+      "Bash(git switch *)",    "PowerShell(git switch *)",
+      "Bash(git merge *)",     "PowerShell(git merge *)",
       "Bash(git clean *)",      "PowerShell(git clean *)",
       "Read(./.env)", "Read(./.env.*)", "Read(./secrets/**)"
     ]
@@ -329,8 +340,10 @@ Last verified: YYYY-MM-DD
 
 | Document | Purpose | Update when |
 |---|---|---|
-| `../VR-Game-Concept-GDD.md` | Game rules, UX, content, MVP | Gameplay/UX changes |
-| `../implementation-guardrails.md` | Engineering rules | Architecture/code-quality rules change |
+| `product/game-design.md` | Game rules, UX, content, MVP | Gameplay/UX changes |
+| `architecture/implementation-guardrails.md` | Engineering rules | Architecture/code-quality rules change |
+| `architecture/adr/` | Dated architecture decisions (ADRs) | A decision is made or superseded |
+| `reference/*.md` | Background (Claude Code rules ref; this blueprint) | The reference material changes |
 | `development/setup.md` | First setup | Unity/packages/platform setup change |
 | `development/build-and-test.md` | Exact build/test commands | Commands/verification change |
 | `quality/performance-budget.md` | VR FPS / draw-call budget | Targets change |
@@ -340,8 +353,8 @@ Last verified: YYYY-MM-DD
 ## Start Here
 1. `../README.md`
 2. `handoff/current-status.md`
-3. `../VR-Game-Concept-GDD.md`
-4. `../implementation-guardrails.md`
+3. `product/game-design.md`
+4. `architecture/implementation-guardrails.md`
 5. `development/build-and-test.md`
 ````
 
@@ -504,9 +517,9 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `chore`, `ci`
 | Event | Required action |
 |---|---|
 | End of every AI session | Update `docs/handoff/current-status.md` |
-| Gameplay rule change | Update `VR-Game-Concept-GDD.md` |
+| Gameplay rule change | Update `docs/product/game-design.md` |
 | Architecture decision | Add or supersede an ADR |
-| Code-quality rule change | Update `implementation-guardrails.md` or `.claude/rules/` |
+| Code-quality rule change | Update `docs/architecture/implementation-guardrails.md` or `.claude/rules/` |
 | Build/test command change | Update `docs/development/build-and-test.md` |
 | Unity/package/platform setup change | Update `docs/development/setup.md` |
 | New external asset | Update `docs/assets/asset-ledger.md` |
@@ -522,7 +535,7 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `chore`, `ci`
 2. Create the bootstrap docs only (§5).
 3. Create `CLAUDE.md` (§7).
 4. Create `.claude/settings.json` with the Bash + PowerShell git-write deny rules (§10).
-5. Create `docs/INDEX.md` linking the root GDD, guardrails, and claude-code-rules.
+5. Create `docs/INDEX.md` linking the consolidated GDD (`docs/product/game-design.md`), guardrails, and reference docs.
 6. Create `docs/development/build-and-test.md`, `docs/handoff/current-status.md`, `docs/assets/asset-ledger.md`.
 7. Add `docs/development/setup.md` if setup doesn't fit the README.
 8. Add `.github/pull_request_template.md` and `.claude/rules/unity-code.md` if useful.
@@ -547,7 +560,7 @@ The documentation system is acceptable when:
 - Claude Code has a concise `CLAUDE.md` and (if used) modular `.claude/rules/`.
 - Git writes are blocked by `permissions.deny` covering **Bash and PowerShell**.
 - The current state is recoverable from `docs/handoff/current-status.md`.
-- Game design and engineering guardrails have clear, single source files (the root foundation docs).
+- Game design and engineering guardrails have clear, single source files (consolidated in-repo under `docs/`).
 - Build/test steps are exact enough to run.
 - Important decisions are captured as ADRs.
 - Assets have source and license records.

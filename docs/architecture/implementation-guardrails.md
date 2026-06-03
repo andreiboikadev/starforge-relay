@@ -4,7 +4,7 @@
 >
 > **Scope.** These rules apply *after* the technical chat sets up the concrete Unity + XR stack (OpenXR + XR Interaction Toolkit on URP, Android/Quest target). They do **not** replace the game design document. They define how the code should be structured while implementing it.
 >
-> **Companion documents:** `VR-Game-Concept-GDD.md` (design source of truth) and the VR project setup plan (OpenXR + XRI + MCP for Unity).
+> **Companion documents:** `docs/product/game-design.md` (the GDD — design source of truth) and the VR project setup plan (OpenXR + XRI + MCP for Unity).
 >
 > **Design numbers live in the GDD.** Where this doc cites values (90 s round, 20 stabilization, heat cap 8, 4–6 active shards, 14→12 s lifetime, combo +50 / 5, respawn 0.3–0.8 s), the **GDD is the source of truth**. Keep them in `RoundConfig`, not hard-coded in logic.
 
@@ -661,7 +661,7 @@ This gate forces a deliberate choice before generating code; it is not a long es
 
 ## 21. LLM Implementation Protocol
 
-Before coding: read `VR-Game-Concept-GDD.md` and this document and the setup plan; confirm the chosen XR stack and Unity version; choose manual DI or a specific container and explain why; list the planned systems and files; state intentional deviations.
+Before coding: read `docs/product/game-design.md` (the GDD) and this document and the setup plan; confirm the chosen XR stack and Unity version; choose manual DI or a specific container and explain why; list the planned systems and files; state intentional deviations.
 
 During coding: build **one vertical slice first** — menu → calibration → start round → grab a primitive shard → socket it into a matching primitive port → correct/wrong/expired feedback → results — before importing art. Keep classes small; move formulas and state transitions out of MonoBehaviours when practical; write unit tests **alongside each mechanic** (same change), not afterward; do not postpone all architecture until after the prototype works.
 
@@ -755,7 +755,7 @@ The ideal result is boring in the best way: clear, explicit, easy to debug, and 
 
 The Starforge Relay implementation should be accepted only when:
 
-- The game design in `VR-Game-Concept-GDD.md` is playable.
+- The game design in `docs/product/game-design.md` is playable.
 - The architecture is split into XR rig/interaction, gameplay, UI, audio, persistence, and infrastructure boundaries.
 - No MVP gameplay depends on global singletons.
 - Dependencies are wired through a clear composition root, manual DI, or one approved DI container.
