@@ -335,7 +335,7 @@ Feeder pads are where shards appear.
 - Mid-left pad.
 - Mid-right pad.
 - Front-right pad.
-- Optional upper-left and upper-right pads only if reach remains comfortable and 5 to 6 active shards are enabled.
+- Optional extra pads for the post-MVP escalation lever (§12) — kept **within the comfortable forward arc and chest height** (§9), enabled only if reach, readability, and Quest 2 perf hold.
 
 **Behavior:**
 
@@ -399,9 +399,12 @@ Optional controls should only be added if the MVP loop is already stable.
 
 **Active shard count:**
 
-- Start with 4 active shards, one per MVP feeder pad.
-- Increase to 5 active shards after 8 correct accepts only if a fifth feeder slot exists.
-- Increase to 6 active shards after 15 correct accepts only if readability remains good and six feeder slots exist.
+- **MVP: 4 active shards, fixed** — one per MVP feeder pad. In MVP the intensity ramps via the shortening
+  shard lifetime (see Spawn rules), not via more shards.
+- **Difficulty lever (post-MVP, off by default):** optionally raise to 5 (after 8 accepts) / 6 (after 15
+  accepts) **only if** extra feeder pads exist **within the comfortable forward arc and chest height
+  (§9)**, readability holds, and Quest 2 has perf headroom — validate on device. Never above 6 (§26).
+  (Resolved §34.1.)
 
 **Spawn rules:**
 
@@ -411,7 +414,7 @@ Optional controls should only be added if the MVP loop is already stable.
 - Always keep at least 2 different colors active.
 - Prefer spawning a color that currently has fewer active shards.
 - Each feeder pad holds at most one shard at a time; the pad stays reserved while its shard is idle, grabbed, or returning, so no second shard spawns there.
-- When a shard is accepted or expires, free its pad and spawn a replacement on a free pad after about 0.3 to 0.8 seconds, keeping the active shard count at its current target (4 by default) and honoring the color rules above.
+- When a shard is accepted or expires, free its pad and spawn a replacement on a free pad after about 0.3 to 0.8 seconds, keeping the active shard count at its target (**4 in MVP**; dynamic only if the post-MVP escalation lever is enabled) and honoring the color rules above.
 - Shard lifetime starts at 14 seconds.
 - After 10 correct accepts, shard lifetime may drop to 12 seconds.
 - Never spawn required interactions outside comfortable reach.
@@ -456,7 +459,7 @@ Optional controls should only be added if the MVP loop is already stable.
 **Time-out:**
 
 - Triggered when timer reaches 0.
-- Stop spawning.
+- Stop timer (already 0) and spawning.
 - Core shows partial stabilization based on progress.
 - Show results after about 1 second.
 
@@ -506,14 +509,17 @@ Initial tuning targets:
 
 If the game feels too easy:
 
-- Reduce starting shard lifetime from 14 to 12 seconds.
-- Increase active shards to 5 earlier only if a fifth feeder slot exists.
-- Raise stabilization requirement from 20 to 24.
+- Shorten shard lifetime — e.g. start 12 s / late 10 s — **keeping the start > late ramp** (don't flatten
+  start and late to one value; MVP is 14 → 12 s). Tunable; confirm on device.
+- Raise the active-shard count via the **post-MVP escalation lever** (§12), only under its conditions
+  (comfort-safe extra pads, readability, perf).
+- Raise the stabilization requirement (e.g. 20 → 24). **If you do, rescale the §13 star bands to the new
+  requirement** — they are defined for 20, so leaving them unchanged would mishandle 20–23. Tunable.
 
 If the game feels too hard:
 
 - Increase shard lifetime to 16 seconds.
-- Keep active shards at 4 for the whole round.
+- Leave the §12 escalation lever off — active shards stay at 4 all round (the MVP default).
 - Raise heat cap from 8 to 10.
 - Make ports larger.
 
@@ -522,7 +528,7 @@ If grabbing feels unreliable:
 - Increase shard colliders.
 - Increase direct interactor radius.
 - Move feeder pads closer.
-- Remove upper pads.
+- Remove any extra (non-MVP) pads.
 
 ---
 
@@ -617,7 +623,7 @@ Keep the credits accessible from the main menu.
 
 **Content:**
 
-- UI text: **Stand or sit comfortably and face forward**
+- UI text: **Stand comfortably and face forward** *(standing-only MVP per §9/§24; restore "or sit" only if seated mode is shipped)*
 - Buttons:
   - **Start**
   - **Recenter**
@@ -1001,7 +1007,7 @@ Keep copy short. Suggested English UI text:
 - **Partial Relay**
 - **Overloaded**
 - **Tracking lost. Face the reactor.**
-- **Stand or sit comfortably**
+- **Stand comfortably and face forward**
 
 Do not add long tutorial paragraphs in the game UI.
 
@@ -1113,26 +1119,21 @@ The final intended MVP is a compact, polished VR arcade toy: stand at a reactor,
 
 ---
 
-## 34. Open design questions (resolve when the relevant feature is built)
+## 34. Design decisions (resolved 2026-06-03)
 
-Internal design ambiguities surfaced in a 2026-06-03 consistency review. **None affect the MVP** (active
-shards = 4, standing-only, 20-shard requirement), so they are deferred — resolve each in the task brief
-that implements the feature it touches; until then the MVP behaviour defined above is authoritative.
+Internal design ambiguities from a 2026-06-03 consistency review, now **resolved** in the sections above.
+MVP behaviour is unchanged (active shards = 4, standing-only, 20-shard requirement, 14 → 12 s lifetime);
+numbers tagged "tunable" are confirmed on a Quest device during balance playtests (§14 + the per-mechanic
+test gate), not changed from the MVP defaults here.
 
-1. **Active-shard escalation (5–6) vs. "target 4".** §12 escalates to 5 (after 8 accepts) / 6 (after 15)
-   "only if extra feeder slots exist," but the spawn rule and §6/§26 treat the target as 4, and the extra
-   "upper" pads are optional (§10) and would sit above the §9/§27 reach ceiling. In the 4-pad MVP the
-   escalation never fires. On implementation, either confirm 4-only, or define upper pads within reach and
-   make the escalation target explicit in the spawn loop.
-2. **Balance lever "20 → 24" vs. star bands.** §14's "raise the stabilization requirement to 24" would
-   leave the §13 star bands (0–5 / 6–11 / 12–19 / 20) unscaled (20–23 unmapped). If ever used, rescale the
-   bands to the requirement. MVP stays at 20.
-3. **Lifetime lever "14 → 12".** §14's "reduce starting lifetime to 12" collides with the existing §12
-   ramp (14 → 12 after 10 accepts). When tuning, clarify whether it lowers the *start* (flattening the
-   ramp) or the late value.
-4. **Seated wording.** UI copy "Stand or sit comfortably" (§16/§28) implies seated support, but §9/§24
-   make standing the MVP posture and say to strip seated wording if seated isn't shipped. Use "Stand
-   comfortably and face forward" until seated mode is actually implemented.
-5. **Time-out wording.** §12 Time-out says "stop spawning" but — unlike Victory/Overload — doesn't say
-   "stop timer"; harmless (the timer is already 0), but for parity say "stop timer (already 0) and
-   spawning."
+1. **Active-shard escalation → MVP fixed at 4; escalation is a post-MVP lever.** The 5/6 ramp is off by
+   default; if ever enabled it needs comfort-safe extra pads (within the forward arc + chest height, §9),
+   intact readability, and Quest-2 perf headroom — validated on device. MVP intensity ramps via the
+   shortening lifetime instead. (§12 Active shard count + Spawn rules; §14.)
+2. **Stabilization requirement stays 20 for MVP.** The "20 → 24" lever remains available but tunable; **if
+   the requirement changes, the §13 star bands must be rescaled to it** (they are defined for 20). (§14.)
+3. **Lifetime lever clarified.** "Too easy" shortens lifetime while **keeping a start > late ramp** (e.g.
+   12 / 10 s), not flattening start and late to one value. Tunable. (§14.)
+4. **Standing-only MVP copy.** Calibration/tutorial copy is "Stand comfortably and face forward"; the
+   "or sit" wording returns only if seated mode is shipped (seated is optional polish, §9). (§16, §28.)
+5. **Time-out parity.** Time-out now "stops timer (already 0) and spawning", matching Victory/Overload. (§12.)

@@ -33,7 +33,7 @@ primitives, following the GDD development order and the per-mechanic test gate.
   (`docs/architecture/implementation-guardrails.md`, `docs/reference/{claude-code-rules,documentation-system}.md`)
   — fixed stale "foundation docs at repo root" wording and broken `VR-Game-Concept-GDD.md` references →
   `docs/product/game-design.md`, and tightened the git-deny example (added `switch`/`merge`; prefix
-  `checkout`). Added GDD **§34 "Open design questions"** (deferred; MVP behaviour stays authoritative).
+  `checkout`). Added, then **resolved**, GDD §34 — the 5 design ambiguities decided (recommendation each) and fixed in §12/§14/§16/§28 (§34 is now a decisions log); MVP behaviour unchanged (4 shards, 20-req, standing, 14→12 s).
 - **Not started:** all gameplay code. No scripts under `Assets/_Project/` yet. No ScriptableObject
   configs, prefabs, or tests yet. No DI container (manual DI by ADR 0001). The rig still includes the
   Starter Assets **Locomotion** branch — to be stripped during implementation (no locomotion in MVP).
