@@ -63,7 +63,7 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 
 | ID | Title | Branch | Milestone | Depends on | Scenes | Brief | Status |
 |---|---|---|---|---|---|---|---|
-| T01 | RoundConfig + ScoreService + ComboTracker | `feature/round-config-scoring` | M1 rules | — | no | ✓ | ▫ |
+| T01 | RoundConfig + ScoreService + ComboTracker | `feature/round-config-scoring` | M1 rules | — | no | ✓ | ✅ |
 | T02 | HeatService + StabilizationProgress | `feature/heat-stabilization` | M1 rules | T01 | no | ✓ | ▫ |
 | T03 | RoundTimer | `feature/round-timer` | M1 rules | T01 | no | ✓ | ▫ |
 | T04 | PortValidationService (color match in code) | `feature/port-validation` | M1 rules | T01 | no | ✓ | ▫ |
