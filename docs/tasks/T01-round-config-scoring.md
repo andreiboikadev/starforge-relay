@@ -7,7 +7,7 @@
 | Design ref | GDD §12–13 (round rules, scoring); guardrails §7 (RoundConfig), §16–17 |
 | Depends on | — |
 | Touches scenes/prefabs | no |
-| Status | ▫ not started |
+| Status | ✅ done |
 
 ## Goal
 
@@ -56,4 +56,21 @@ Everything downstream reads the GDD's numbers from `RoundConfig` (never hard-cod
 
 ## What was actually done
 
-—
+Built on `feature/round-config-scoring` (2026-06-03); **12/12 EditMode tests green** via MCP Test Runner,
+no Console errors after compile. Commit proposed (human commits).
+
+- `ShardColor` enum (Solar/Ion/Pulse) — `Assets/_Project/Scripts/Gameplay/ShardColor.cs`.
+- `RoundConfig` SO — `Assets/_Project/ScriptableObjects/Config/RoundConfig.cs` + `RoundConfig.asset`; all
+  GDD §12–13 defaults verified serialized (90/20/8 · 4/6 · 14/12/10 · 0.3/0.8 · 5/50/1 · 10/10/2);
+  read-only getters, `[CreateAssetMenu]`.
+- `ScoreService` (pure C#) — +10/correct; +50/milestone; victory bonus = remaining×2; heat penalty =
+  heat×10 clamped ≥0. Scoring numbers injected via ctor (4 ints), not the SO type.
+- `ComboTracker` (pure C#) — +1/correct (returns a milestone bool every 5); reset on wrong; reset on
+  expire only if held. Owns the milestone formula; `ScoreService` consumes the signal (one owner per rule).
+- Asmdefs: `StarforgeRelay.Runtime` (one runtime assembly at `_Project/` root) + `StarforgeRelay.Tests.EditMode`.
+- Tests: `ScoreServiceTests` (6) + `ComboTrackerTests` (6).
+
+Decisions: single `StarforgeRelay.Runtime` asmdef at the `_Project/` root covers `Scripts/` +
+`ScriptableObjects/` (resolves guardrails §4's optional-asmdef); the EditMode test asmdef under
+`Tests/EditMode/` carves out its own subtree. Passed the 4 scoring ints to `ScoreService` directly rather
+than a config struct (abstraction deferred to 2nd use). No guardrail deviations.

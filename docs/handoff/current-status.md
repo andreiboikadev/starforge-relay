@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-03
-Updated by: Claude Code (task-system + agent-verification docs session)
-Branch/context: `dev` (local workspace — human reviews and commits)
+Updated by: Claude Code (project-structure tidy + T01 pure rules)
+Branch/context: `feature/round-config-scoring` (off `dev`; human reviews and commits)
 
 ## Current objective
 
@@ -41,9 +41,15 @@ primitives, following the GDD development order and the per-mechanic test gate.
   `Readme.asset`). Left package/template config (`XR/ XRI/ Settings/ Samples/`) and the referenced
   `InputSystem_Actions.inputactions` in place. `ProjectSettings.asset templateDefaultScene` still points at
   the old path (vestigial template field — no build/gameplay impact). Console clean; no gameplay code yet.
-- **Not started:** all gameplay code. No scripts under `Assets/_Project/` yet. No ScriptableObject
-  configs, prefabs, or tests yet. No DI container (manual DI by ADR 0001). The rig still includes the
-  Starter Assets **Locomotion** branch — to be stripped during implementation (no locomotion in MVP).
+- **Done — T01 pure rules (this session, uncommitted; branch `feature/round-config-scoring`):**
+  `ShardColor`, `RoundConfig` (+ asset with GDD defaults), `ScoreService`, `ComboTracker` under
+  `Assets/_Project/`, with `StarforgeRelay.Runtime` + `StarforgeRelay.Tests.EditMode` asmdefs. **12/12
+  EditMode tests green** (MCP Test Runner, 2026-06-03); no Console errors. Brief:
+  [`../tasks/T01-round-config-scoring.md`](../tasks/T01-round-config-scoring.md).
+- **Not started:** M1 rules `T02`–`T06` (Heat/Stabilization, Timer, PortValidation, ShardSpawnPlanner,
+  RoundController); all MonoBehaviour adapters / scene wiring (M2+); no prefabs; no DI composition root
+  (manual DI by ADR 0001). The rig still includes the Starter Assets **Locomotion** branch — to be
+  stripped at the first interaction slice (T07; no locomotion in MVP).
 
 ## Files changed recently
 
@@ -56,6 +62,11 @@ primitives, following the GDD development order and the per-mechanic test gate.
   (above); deleted URP-template `Assets/TutorialInfo/` + `Assets/Readme.asset`; updated
   `ProjectSettings/EditorBuildSettings.asset` and scene-path refs in `README.md` +
   `docs/{development/build-and-test,architecture/adr/0001-tech-baseline,handoff/current-status}.md`.
+- T01 pure rules (this session, uncommitted; `feature/round-config-scoring`):
+  `Assets/_Project/Scripts/Gameplay/{ShardColor,ScoreService,ComboTracker}.cs`,
+  `Assets/_Project/ScriptableObjects/Config/RoundConfig.{cs,asset}`, `Assets/_Project/StarforgeRelay.Runtime.asmdef`,
+  `Assets/_Project/Tests/EditMode/{StarforgeRelay.Tests.EditMode.asmdef,ScoreServiceTests.cs,ComboTrackerTests.cs}`;
+  closed `docs/tasks/{README,T01-round-config-scoring}.md`.
 
 ## Checks run
 
@@ -63,6 +74,7 @@ primitives, following the GDD development order and the per-mechanic test gate.
 - Project Validation (Android): 0 errors (the optional SSAO warning was resolved by removing the
   renderer feature from `PC_Renderer`).
 - Docs session: no compile/tests required; Unity Editor not modified.
+- T01 (2026-06-03): full EditMode suite green — **12/12** via MCP Test Runner; no Console errors after compile.
 
 ## Decisions made
 
@@ -81,9 +93,9 @@ primitives, following the GDD development order and the per-mechanic test gate.
 The full plan now lives in [`../tasks/README.md`](../tasks/README.md) (matrix **M0–M6** to demo-ready).
 Work top-down from there; immediate queue:
 
-1. **M1 — pure rules (T01–T06), each with EditMode tests** (guardrails §17): `T01` RoundConfig +
-   ScoreService + ComboTracker → `T02` Heat + Stabilization → `T03` RoundTimer → `T04` PortValidation →
-   `T05` ShardSpawnPlanner → `T06` RoundController. **Start with T01.**
+1. **M1 — pure rules (each with EditMode tests, guardrails §17):** `T01` ✅ done → **next `T02` Heat +
+   Stabilization** → `T03` RoundTimer → `T04` PortValidation → `T05` ShardSpawnPlanner → `T06`
+   RoundController.
 2. **M2 — VR vertical slice (T07–T11)** in `SampleScene`: strip Locomotion, primitive shards (grab on
    Grip) + accept-any sockets (validate color **in code**) + reactor / feeder spawn + round-loop adapter.
 3. **M3+ (T12–T21)** — composition root, app flow, world-space UI, then feedback / art / device tuning.
