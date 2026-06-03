@@ -1,7 +1,7 @@
 # Current Status
 
-Last updated: 2026-06-02
-Updated by: Claude Code (Part B VR setup + docs bootstrap session)
+Last updated: 2026-06-03
+Updated by: Claude Code (task-system + agent-verification docs session)
 Branch/context: `dev` (local workspace — human reviews and commits)
 
 ## Current objective
@@ -20,11 +20,15 @@ primitives, following the GDD development order and the per-mechanic test gate.
   **XR Interaction Manager**, and the rig's Input Action Manager; default Main Camera removed; scene in
   the Build list. **Verified on a real Quest 2** — built, installed, launched, OpenXR session reached
   FOCUSED, Vulkan render, Touch controllers tracked, no crash.
-- **Done — docs/rules bootstrap (this session):** `CLAUDE.md`, `README.md`, `.claude/settings.json`
+- **Done — docs/rules bootstrap (2026-06-02 session):** `CLAUDE.md`, `README.md`, `.claude/settings.json`
   (git-write deny for Bash *and* PowerShell + secret/keystore deny), `.claude/rules/unity-csharp.md` and
   `.claude/rules/docs.md`, `docs/INDEX.md`, ADR 0000/0001, `build-and-test.md`, `asset-ledger.md`, this
   file. The 4 source docs were consolidated in-repo: GDD → `docs/product/game-design.md`, guardrails →
   `docs/architecture/implementation-guardrails.md`, the two reference guides → `docs/reference/`.
+- **Done — task system + verification (this session, 2026-06-03):** added `docs/tasks/` (the plan to
+  demo-ready — matrix M0–M6 + per-task briefs; full briefs written for M1 `T01`–`T06`) and
+  `docs/development/agent-verification.md` (anti-false-claim discipline, distilled from a larger project's
+  protocol). Both linked from `docs/INDEX.md`. No gameplay code yet — docs only.
 - **Not started:** all gameplay code. No scripts under `Assets/_Project/` yet. No ScriptableObject
   configs, prefabs, or tests yet. No DI container (manual DI by ADR 0001). The rig still includes the
   Starter Assets **Locomotion** branch — to be stripped during implementation (no locomotion in MVP).
@@ -57,15 +61,18 @@ primitives, following the GDD development order and the per-mechanic test gate.
 
 ## Next actions
 
-1. **Pure rules + tests first.** Add a `RoundConfig` ScriptableObject (90 s, 20 stabilization, heat cap
-   8, 4–6 shards, 14→12 s lifetime, combo +50/5) and plain-C# `ScoreService`, `ComboTracker`,
-   `HeatService`, `StabilizationProgress`, `RoundTimer`, `PortValidationService`, `ShardSpawnPlanner`
-   under `Assets/_Project/Scripts/Gameplay`, each with EditMode tests (guardrails §17).
-2. **VR vertical slice** in `SampleScene`: primitive reactor + 3 ports (XR Socket Interactors) +
-   grabbable primitive shards; grab on Grip; validate color **in code** on socket select;
-   correct/wrong/expired feedback. Verify under the XR Device Simulator / Quest Link.
-3. **Composition root** wiring menu → calibration → start round → grab shard → socket → results, using
-   serialized refs + manual DI; pool shards / beams / VFX.
+The full plan now lives in [`../tasks/README.md`](../tasks/README.md) (matrix **M0–M6** to demo-ready).
+Work top-down from there; immediate queue:
+
+1. **M1 — pure rules (T01–T06), each with EditMode tests** (guardrails §17): `T01` RoundConfig +
+   ScoreService + ComboTracker → `T02` Heat + Stabilization → `T03` RoundTimer → `T04` PortValidation →
+   `T05` ShardSpawnPlanner → `T06` RoundController. **Start with T01.**
+2. **M2 — VR vertical slice (T07–T11)** in `SampleScene`: strip Locomotion, primitive shards (grab on
+   Grip) + accept-any sockets (validate color **in code**) + reactor / feeder spawn + round-loop adapter.
+3. **M3+ (T12–T21)** — composition root, app flow, world-space UI, then feedback / art / device tuning.
+
+Per task: write/confirm the brief, set Status 🟡, do the work + tests, then close it (brief + matrix +
+this file) per [`../development/agent-verification.md`](../development/agent-verification.md).
 
 ## Notes for next session
 

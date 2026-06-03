@@ -1,6 +1,6 @@
 # Documentation Index
 
-Last verified: 2026-06-02
+Last verified: 2026-06-03
 
 This is the source-of-truth map for Starforge Relay. **No new doc should exist unless it is linked here.**
 
@@ -10,6 +10,8 @@ This is the source-of-truth map for Starforge Relay. **No new doc should exist u
 | [architecture/implementation-guardrails.md](architecture/implementation-guardrails.md) | Engineering rules + code-review checklist | Architecture / code-quality rules change |
 | [architecture/adr/](architecture/adr/) | Dated architecture decisions (ADRs) | A significant decision is made or superseded |
 | [development/build-and-test.md](development/build-and-test.md) | Exact build / test / verify commands | Commands or verification process change |
+| [development/agent-verification.md](development/agent-verification.md) | Verify state before claiming it (anti-false-claim discipline) | The verification discipline changes |
+| [tasks/README.md](tasks/README.md) | Task plan to demo-ready — matrix + per-task briefs (`tasks/Tnn-*.md`) | A task is added, started, or closed |
 | [handoff/current-status.md](handoff/current-status.md) | Current active state, blockers, next actions | End of every session |
 | [assets/asset-ledger.md](assets/asset-ledger.md) | Third-party assets + licenses | An asset is added, removed, or modified |
 
@@ -20,6 +22,7 @@ This is the source-of-truth map for Starforge Relay. **No new doc should exist u
 3. [product/game-design.md](product/game-design.md)
 4. [architecture/implementation-guardrails.md](architecture/implementation-guardrails.md)
 5. [development/build-and-test.md](development/build-and-test.md)
+6. [tasks/README.md](tasks/README.md) — the task plan; what to work on next
 
 ## Reference (background — not the live config)
 
