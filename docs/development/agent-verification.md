@@ -1,4 +1,4 @@
-# Agent Verification Protocol
+# Agent Verification & Self-Review
 
 Last verified: 2026-06-03
 
@@ -7,6 +7,29 @@ done", "that test passed", "that's not the cause" — stated without checking. T
 discipline that prevents it. It is project-agnostic; reuse it across projects. (Distilled from a larger
 project's hard-won `agent_verification_protocol.md`; the cross-team-communication parts of that original
 are intentionally omitted here.)
+
+## 0. Assume your first attempt is probably wrong — self-review before you present
+
+A chat's first pass at anything non-trivial almost always carries an error, an omission, or over-reach.
+**Treat your own output as a draft to be audited, not a finished answer.** Before presenting a result,
+run the loop:
+
+> **produce → adversarially self-review → cross-check against reality → fix → re-verify → only then present**
+
+- **Audit your own work as a skeptic would** — assume a bug / inconsistency / over-reach is in there and
+  go find it, instead of confirming it looks fine (the contradiction-seeking step, §3, is the mechanic).
+- **Check it both ways (вдоль и поперёк):** does it do what was intended **and** not break anything else?
+  Edge cases covered? Do cross-references, numbers, and names still line up? Did the change create a *new*
+  inconsistency somewhere you didn't look?
+- **Cross-check against the real thing, not your memory or the docs.** Run the tools (§4): for Unity, read
+  the **Console** (compile/errors), **run the tests**, read the actual **editor / scene / git** state via
+  MCP. Reality outranks every doc and every assumption (§1).
+- **Be adequate:** is the result right-sized (not over-engineered, not gold-plated), free of invented
+  facts, and does it solve the user's *real* need rather than a misread of it?
+- **Iterate to the desired result.** If self-review finds anything, fix it and re-verify — loop until it's
+  clean. **Stopping at "first attempt done" is the single most common failure; don't.**
+
+Sections 1–6 below are the *mechanics* of this loop.
 
 ## 1. Sources of truth — precedence
 

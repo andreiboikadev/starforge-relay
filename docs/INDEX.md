@@ -10,7 +10,7 @@ This is the source-of-truth map for Starforge Relay. **No new doc should exist u
 | [architecture/implementation-guardrails.md](architecture/implementation-guardrails.md) | Engineering rules + code-review checklist | Architecture / code-quality rules change |
 | [architecture/adr/](architecture/adr/) | Dated architecture decisions (ADRs) | A significant decision is made or superseded |
 | [development/build-and-test.md](development/build-and-test.md) | Exact build / test / verify commands | Commands or verification process change |
-| [development/agent-verification.md](development/agent-verification.md) | Verify state before claiming it (anti-false-claim discipline) | The verification discipline changes |
+| [development/agent-verification.md](development/agent-verification.md) | Self-review your first attempt + verify before you claim/present (anti-false-claim) | The verification discipline changes |
 | [tasks/README.md](tasks/README.md) | Task plan to demo-ready — matrix + per-task briefs (`tasks/Tnn-*.md`) | A task is added, started, or closed |
 | [handoff/current-status.md](handoff/current-status.md) | Current active state, blockers, next actions | End of every session |
 | [assets/asset-ledger.md](assets/asset-ledger.md) | Third-party assets + licenses | An asset is added, removed, or modified |
