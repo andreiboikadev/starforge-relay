@@ -11,8 +11,8 @@ namespace StarforgeRelay.Tests.EditMode
         private const float DelayMin = 0.3f; // GDD §12
         private const float DelayMax = 0.8f; // GDD §12
 
-        private static readonly ShardColor[] AllColors = { ShardColor.Solar, ShardColor.Ion, ShardColor.Pulse };
-        private static readonly SpawnArea Area = new SpawnArea(-50f, 50f, 1.0f, 1.4f);
+        private static readonly ShardColor[] s_allColors = { ShardColor.Solar, ShardColor.Ion, ShardColor.Pulse };
+        private static readonly SpawnArea s_area = new SpawnArea(-50f, 50f, 1.0f, 1.4f);
 
         private static List<FeederPadSlot> FourValidPads() => new List<FeederPadSlot>
         {
@@ -30,8 +30,8 @@ namespace StarforgeRelay.Tests.EditMode
         {
             return new ShardSpawnPlanner(
                 pads ?? FourValidPads(),
-                Area,
-                colors ?? AllColors,
+                s_area,
+                colors ?? s_allColors,
                 target,
                 MaxPerColor,
                 DelayMin,
@@ -76,7 +76,7 @@ namespace StarforgeRelay.Tests.EditMode
             while (planner.TryPlanNextSpawn(out _)) { }
 
             int distinct = 0;
-            foreach (ShardColor color in AllColors)
+            foreach (ShardColor color in s_allColors)
             {
                 if (planner.CountOfColor(color) > 0)
                 {

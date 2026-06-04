@@ -68,7 +68,7 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 | T03 | RoundTimer | `feature/round-timer` | M1 rules | T01 | no | ✓ | ✅ |
 | T04 | PortValidationService (color match in code) | `feature/port-validation` | M1 rules | T01 | no | ✓ | ✅ |
 | T05 | ShardSpawnPlanner (seeded RNG) | `feature/shard-spawn-planner` | M1 rules | T01 | no | ✓ | ✅ |
-| T06 | RoundController (end-state priority, star rating) | `feature/round-controller` | M1 rules | T01–T05 | no | ✓ | ▫ |
+| T06 | RoundController (end-state priority, star rating) | `feature/round-controller` | M1 rules | T01–T05 | no | ✓ | ✅ |
 | T07 | Strip Locomotion; rename scene off `SampleScene` default; confirm rig | `chore/strip-locomotion` | M2 slice | — | yes (rig) | · | ▫ |
 | T08 | Shard prefab + grab (Grip) + ShardPool | `feature/shard-grab` | M2 slice | T01 | yes (prefab) | · | ▫ |
 | T09 | Ports as accept-any sockets → validate in code | `feature/port-socket` | M2 slice | T04, T08 | yes | · | ▫ |
