@@ -7,12 +7,12 @@ namespace StarforgeRelay.Gameplay
     /// </summary>
     public sealed class ComboTracker
     {
-        private readonly int milestoneInterval;
+        private readonly int _milestoneInterval;
 
         /// <param name="comboBonusInterval">Combo length between milestones (GDD: 5). Injected from RoundConfig.</param>
         public ComboTracker(int comboBonusInterval)
         {
-            milestoneInterval = comboBonusInterval;
+            _milestoneInterval = comboBonusInterval;
         }
 
         /// <summary>Current combo — consecutive correct inserts.</summary>
@@ -20,7 +20,7 @@ namespace StarforgeRelay.Gameplay
 
         /// <summary>
         /// Register a correct insert: increments the combo and returns <c>true</c> when this insert lands on
-        /// a milestone (every <see cref="milestoneInterval"/>: 5, 10, 15, …).
+        /// a milestone (every <see cref="_milestoneInterval"/>: 5, 10, 15, …).
         /// </summary>
         public bool RegisterCorrect()
         {
@@ -43,6 +43,6 @@ namespace StarforgeRelay.Gameplay
             }
         }
 
-        private bool IsMilestone => milestoneInterval > 0 && Current > 0 && Current % milestoneInterval == 0;
+        private bool IsMilestone => _milestoneInterval > 0 && Current > 0 && Current % _milestoneInterval == 0;
     }
 }

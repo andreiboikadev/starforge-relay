@@ -9,22 +9,22 @@ namespace StarforgeRelay.Gameplay
     /// </summary>
     public sealed class HeatService
     {
-        private readonly int heatCap;
-        private readonly int comboHeatRelief;
+        private readonly int _heatCap;
+        private readonly int _comboHeatRelief;
 
         /// <param name="heatCap">Overload threshold (GDD: 8).</param>
         /// <param name="comboHeatRelief">Heat removed per combo milestone (GDD: 1). Injected from RoundConfig.</param>
         public HeatService(int heatCap, int comboHeatRelief)
         {
-            this.heatCap = heatCap;
-            this.comboHeatRelief = comboHeatRelief;
+            _heatCap = heatCap;
+            _comboHeatRelief = comboHeatRelief;
         }
 
         /// <summary>Current heat.</summary>
         public int Current { get; private set; }
 
         /// <summary>Heat has reached the cap — the round overloads (GDD §12: exactly at <c>heatCap</c>, not before).</summary>
-        public bool IsOverloaded => Current >= heatCap;
+        public bool IsOverloaded => Current >= _heatCap;
 
         /// <summary>A wrong insert adds 1 heat (GDD §12).</summary>
         public void RegisterWrongInsert() => Gain();
@@ -40,7 +40,7 @@ namespace StarforgeRelay.Gameplay
         {
             if (Current > 0)
             {
-                Current = Math.Max(0, Current - comboHeatRelief);
+                Current = Math.Max(0, Current - _comboHeatRelief);
             }
         }
 

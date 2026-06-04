@@ -9,18 +9,18 @@ namespace StarforgeRelay.Gameplay
     /// </summary>
     public sealed class ScoreService
     {
-        private readonly int correctScore;
-        private readonly int comboBonusScore;
-        private readonly int victoryTimeBonusPerSecond;
-        private readonly int heatPenaltyPerHeat;
+        private readonly int _correctScore;
+        private readonly int _comboBonusScore;
+        private readonly int _victoryTimeBonusPerSecond;
+        private readonly int _heatPenaltyPerHeat;
 
         /// <summary>All values injected from RoundConfig (GDD §13) so the rule stays SO-free and testable.</summary>
         public ScoreService(int correctScore, int comboBonusScore, int victoryTimeBonusPerSecond, int heatPenaltyPerHeat)
         {
-            this.correctScore = correctScore;
-            this.comboBonusScore = comboBonusScore;
-            this.victoryTimeBonusPerSecond = victoryTimeBonusPerSecond;
-            this.heatPenaltyPerHeat = heatPenaltyPerHeat;
+            _correctScore = correctScore;
+            _comboBonusScore = comboBonusScore;
+            _victoryTimeBonusPerSecond = victoryTimeBonusPerSecond;
+            _heatPenaltyPerHeat = heatPenaltyPerHeat;
         }
 
         /// <summary>Accumulated score.</summary>
@@ -29,13 +29,13 @@ namespace StarforgeRelay.Gameplay
         /// <summary>A correct insert awards <c>correctScore</c> (GDD §13: +10).</summary>
         public void AddCorrect()
         {
-            Score += correctScore;
+            Score += _correctScore;
         }
 
         /// <summary>Each combo milestone awards <c>comboBonusScore</c> (GDD §12–13: +50 every 5).</summary>
         public void AddComboMilestoneBonus()
         {
-            Score += comboBonusScore;
+            Score += _comboBonusScore;
         }
 
         /// <summary>On victory, award remaining whole seconds × <c>victoryTimeBonusPerSecond</c> (GDD §13).</summary>
@@ -46,7 +46,7 @@ namespace StarforgeRelay.Gameplay
                 remainingSeconds = 0;
             }
 
-            Score += remainingSeconds * victoryTimeBonusPerSecond;
+            Score += remainingSeconds * _victoryTimeBonusPerSecond;
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace StarforgeRelay.Gameplay
         /// </summary>
         public void ApplyHeatPenalty(int heat)
         {
-            Score = Math.Max(0, Score - heat * heatPenaltyPerHeat);
+            Score = Math.Max(0, Score - heat * _heatPenaltyPerHeat);
         }
     }
 }

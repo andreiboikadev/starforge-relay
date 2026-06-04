@@ -183,6 +183,14 @@ Naming rules:
 
 Avoid vague names: `GameManager`, `MainManager`, `XRManagerCustom`, `SystemController`, `Utils`, `Helper`, `Data`. If a class needs "Manager", it must be obvious what it manages and why no more specific name works.
 
+**Casing, formatting, member order, `var` / `using` rules, and the rest of the C# convention live in
+[`csharp-style.md`](csharp-style.md)** (an engine-agnostic spine + a Unity overlay), machine-enforced by the
+repo-root `.editorconfig`. The essentials: `PascalCase` for types / methods / properties / constants;
+**private, protected, and internal *fields* are `_camelCase`** (static `s_camelCase`, thread-static
+`t_camelCase`) — **not** bare `camelCase`; locals and parameters are `camelCase`; interfaces `IPascal`; one
+public type per file; Allman braces; `using` directives outside the namespace. Don't restate the full list
+here — one home per fact, see `csharp-style.md`.
+
 ---
 
 ## 6. Core Systems for Starforge Relay

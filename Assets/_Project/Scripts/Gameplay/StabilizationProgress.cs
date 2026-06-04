@@ -7,19 +7,19 @@ namespace StarforgeRelay.Gameplay
     /// </summary>
     public sealed class StabilizationProgress
     {
-        private readonly int requirement;
+        private readonly int _requirement;
 
         /// <param name="stabilizationRequirement">Correct inserts needed to stabilize (GDD: 20). Injected from RoundConfig.</param>
         public StabilizationProgress(int stabilizationRequirement)
         {
-            requirement = stabilizationRequirement;
+            _requirement = stabilizationRequirement;
         }
 
         /// <summary>Correct inserts accepted so far.</summary>
         public int Current { get; private set; }
 
         /// <summary>The core is stabilized — victory (GDD §12: exactly at <c>stabilizationRequirement</c>, not before).</summary>
-        public bool IsComplete => Current >= requirement;
+        public bool IsComplete => Current >= _requirement;
 
         /// <summary>A correct insert advances stabilization by 1 (GDD §12).</summary>
         public void RegisterCorrect() => Current++;

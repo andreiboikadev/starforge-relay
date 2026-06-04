@@ -12,19 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5624c153808b4fa4ca12d91c83cdf4da, type: 3}
   m_Name: RoundConfig
   m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.RoundConfig
-  roundDurationSeconds: 90
-  stabilizationRequirement: 20
-  heatCap: 8
-  activeShardsDefault: 4
-  activeShardsMax: 6
-  shardLifetimeStart: 14
-  shardLifetimeLate: 12
-  lateLifetimeAfterAccepts: 10
-  respawnDelayMin: 0.3
-  respawnDelayMax: 0.8
-  comboBonusInterval: 5
-  comboBonusScore: 50
-  comboHeatRelief: 1
-  correctScore: 10
-  heatPenaltyPerHeat: 10
-  victoryTimeBonusPerSecond: 2
+  _roundDurationSeconds: 90
+  _stabilizationRequirement: 20
+  _heatCap: 8
+  _activeShardsDefault: 4
+  _activeShardsMax: 6
+  _shardLifetimeStart: 14
+  _shardLifetimeLate: 12
+  _lateLifetimeAfterAccepts: 10
+  _respawnDelayMin: 0.3
+  _respawnDelayMax: 0.8
+  _comboBonusInterval: 5
+  _comboBonusScore: 50
+  _comboHeatRelief: 1
+  _correctScore: 10
+  _heatPenaltyPerHeat: 10
+  _victoryTimeBonusPerSecond: 2

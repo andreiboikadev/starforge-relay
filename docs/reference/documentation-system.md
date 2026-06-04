@@ -76,6 +76,7 @@ README.md
 CLAUDE.md
 AGENTS.md                          optional, only for non-Claude agents
 CHANGELOG.md                       optional until there are notable changes
+.editorconfig                      machine-enforced C# style (from editorconfig.template)
 .github/
   pull_request_template.md         recommended for PR-style review
 .claude/
@@ -92,6 +93,7 @@ docs/
     scope.md                       optional if scope outgrows the GDD
   architecture/
     implementation-guardrails.md   the engineering contract — consolidated in-repo
+    csharp-style.md                C# code style (spine + engine overlay) — enforced by .editorconfig
     overview.md                    optional if guardrails already explain the shape
     adr/
       0000-template.md             when the first ADR is added
@@ -131,8 +133,9 @@ For the first setup pass, create only what makes the next coding session safe an
 - `docs/development/build-and-test.md`
 - `docs/handoff/current-status.md`
 - `docs/assets/asset-ledger.md`
+- `.editorconfig` at the repo root (copy from `editorconfig.template`) — once C# code is added, so the first generated code already conforms
 
-Consolidated in-repo and linked from `INDEX.md`: the GDD → `docs/product/game-design.md`, guardrails → `docs/architecture/implementation-guardrails.md`, the reference docs → `docs/reference/` (link, don't duplicate).
+Consolidated in-repo and linked from `INDEX.md`: the GDD → `docs/product/game-design.md`, guardrails → `docs/architecture/implementation-guardrails.md`, the reference docs → `docs/reference/` (link, don't duplicate). The C# style guide → `docs/architecture/csharp-style.md` (a portable asset — swap only its engine overlay), machine-enforced by the repo-root `.editorconfig`.
 
 Create if immediately useful: `docs/development/setup.md` (if setup needs more than the README), `.github/pull_request_template.md`, `.claude/rules/unity-code.md`. Create skills/subagents/hooks only after the basic docs exist and a real need appears — not in the first pass.
 
@@ -153,6 +156,7 @@ Every important fact has one home:
 | Game rules, UX, content, MVP | `docs/product/game-design.md` |
 | MVP cuts and non-goals | `docs/product/game-design.md` (or `docs/product/scope.md` if it grows) |
 | Engineering guardrails | `docs/architecture/implementation-guardrails.md` |
+| C# code style (naming, formatting, conventions) | `docs/architecture/csharp-style.md` (enforced by repo-root `.editorconfig`) |
 | Architecture decisions | `docs/architecture/adr/` |
 | Setup steps | `docs/development/setup.md` |
 | Build and test commands | `docs/development/build-and-test.md` |
@@ -238,6 +242,7 @@ paths:
 ---
 # Unity C# Rules
 - Follow `implementation-guardrails.md`.
+- Naming / formatting per `csharp-style.md`, enforced by `.editorconfig` (private fields `_camelCase`, **not** bare `camelCase`).
 - No `GameObject.Find` / `FindObjectOfType` / `Camera.main` in runtime gameplay code.
 - Use serialized references, composition-root wiring, factories, or pools instead of hidden globals.
 - Keep gameplay rules testable outside MonoBehaviours; add/Update EditMode tests when changing pure logic.
@@ -342,6 +347,7 @@ Last verified: YYYY-MM-DD
 |---|---|---|
 | `product/game-design.md` | Game rules, UX, content, MVP | Gameplay/UX changes |
 | `architecture/implementation-guardrails.md` | Engineering rules | Architecture/code-quality rules change |
+| `architecture/csharp-style.md` | C# style (naming/format) — enforced by `.editorconfig` | The style or its enforcement changes |
 | `architecture/adr/` | Dated architecture decisions (ADRs) | A decision is made or superseded |
 | `reference/*.md` | Background (Claude Code rules ref; this blueprint) | The reference material changes |
 | `development/setup.md` | First setup | Unity/packages/platform setup change |
@@ -494,7 +500,7 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `chore`, `ci`
 
 ## 17. Unity version-control rules
 
-**Track:** `Assets/`, `Packages/` (incl. `manifest.json` + `packages-lock.json`), `ProjectSettings/`, `.meta` files, project docs, `.github/`, reviewed `.claude/` shared config.
+**Track:** `Assets/`, `Packages/` (incl. `manifest.json` + `packages-lock.json`), `ProjectSettings/`, `.meta` files, project docs, `.github/`, `.editorconfig`, reviewed `.claude/` shared config.
 
 **Ignore:** `Library/`, `Temp/`, `Obj/`, `Logs/`, `UserSettings/`, build outputs (`*.apk`, `Builds/`) unless intentionally versioned, IDE-generated files. (Unity Hub's template `.gitignore`/`.gitattributes` cover most of this.)
 
@@ -520,6 +526,7 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `chore`, `ci`
 | Gameplay rule change | Update `docs/product/game-design.md` |
 | Architecture decision | Add or supersede an ADR |
 | Code-quality rule change | Update `docs/architecture/implementation-guardrails.md` or `.claude/rules/` |
+| C# style or its enforcement change | Update `docs/architecture/csharp-style.md` / repo-root `.editorconfig` |
 | Build/test command change | Update `docs/development/build-and-test.md` |
 | Unity/package/platform setup change | Update `docs/development/setup.md` |
 | New external asset | Update `docs/assets/asset-ledger.md` |
@@ -536,7 +543,7 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `chore`, `ci`
 3. Create `CLAUDE.md` (§7).
 4. Create `.claude/settings.json` with the Bash + PowerShell git-write deny rules (§10).
 5. Create `docs/INDEX.md` linking the consolidated GDD (`docs/product/game-design.md`), guardrails, and reference docs.
-6. Create `docs/development/build-and-test.md`, `docs/handoff/current-status.md`, `docs/assets/asset-ledger.md`.
+6. Create `docs/development/build-and-test.md`, `docs/handoff/current-status.md`, `docs/assets/asset-ledger.md`; and (once C# code is added) a repo-root `.editorconfig` from `editorconfig.template` + `docs/architecture/csharp-style.md` (swap its engine overlay).
 7. Add `docs/development/setup.md` if setup doesn't fit the README.
 8. Add `.github/pull_request_template.md` and `.claude/rules/unity-code.md` if useful.
 9. Add ADR 0001 only if an architecture choice is already locked.

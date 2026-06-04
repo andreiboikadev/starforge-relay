@@ -76,7 +76,9 @@ prefer a direct method call over an event.
 (state → view) · `*View` (owns scene objects/visuals) · `*Config`/`*Definition` (ScriptableObject
 data) · `*State` · `*EventChannel` · `*CompositionRoot`/`*Installer` (wiring only, no rules).
 Avoid `GameManager`, `Manager`, `Utils`, `Helper`, `Data`. One public type per file (= filename);
-PascalCase types/methods, camelCase fields.
+PascalCase types/methods/properties/consts; **private/internal/protected fields `_camelCase`** (static
+`s_camelCase`), locals/params `camelCase`, interfaces `IPascal`. Full convention + enforcement:
+[`csharp-style.md`](../../docs/architecture/csharp-style.md) + the repo-root `.editorconfig`.
 
 ## Tests
 

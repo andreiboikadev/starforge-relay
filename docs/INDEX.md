@@ -8,6 +8,7 @@ This is the source-of-truth map for Starforge Relay. **No new doc should exist u
 |---|---|---|
 | [product/game-design.md](product/game-design.md) | Game rules, UX, content, MVP cut line | Gameplay or UX changes |
 | [architecture/implementation-guardrails.md](architecture/implementation-guardrails.md) | Engineering rules + code-review checklist | Architecture / code-quality rules change |
+| [architecture/csharp-style.md](architecture/csharp-style.md) | C# code style (naming, formatting) — enforced by the repo-root `.editorconfig` | The style or its enforcement changes |
 | [architecture/adr/](architecture/adr/) | Dated architecture decisions (ADRs) | A significant decision is made or superseded |
 | [development/build-and-test.md](development/build-and-test.md) | Exact build / test / verify commands | Commands or verification process change |
 | [development/agent-verification.md](development/agent-verification.md) | Self-review your first attempt + verify before you claim/present (anti-false-claim) | The verification discipline changes |
