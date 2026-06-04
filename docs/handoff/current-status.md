@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-04
-Updated by: Claude Code (T06 — round controller)
-Branch/context: `feature/round-controller` (off `dev`; human reviews + PRs to `dev`)
+Updated by: Claude Code (session handoff — M1 complete)
+Branch/context: on `dev`, in sync with `origin/dev`. M1 merged via PRs (T06 = #5). **Next task starts on its own `feature/<slug>` branch off `dev` — create + switch BEFORE editing; PR back to `dev`.**
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -12,7 +12,7 @@ Branch/context: `feature/round-controller` (off `dev`; human reviews + PRs to `d
 
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
-- **M1 — pure rules:** ✅ **complete** (`T01`–`T06`). → **next milestone M2 (T07+): the VR slice** — strip the Starter-Assets Locomotion branch, rename the scene off `SampleScene`, then grab / sockets / spawn in-scene.
+- **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5). → **next: M2 / `T07`** — strip the Starter-Assets Locomotion branch + rename the scene off `SampleScene`; then (T08+) shard grab / port sockets / spawner in-scene.
 - **M2–M6:** not started (VR slice → wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green (68/68), re-verified this session** (T06 added 16; Console clean; restricted-API + objective style checks clean). All
@@ -47,6 +47,9 @@ Branch/context: `feature/round-controller` (off `dev`; human reviews + PRs to `d
 ## Notes for next chat
 
 - Read `CLAUDE.md` + this file + the relevant `Tnn` brief first.
+- **Branch first:** create + switch to `feature/<slug>` off `dev` **before any edits**; PR → `dev` (pattern: #3/#4/#5) — never commit straight to `dev`. (Assistant: at task start run `git status`; if on `dev`, STOP and ask to branch.)
+- **Style check covers ALL first-party C#** — runtime **and** tests (`.editorconfig` / IDE1006). A test-file `s_` violation slipped past a runtime-only check this session; don't repeat.
+- **T07 is the first scene/rig task** → needs a smoke / XR-Simulator (and Quest where grab feel matters) pass per §17, not just EditMode.
 - **New C# follows `docs/architecture/csharp-style.md`** (enforced by the repo-root `.editorconfig`):
   non-public fields `_camelCase` (static `s_camelCase`), `PascalCase` types/methods/properties/consts.
 - **Per-mechanic test gate** (guardrails §17): pure rules ship EditMode tests in-change and the full suite
