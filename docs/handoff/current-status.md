@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-04
-Updated by: Claude Code (C# style conformance)
-Branch/context: `chore/adopt-csharp-style` (proposed, off `dev`; human reviews and commits)
+Updated by: Claude Code (T05 — shard-spawn planner)
+Branch/context: `feature/shard-spawn-planner` (proposed, off `dev`; human reviews and commits)
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -12,10 +12,10 @@ Branch/context: `chore/adopt-csharp-style` (proposed, off `dev`; human reviews a
 
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
-- **M1 — pure rules:** `T01` ✅ · `T02` ✅ · `T03` ✅ · `T04` ✅ → **next `T05` ShardSpawnPlanner** → `T06`.
+- **M1 — pure rules:** `T01`–`T05` ✅ → **next `T06` RoundController** (the last M1 rule: end-state priority + star rating).
 - **M2–M6:** not started (VR slice → wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
-- EditMode suite **green (45/45), re-verified this session** (after the C# style refactor; Console clean). All
+- EditMode suite **green (52/52), re-verified this session** (45 prior + 7 new T05; Console clean). All
   gameplay so far is **pure C# under `Assets/_Project/`** (`StarforgeRelay.Runtime` +
   `StarforgeRelay.Tests.EditMode` asmdefs); no scene gameplay / MonoBehaviours yet.
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a

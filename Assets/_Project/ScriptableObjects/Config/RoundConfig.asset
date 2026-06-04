@@ -17,6 +17,7 @@ MonoBehaviour:
   _heatCap: 8
   _activeShardsDefault: 4
   _activeShardsMax: 6
+  _maxShardsPerColor: 3
   _shardLifetimeStart: 14
   _shardLifetimeLate: 12
   _lateLifetimeAfterAccepts: 10

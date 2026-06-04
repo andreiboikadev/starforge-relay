@@ -7,7 +7,7 @@
 | Design ref | GDD §12 (spawn rules), §9 (reach zone); guardrails §16–17 |
 | Depends on | T01 (RoundConfig + ShardColor) |
 | Touches scenes/prefabs | no |
-| Status | ▫ not started |
+| Status | ✅ done |
 
 ## Goal
 
@@ -49,4 +49,18 @@ rule, so it must be fully testable with a seeded random source (no `UnityEngine.
 
 ## What was actually done
 
-—
+Implemented + verified 2026-06-04 (branch `feature/shard-spawn-planner`; commit proposed, human commits).
+
+- **`ShardSpawnPlanner`** (pure C#, `Assets/_Project/Scripts/Gameplay/`): `TryPlanNextSpawn(out plan)` picks
+  the under-represented color (cap = `maxShardsPerColor`, ties random) on a random free **in-reach** pad and
+  reserves it; `NextRespawnDelay()` ∈ [0.3, 0.8]; `Release(padId)` frees on accept/expire; plus
+  `ActiveCount` / `IsAtTarget` / `CountOfColor`. Slots outside `SpawnArea` are filtered at construction and
+  never returned. ≥2 active colors is **emergent** from the under-represented preference (no extra param).
+- **Support types:** `IRandom` + `SeededRandom` (`System.Random` — no `UnityEngine.Random`), `FeederPadSlot`
+  (padId / angle° / height), `SpawnArea` (arc + height band + `Contains`), `ShardSpawnPlan` (padId / color).
+- **`RoundConfig`:** added `maxShardsPerColor` (3) + property + `.asset` key (the GDD §12 per-color cap).
+- **Tests:** `ShardSpawnPlannerTests` (7 cases) + `FakeRandom` double — target / cap-≤3 / ≥2-colors /
+  under-represented / delay-bounds / pad-reservation / invalid-slot. Full EditMode suite **52/52 green**
+  (45 prior + 7 new); Console clean.
+- First gameplay code authored under the new C# style ([ADR 0002](../architecture/adr/0002-csharp-style.md)).
+  No deviations; the 5/6 active-shard escalation stays out (post-MVP).

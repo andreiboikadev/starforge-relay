@@ -19,6 +19,7 @@ namespace StarforgeRelay.Gameplay
         [Header("Shards")]
         [SerializeField] private int _activeShardsDefault = 4;
         [SerializeField] private int _activeShardsMax = 6;
+        [SerializeField] private int _maxShardsPerColor = 3;
         [SerializeField] private float _shardLifetimeStart = 14f;
         [SerializeField] private float _shardLifetimeLate = 12f;
         [SerializeField] private int _lateLifetimeAfterAccepts = 10;
@@ -41,6 +42,7 @@ namespace StarforgeRelay.Gameplay
 
         public int ActiveShardsDefault => _activeShardsDefault;
         public int ActiveShardsMax => _activeShardsMax;
+        public int MaxShardsPerColor => _maxShardsPerColor;
         public float ShardLifetimeStart => _shardLifetimeStart;
         public float ShardLifetimeLate => _shardLifetimeLate;
         public int LateLifetimeAfterAccepts => _lateLifetimeAfterAccepts;
