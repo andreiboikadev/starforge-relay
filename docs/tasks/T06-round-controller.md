@@ -7,7 +7,7 @@
 | Design ref | GDD §12 (end states), §13 (star rating); guardrails §16 (priority), §17 |
 | Depends on | T01 + T02 + T03 + T04 + T05 |
 | Touches scenes/prefabs | no |
-| Status | ▫ not started |
+| Status | ✅ done |
 
 ## Goal
 
@@ -49,4 +49,22 @@ Unity-facing events is the M2 slice (T11).
 
 ## What was actually done
 
-—
+Implemented + verified 2026-06-04 (branch `feature/round-controller`; commit proposed, human commits).
+
+- **`RoundController`** (pure C#, 5 injected services): `Start` / `ApplyCorrect` / `ApplyWrong` /
+  `ApplyExpired(wasHeld)` / `Tick(dt)` + read-state (`Phase`, `Score`, `Combo`, `Heat`, `Stabilization`,
+  `TimeRemaining`, `Stars`, `IsOver`). Apply/Tick are no-ops outside `Playing`.
+- **End-state priority** (guardrails §16): one `CheckEndConditions()` resolves **Won > Overloaded >
+  TimedOut** after each apply/tick — deterministic on coincident conditions.
+- **Star rating** (GDD §13): 0 (0–5, incl. overload-before-6) / 1 (6–11) / 2 (12–19) / 3 (stabilized — via
+  `StabilizationProgress.IsComplete`, so it tracks the requirement if retuned).
+- Wires the T01–T04 rules (combo / score / stabilization / heat + milestone bonus & relief) — does **not**
+  re-implement them. `PortValidationService` / `ShardSpawnPlanner` are adapter-side (T11), not injected here.
+- **Typed events** (guardrails §15, for the T11 adapter): `CorrectInserted` / `WrongInserted` /
+  `ShardExpired` / `Ended` with small `readonly struct` payloads (`RoundPhase` enum + 4 event structs).
+- **Tests:** `RoundControllerTests` (16 cases) — meters-once / milestone bonus+relief / wrong+expired /
+  each end state in isolation / concurrent priority / star boundaries / overload-before-6 / no-op-after-end
+  / events. Full EditMode suite **68/68 green** (52 prior + 16).
+- **Verification:** objective `.editorconfig` style check clean (0 IDE1006); restricted-API scan clean;
+  Unity Console clean. First-authored under the new C# style ([ADR 0002](../architecture/adr/0002-csharp-style.md)).
+- **M1 (pure rules) is complete** with T06 green. No deviations.
