@@ -2,7 +2,7 @@
 
 Last updated: 2026-06-04
 Updated by: Claude Code (session handoff — M1 complete)
-Branch/context: on `dev`, in sync with `origin/dev`. M1 merged via PRs (T06 = #5). **Next task starts on its own `feature/<slug>` branch off `dev` — create + switch BEFORE editing; PR back to `dev`.**
+Branch/context: on `chore/strip-locomotion` (off `dev`). **T07 in progress** — brief authored ([`../tasks/T07-strip-locomotion.md`](../tasks/T07-strip-locomotion.md)); implementation next on this branch, PR → `dev`. (M1 merged via PRs, T06 = #5.)
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
