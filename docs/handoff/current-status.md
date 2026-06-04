@@ -2,7 +2,7 @@
 
 Last updated: 2026-06-04
 Updated by: Claude Code (session handoff — M1 complete)
-Branch/context: on `dev`, in sync with `origin/dev`. M1 merged via PRs (T06 = #5). **Next task starts on its own `feature/<slug>` branch off `dev` — create + switch BEFORE editing; PR back to `dev`.**
+Branch/context: on `chore/strip-locomotion` (off `dev`). **T07 ✅ done & verified** — Locomotion/teleport/gaze stripped, rig **unpacked**, scene `SampleScene`→`StarforgeRelay`; EditMode **68/68**, Play-mode error-free, Project Validation (Android) **0 issues**. **Ready to commit → PR → `dev`.** Brief: [`../tasks/T07-strip-locomotion.md`](../tasks/T07-strip-locomotion.md). (M1 merged via PRs, T06 = #5.)
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -12,7 +12,8 @@ Branch/context: on `dev`, in sync with `origin/dev`. M1 merged via PRs (T06 = #5
 
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
-- **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5). → **next: M2 / `T07`** — strip the Starter-Assets Locomotion branch + rename the scene off `SampleScene`; then (T08+) shard grab / port sockets / spawner in-scene.
+- **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
+- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ done** (Locomotion stripped, rig unpacked, scene → `StarforgeRelay`); **next `T08`** — shard prefab + grab (Grip) + ShardPool; then T09+ (port sockets / spawner) in-scene.
 - **M2–M6:** not started (VR slice → wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green (68/68), re-verified this session** (T06 added 16; Console clean; restricted-API + objective style checks clean). All
@@ -24,11 +25,10 @@ Branch/context: on `dev`, in sync with `origin/dev`. M1 merged via PRs (T06 = #5
 
 ## Still to build / watch
 
-- Scene interaction (grab / sockets / spawn) begins at **M2 (T07+)** — nothing in the scene yet.
-- The rig still includes the Starter Assets **Locomotion** branch — strip it in **T07** (no locomotion in MVP).
-- The scene is still the URP default name `Assets/_Project/Scenes/SampleScene.unity` — **rename in T07**
-  (name TBD); fix the vestigial `ProjectSettings.asset → templateDefaultScene` (old path; no build impact) in
-  the same pass.
+- Scene interaction (grab / sockets / spawn) begins at **T08+** — nothing interactive in the scene yet.
+- **Env note (future scene/rig tasks):** `execute_code` is broken here (CodeDom `mono.exe` path error; no
+  Roslyn) — use structural MCP tools; prefab **unpack** is a manual 1-click editor step; the MCP asset-rename
+  tool reports "failed" but succeeds on disk (verify via filesystem).
 
 ## Blockers
 
