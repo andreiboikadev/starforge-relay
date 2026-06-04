@@ -7,7 +7,7 @@
 | Design ref | GDD §7 / §9 / §27 (no locomotion, stationary, Floor); guardrails §13 (XR rules), §17 (smoke gate); [ADR 0001](../architecture/adr/0001-tech-baseline.md) |
 | Depends on | — |
 | Touches scenes/prefabs | yes — `XR Origin (XR Rig)` + scene rename (the only build scene) |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 
@@ -101,4 +101,21 @@ verified by `find_gameobjects by_component` returning **none** of the provider t
 
 ## What was actually done
 
-— (filled on close)
+Implemented + verified 2026-06-04 (branch `chore/strip-locomotion`; human commits).
+
+- **Locomotion stripped.** Rig **unpacked** from the Starter-Assets prefab (scene has no
+  `PrefabInstance`/`m_SourcePrefab`). Deleted the `Locomotion` subtree (mediator, body transformer,
+  Move/Turn/Teleport/Climb/Grab/Gravity/Jump providers); removed per-controller `ControllerInputActionManager`
+  + `Teleport Interactor`, plus `CharacterController` + `XRGazeAssistance`; deleted gaze + teleport-stabilized
+  objects. `XRInteractionGroup` needed no cleanup (teleport was not a starting member — verified).
+- **Kept (verified via `find_gameobjects by_component`):** Near-Far ×2 + Poke ×2 interactors, one `XROrigin`
+  (Floor), one `XRInteractionManager`. Every stripped component type reports 0.
+- **Scene renamed** `SampleScene` → `StarforgeRelay` (GUID `99c9720…` preserved → `EditorBuildSettings`
+  auto-relinked; `templateDefaultScene` + Volume profile → `StarforgeRelayProfile` re-pointed; docs paths
+  updated: README, build-and-test, ADR 0001).
+- **Gates:** EditMode **68/68** green (no rule changes); Play-mode entry **0 Console errors**; **Project
+  Validation (Android) 0 issues / 28 checks**. No-locomotion is structural (0 providers); controller grab/UI
+  feel deferred to **T08** smoke (per brief).
+- **Tooling note (for future scene/rig tasks):** `execute_code` is broken in this env (CodeDom `mono.exe`
+  path error; no Roslyn) → rig edits + scene rename done via structural MCP tools + a manual Unpack; the MCP
+  asset-rename tool reports "failed" but succeeds on disk (verify via filesystem).

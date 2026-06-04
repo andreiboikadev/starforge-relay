@@ -31,7 +31,7 @@ cross-check against `Packages/manifest.json` and `ProjectSettings/ProjectVersion
 - **Dependency injection:** **manual DI** (composition root + constructor injection + serialized refs +
   factories/pools). **No container** for MVP. VContainer is the only sanctioned container if one is
   later justified — via its own ADR (Zenject/Extenject rejected as abandoned).
-- **Scenes:** a **single** `Assets/_Project/Scenes/SampleScene.unity` for the MVP (the only build scene), with one
+- **Scenes:** a **single** `Assets/_Project/Scenes/StarforgeRelay.unity` for the MVP (the only build scene), with one
   XR Origin rig (tracking origin **Floor**) and one XR Interaction Manager.
 - **Pooling:** `UnityEngine.Pool.ObjectPool<T>` for shards, insert beams, and repeated VFX.
 

@@ -11,7 +11,7 @@ name availability before any public release.)*
 ## Current status
 
 **Baseline only.** Unity + URP + OpenXR + XR Interaction Toolkit are configured for Quest, with a
-`SampleScene` that contains an XR Origin rig and **no gameplay code yet**. Verified building and
+`StarforgeRelay` scene that contains an XR Origin rig (Starter-Assets Locomotion stripped) and **no gameplay code yet**. Verified building and
 launching on a Quest 2. Latest detailed state:
 [docs/handoff/current-status.md](docs/handoff/current-status.md).
 
@@ -26,7 +26,7 @@ launching on a Quest 2. Latest detailed state:
 ## Quick start
 
 1. Open this folder in Unity 6.3 LTS via Unity Hub; let it restore packages on first open.
-2. Open `Assets/_Project/Scenes/SampleScene.unity`.
+2. Open `Assets/_Project/Scenes/StarforgeRelay.unity`.
 3. **Test on device (the validated path):** make sure the active platform is **Android**
    (`File → Build Profiles → Switch Platform` — the active target is *not* version-controlled), then
    **Build And Run** to a Quest in Developer Mode.
