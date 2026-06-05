@@ -1,8 +1,8 @@
 # Current Status
 
-Last updated: 2026-06-04
-Updated by: Claude Code (session handoff — M1 complete)
-Branch/context: on `chore/strip-locomotion` (off `dev`). **T07 ✅ done & verified** — Locomotion/teleport/gaze stripped, rig **unpacked**, scene `SampleScene`→`StarforgeRelay`; EditMode **68/68**, Play-mode error-free, Project Validation (Android) **0 issues**. **Ready to commit → PR → `dev`.** Brief: [`../tasks/T07-strip-locomotion.md`](../tasks/T07-strip-locomotion.md). (M1 merged via PRs, T06 = #5.)
+Last updated: 2026-06-05
+Updated by: Claude Code (T08 start)
+Branch/context: on `feature/shard-grab` (off `dev`). **T07 ✅ merged (#6)** — Locomotion/teleport/gaze stripped, rig **unpacked** & on **Near-Far** interactors (grab on Grip), scene `StarforgeRelay`. **`T08` brief authored — awaiting validation, then implement on command.** Brief: [`../tasks/T08-shard-grab.md`](../tasks/T08-shard-grab.md). EditMode **68/68** at last run (M1). (M1 merged via PRs; T06 = #5, T07 = #6.)
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -13,7 +13,7 @@ Branch/context: on `chore/strip-locomotion` (off `dev`). **T07 ✅ done & verifi
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
-- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ done** (Locomotion stripped, rig unpacked, scene → `StarforgeRelay`); **next `T08`** — shard prefab + grab (Grip) + ShardPool; then T09+ (port sockets / spawner) in-scene.
+- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ merged (#6)** (Locomotion stripped, rig unpacked & on Near-Far, scene → `StarforgeRelay`); **`T08` 🟡 (brief stage — implement on command)** — shard prefab + grab (Grip) + ShardPool; then T09 (port sockets) / T10 (core + feeder pads + spawner) in-scene.
 - **M2–M6:** not started (VR slice → wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green (68/68), re-verified this session** (T06 added 16; Console clean; restricted-API + objective style checks clean). All
@@ -26,9 +26,10 @@ Branch/context: on `chore/strip-locomotion` (off `dev`). **T07 ✅ done & verifi
 ## Still to build / watch
 
 - Scene interaction (grab / sockets / spawn) begins at **T08+** — nothing interactive in the scene yet.
-- **Env note (future scene/rig tasks):** `execute_code` is broken here (CodeDom `mono.exe` path error; no
-  Roslyn) — use structural MCP tools; prefab **unpack** is a manual 1-click editor step; the MCP asset-rename
-  tool reports "failed" but succeeds on disk (verify via filesystem).
+- **Env note (scene/rig tasks):** `execute_code` is broken on **both** dev machines (CodeDom `mono.exe`
+  "filename or extension is too long"; no Roslyn) — re-verified on the work machine 2026-06-05; use
+  structural MCP tools. Prefab **unpack** is a manual 1-click editor step; the MCP asset-rename tool reports
+  "failed" but succeeds on disk (verify via filesystem).
 
 ## Blockers
 
