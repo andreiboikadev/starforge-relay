@@ -36,6 +36,25 @@ namespace StarforgeRelay.Gameplay
         /// <summary>Raised after a shard is socketed and validated. Outcome is Correct or Wrong (never NoPenalty).</summary>
         public event Action<PortSocket, ShardView, InsertOutcome> InsertEvaluated;
 
+        /// <summary>
+        /// Force-release the shard this socket currently holds, so the round loop (T11) can consume a correct
+        /// insert — never pool a socket-held shard (T09). Call from outside the select callback (the consumer
+        /// defers a frame); the <c>SelectExit</c> runs synchronously here. No-op when nothing is socketed.
+        /// </summary>
+        public void ReleaseSelected()
+        {
+            if (_socket == null || _socket.interactionManager == null || !_socket.hasSelection)
+            {
+                return;
+            }
+
+            IXRSelectInteractable interactable = _socket.firstInteractableSelected;
+            if (interactable != null && _socket.IsSelecting(interactable))
+            {
+                _socket.interactionManager.SelectExit((IXRSelectInteractor)_socket, interactable);
+            }
+        }
+
         private void Awake()
         {
             if (_socket == null)

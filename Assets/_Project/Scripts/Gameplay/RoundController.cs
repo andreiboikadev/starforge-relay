@@ -185,6 +185,17 @@ namespace StarforgeRelay.Gameplay
         private void End(RoundPhase phase)
         {
             Phase = phase;
+
+            // Finalize the results score (GDD §13) before publishing the snapshot the Results screen reads
+            // (RoundEndedEvent "never recomputes"): a win adds the remaining-time bonus, and every outcome
+            // applies the heat penalty (clamped at 0 by ScoreService).
+            if (phase == RoundPhase.Won)
+            {
+                _score.AddVictoryTimeBonus((int)_timer.Remaining);
+            }
+
+            _score.ApplyHeatPenalty(_heat.Current);
+
             Ended?.Invoke(new RoundEndedEvent(phase, Stars, _score.Score, _stabilization.Current, _heat.Current));
         }
     }

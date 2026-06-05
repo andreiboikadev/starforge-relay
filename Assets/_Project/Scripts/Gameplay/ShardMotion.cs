@@ -53,6 +53,7 @@ namespace StarforgeRelay.Gameplay
         public void SetHome(Transform home)
         {
             _home = home;
+            _wasSelected = false;
             _waiting = false;
             _returning = false;
         }
