@@ -12,8 +12,9 @@ namespace StarforgeRelay.Gameplay
     /// <b>any</b> shard (a shared interaction layer, NOT a colour-gated filter — guardrails §6 critical note);
     /// on select it validates colour in code via <see cref="PortValidationService"/> (T04): a match is a correct
     /// insert (accepted), a mismatch is force-ejected. Emits only the port-level <see cref="InsertOutcome"/> —
-    /// scoring/heat/combo and the rich CorrectInsert/WrongInsert events are RoundController's (wired T11); beams,
-    /// consuming the shard to the pool, and the real return-to-pad are T10/T11/T17.
+    /// scoring/heat/combo and the rich CorrectInsert/WrongInsert events are RoundController's (wired T11); beams
+    /// and consuming the shard to the pool are T11/T17. The wrong-insert return-to-pad is wired here (T10) via
+    /// <see cref="ShardMotion"/>.
     /// </summary>
     [RequireComponent(typeof(XRSocketInteractor))]
     public sealed class PortSocket : MonoBehaviour
@@ -26,9 +27,6 @@ namespace StarforgeRelay.Gameplay
 
         [Tooltip("Optional view tinted to the port colour. Falls back to a child PortView if unset.")]
         [SerializeField] private PortView _portView;
-
-        [Tooltip("Distance a rejected shard is pushed out of the socket so it can't immediately re-select (metres).")]
-        [SerializeField] private float _ejectDistance = 0.35f;
 
         private readonly PortValidationService _validation = new PortValidationService();
 
@@ -95,9 +93,9 @@ namespace StarforgeRelay.Gameplay
 
         // Reject a wrong-colour shard. We defer one frame (force-exiting from inside the select event would be
         // re-entrant), then force the socket to release via the current (non-obsolete) SelectExit overload —
-        // socketActive alone doesn't reliably drop an already-held target while keepSelectedTargetValid is on —
-        // and push the shard clear of the trigger so it isn't re-selected (recycleDelayTime also guards). The
-        // real return-to-pad replaces this scripted push in T10.
+        // socketActive alone doesn't reliably drop an already-held target while keepSelectedTargetValid is on.
+        // Once released, hand off to ShardMotion to lerp the shard back to its feeder pad (T10) — this replaces
+        // the T09 placeholder shove; recycleDelayTime guards against an immediate re-select.
         private IEnumerator EjectRoutine(IXRSelectInteractable interactable, ShardView shard)
         {
             yield return null;
@@ -107,9 +105,10 @@ namespace StarforgeRelay.Gameplay
                 _socket.interactionManager.SelectExit((IXRSelectInteractor)_socket, interactable);
             }
 
+            // After SelectExit (never before — the socket would re-snap it), send the shard home.
             if (shard != null)
             {
-                shard.transform.position = transform.position + (transform.forward * _ejectDistance);
+                shard.GetComponent<ShardMotion>()?.ReturnToPad();
             }
         }
     }
