@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -51,6 +52,7 @@ namespace StarforgeRelay.Gameplay
 
         private ShardSpawnPlanner _planner;
         private ShardPool _pool;
+        private bool _active;
 
         // Active shard -> its pad id; the round loop (T11) reads this to free the pad on accept/expire.
         private readonly Dictionary<ShardView, int> _shardPads = new Dictionary<ShardView, int>();
@@ -69,6 +71,7 @@ namespace StarforgeRelay.Gameplay
 
             _pool.Prewarm(_roundConfig.ActiveShardsDefault);
             SpawnToTarget();
+            _active = true;
         }
 
         /// <summary>Fill every free pad up to the active target with colour-distributed shards (GDD §12).</summary>
@@ -86,6 +89,40 @@ namespace StarforgeRelay.Gameplay
                     $"[ShardSpawner] Filled only {_planner.ActiveCount}/{target} shards — a pad may be outside the " +
                     "reach zone (SpawnArea) or there are fewer pads than the target.",
                     this);
+            }
+        }
+
+        /// <summary>Consume an accepted shard (T11): pool it, free its pad, and schedule a replacement (GDD §12).</summary>
+        public void Despawn(ShardView shard)
+        {
+            if (shard == null || !_shardPads.TryGetValue(shard, out int padId))
+            {
+                return;
+            }
+
+            _shardPads.Remove(shard);
+            _planner.Release(padId);
+            _pool.Release(shard);
+
+            if (_active)
+            {
+                StartCoroutine(RespawnAfterDelay(_planner.NextRespawnDelay()));
+            }
+        }
+
+        /// <summary>Stop replacing consumed shards and cancel pending respawns (round end, T11).</summary>
+        public void StopRespawns()
+        {
+            _active = false;
+            StopAllCoroutines();
+        }
+
+        private IEnumerator RespawnAfterDelay(float delaySeconds)
+        {
+            yield return new WaitForSeconds(delaySeconds);
+            if (_active)
+            {
+                SpawnToTarget();
             }
         }
 

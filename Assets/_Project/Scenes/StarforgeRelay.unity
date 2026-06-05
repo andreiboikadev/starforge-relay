@@ -163,6 +163,56 @@ PhysicsMaterial:
   m_Bounciness: 0
   m_FrictionCombine: 0
   m_BounceCombine: 0
+--- !u!1 &270399053
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 270399055}
+  - component: {fileID: 270399054}
+  m_Layer: 0
+  m_Name: Round Loop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &270399054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270399053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 441ab0d525c240042ab97ab2802aecdd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.RoundLoopController
+  _config: {fileID: 11400000, guid: d2e3ea7970a682f4fb6ce94fe5bc5747, type: 2}
+  _ports:
+  - {fileID: 993739357808976661}
+  - {fileID: 997254335}
+  - {fileID: 1051404493}
+  _spawner: {fileID: 1714955172}
+--- !u!4 &270399055
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270399053}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,6 +650,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4994205150377117534, guid: 8611cb6bde7e1dd49a763bb9e27b745b, type: 3}
   m_PrefabInstance: {fileID: 997254333}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &997254335 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 805199065843274198, guid: 8611cb6bde7e1dd49a763bb9e27b745b, type: 3}
+  m_PrefabInstance: {fileID: 997254333}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d11f7cc38b5f75449de319212aff22c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.PortSocket
 --- !u!1001 &1013188978
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -812,6 +873,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4994205150377117534, guid: 8611cb6bde7e1dd49a763bb9e27b745b, type: 3}
   m_PrefabInstance: {fileID: 1051404491}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1051404493 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 805199065843274198, guid: 8611cb6bde7e1dd49a763bb9e27b745b, type: 3}
+  m_PrefabInstance: {fileID: 1051404491}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d11f7cc38b5f75449de319212aff22c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.PortSocket
 --- !u!1 &1714955171
 GameObject:
   m_ObjectHideFlags: 0
@@ -854,7 +926,7 @@ MonoBehaviour:
   _maxAngleDegrees: 50
   _minHeight: 0.9
   _maxHeight: 1.4
-  _spawnSeed: 12345
+  _spawnSeed: 0
 --- !u!4 &1714955173
 Transform:
   m_ObjectHideFlags: 0
@@ -1702,6 +1774,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4994205150377117534, guid: 8611cb6bde7e1dd49a763bb9e27b745b, type: 3}
   m_PrefabInstance: {fileID: 993739357808976659}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &993739357808976661 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 805199065843274198, guid: 8611cb6bde7e1dd49a763bb9e27b745b, type: 3}
+  m_PrefabInstance: {fileID: 993739357808976659}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d11f7cc38b5f75449de319212aff22c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.PortSocket
 --- !u!1 &1000662906668110841
 GameObject:
   m_ObjectHideFlags: 0
@@ -6477,3 +6560,4 @@ SceneRoots:
   - {fileID: 883883572}
   - {fileID: 716758691}
   - {fileID: 1714955173}
+  - {fileID: 270399055}

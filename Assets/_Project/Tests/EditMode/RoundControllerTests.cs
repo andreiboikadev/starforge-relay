@@ -278,5 +278,51 @@ namespace StarforgeRelay.Tests.EditMode
             rc.ApplyCorrect(); // 5th → milestone
             Assert.IsTrue(lastMilestone, "combo 5 is a milestone");
         }
+
+        // ---- final-score finalization on End (T11: victory time bonus + heat penalty, GDD §13) ----
+
+        [Test]
+        public void Victory_Score_Includes_Time_Bonus()
+        {
+            var rc = NewStarted(); // 90 s timer, never ticked → 90 s remaining at the win
+            for (int i = 0; i < 20; i++)
+            {
+                rc.ApplyCorrect();
+            }
+
+            // 20×10 + four milestone bonuses (5,10,15,20)×50 = 400; + 90 s × 2 victory bonus; − 0 heat.
+            Assert.AreEqual(RoundPhase.Won, rc.Phase);
+            Assert.AreEqual(580, rc.Score);
+        }
+
+        [Test]
+        public void End_Applies_Heat_Penalty_To_Final_Score()
+        {
+            var rc = NewStarted();
+            for (int i = 0; i < 6; i++)
+            {
+                rc.ApplyCorrect(); // 6×10 + milestone@5 (+50) = 110
+            }
+
+            rc.ApplyWrong(); // heat 1
+            rc.ApplyWrong(); // heat 2
+            rc.Tick(90f);    // time-out → End subtracts heat penalty 2×10
+
+            Assert.AreEqual(RoundPhase.TimedOut, rc.Phase);
+            Assert.AreEqual(90, rc.Score); // 110 − 20
+        }
+
+        [Test]
+        public void End_Heat_Penalty_Never_Below_Zero()
+        {
+            var rc = NewStarted();
+            for (int i = 0; i < 8; i++)
+            {
+                rc.ApplyWrong(); // overload at heat 8, score 0
+            }
+
+            Assert.AreEqual(RoundPhase.Overloaded, rc.Phase);
+            Assert.AreEqual(0, rc.Score); // 0 − 80, clamped at 0
+        }
     }
 }

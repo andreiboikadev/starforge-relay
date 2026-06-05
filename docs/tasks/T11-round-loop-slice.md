@@ -7,7 +7,7 @@
 | Design ref | GDD §5 (loop), §12 (correct/wrong/expired, victory/overload/time-out), §13 (scoring/stars); guardrails §6 (Round Gameplay, events), §15 (event policy), §16 (rule ownership + end-state priority) |
 | Depends on | T06 (`RoundController` + event structs), T09 (`PortSocket.InsertEvaluated`), T10 (`ShardSpawner`, `ShardMotion`, `ShardPool`) |
 | Touches scenes/prefabs | **yes** — new `RoundLoopController` in the scene + wiring; edits existing scripts `ShardSpawner` / `PortSocket` / `RoundController` + the shard pool-reset (see Implementation notes). No new prefab. |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 Close the Stabilize Run loop in-scene: a thin MonoBehaviour adapter (`RoundLoopController`) that wires the port
@@ -120,4 +120,35 @@ applied; never < 0) — guardrails §17. This is the single T06 pure-rule change
   errors; then close docs (brief + matrix + current-status).
 
 ## What was actually done
-`—` (not started; implementation begins after the docs commit + validation).
+Implemented + verified 2026-06-05 (branch `feature/round-loop-slice`; human commits).
+
+- **Code:** new `RoundLoopController` (builds `RoundController` from `RoundConfig`; routes each port's
+  `InsertEvaluated` → `ApplyCorrect`/`ApplyWrong`; ticks the clock in `Update`; forwards round events as dev
+  logs). `ShardSpawner` += `Despawn` (pool + `planner.Release` + delayed respawn) / `StopRespawns` / `_active`.
+  `PortSocket` += `ReleaseSelected()`. **`RoundController.End()` finalization** — victory time bonus (on `Won`)
+  + heat penalty (always, clamped ≥0) before `RoundEndedEvent`.
+- **Consume sequencing:** on a correct insert, `RoundLoopController.ConsumeRoutine` defers one frame, calls
+  `port.ReleaseSelected()` (SelectExit), then `spawner.Despawn(shard)` — never pools a socket-held shard (T09).
+- **Tests:** +3 `RoundControllerTests` (victory time bonus, heat penalty subtracts, clamp ≥0). Full EditMode
+  **78/78** this session (75 + 3), no regression.
+- **Scene:** `Round Loop` object + `RoundLoopController` wired (`_config` + 3 `PortSocket`s + `ShardSpawner`);
+  `ShardSpawner._spawnSeed` switched **12345 → 0** (time-based — the fixed debug seed made every play identical).
+- **Decisions (this session):** lifetime/expiry **split → `T11b`**; final-score finalization **folded into T11**.
+- **Deviations from the brief (deliberate):** (1) the spawner keeps **self-filling in its own `Start`** (T10);
+  `RoundLoopController` does **not** call `SpawnToTarget` — avoids a double-fill and an Awake/ordering refactor.
+  (2) the ShardMotion pool-reuse reset is folded into **`SetHome`** (called on every spawn — clears
+  `_wasSelected`/`_waiting`/`_returning`) instead of a separate `ResetForPool`; no `ShardView`↔`ShardMotion`
+  coupling.
+- **Checks:** compile clean; restricted-API clean (`Interaction.Toolkit` in C# only in `PortSocket` +
+  `ShardMotion`). **MCP Play:** 4 shards spawn, distribution per the planner. **Human smoke (XR Device
+  Simulator):** correct → consume + respawn + meters; wrong → +heat, combo reset, shard returns; **Overload @
+  heat 8** with `Ended` once + spawning stopped; **finalization confirmed live** (overload score 0 = 3×10 −
+  8×10, clamped). Console clean (only the known sim-haptic noise; **no `routine is null` in the human Play** —
+  that was an MCP-Play artifact). `Won`@20 / `TimedOut`@90 s are EditMode-covered and adapter-wired identically.
+- **Colour-distribution note (not a bug):** "the same colour respawns on a repeatedly-consumed pad" is the
+  planner's under-represented preference (GDD §12, T05-tested) — consuming colour X frees X → respawns X on the
+  freed pad. Verified by the spawn log. The fixed seed (identical every play) was the real "always the same"
+  cause → now time-based. Deeper within-round anti-repetition is a planner **tuning candidate (T21)**, not T11.
+- **Deferred:** lifetime/expiry → **T11b**; centralised composition + pool `Prewarm`/**`Dispose` on teardown**
+  (a leak notice on Play-stop) → **T12**; the dev `[Round]` logs are temporary — HUD consumes the events at **T14**.
+- Commit: `feat(gameplay): round loop + consume/respawn + finalize score (T11)`.
