@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-05
-Updated by: Claude Code (T08 done)
-Branch/context: on `feature/shard-grab` (off `dev`). **`T08` ✅ done & verified** — shard prefab + grab (Grip) + `ShardPool`; EditMode **75/75**, grab smoke passed (XR Device Simulator), restricted-API clean. **Ready to commit → PR → `dev`.** Next **`T09`** — ports as accept-any sockets → validate colour in code. Brief: [`../tasks/T08-shard-grab.md`](../tasks/T08-shard-grab.md). (M1 merged; T06 = #5, T07 = #6.)
+Updated by: Claude Code (T09 done)
+Branch/context: on `feature/port-socket` (off `dev`). **`T09` ✅ done & verified** — 3 reactor ports = accept-any `XRSocketInteractor` + validate colour in code + eject-on-wrong; EditMode **75/75**, smoke passed (XR Device Simulator: correct accepted, wrong ejected, no loop), restricted-API clean. **Ready to commit → PR → `dev`.** Next **`T10`** — reactor core + feeder pads + spawner + lerp-back. Brief: [`../tasks/T09-port-socket.md`](../tasks/T09-port-socket.md). (T07 = #6, T08 = #7.)
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -13,7 +13,7 @@ Branch/context: on `feature/shard-grab` (off `dev`). **`T08` ✅ done & verified
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
-- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ merged (#6)**, **`T08` ✅ done** (shard prefab + grab + `ShardPool`; EditMode 75/75 + grab smoke); **next `T09`** — ports as accept-any sockets → validate colour in code; then T10 (core + feeder pads + spawner) in-scene.
+- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ (#6)**, **`T08` ✅ (#7)**, **`T09` ✅** (3 ports: accept-any socket + validate colour in code + eject); **next `T10`** — reactor core + feeder pads + spawner + lerp-back; then T11 (round-loop wiring) in-scene.
 - **M2–M6:** not started (VR slice → wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green (75/75), re-verified this session** (T08 added 7 `ShardPool` tests; restricted-API clean). T08 adds the
@@ -58,7 +58,7 @@ Branch/context: on `feature/shard-grab` (off `dev`). **`T08` ✅ done & verified
 - Read `CLAUDE.md` + this file + the relevant `Tnn` brief first.
 - **Branch first:** create + switch to `feature/<slug>` off `dev` **before any edits**; PR → `dev` (pattern: #3/#4/#5) — never commit straight to `dev`. (Assistant: at task start run `git status`; if on `dev`, STOP and ask to branch.)
 - **Style check covers ALL first-party C#** — runtime **and** tests (`.editorconfig` / IDE1006). A test-file `s_` violation slipped past a runtime-only check this session; don't repeat.
-- **`T09` is next** — ports = **accept-any** `XRSocketInteractor`s that **validate colour in code** (guardrails §6 critical note), *not* color-gated sockets; needs an XR-sim/device smoke, not just EditMode. If shards move to a named "Shard" interaction layer, **also add it to the rig interactors' mask** or grab breaks.
+- **`T09` ✅ done; `T10` next** (carry-forward) — ports = **accept-any** `XRSocketInteractor` + **validate colour in code** (guardrails §6), *not* colour-gated; on the **Default** interaction layer for now. Named "Shard" layer + rig-mask separation **deferred to T14/UI** (when introduced, update the interactors' mask or grab breaks). Working wrong-insert eject = force-release via `XRInteractionManager.SelectExit((IXRSelectInteractor)socket, interactable)` (the **non-obsolete** overload; the concrete-type one is obsolete) + push the shard out of the trigger — `socketActive`/`keepSelectedTargetValid` alone don't drop a held shard. Don't edit scripts while **in Play** (recompile→domain reload corrupts live XR state).
 - **New C# follows `docs/architecture/csharp-style.md`** (enforced by the repo-root `.editorconfig`):
   non-public fields `_camelCase` (static `s_camelCase`), `PascalCase` types/methods/properties/consts.
 - **Per-mechanic test gate** (guardrails §17): pure rules ship EditMode tests in-change and the full suite

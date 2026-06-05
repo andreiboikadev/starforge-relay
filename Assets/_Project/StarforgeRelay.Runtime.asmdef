@@ -1,7 +1,9 @@
 {
     "name": "StarforgeRelay.Runtime",
     "rootNamespace": "StarforgeRelay",
-    "references": [],
+    "references": [
+        "Unity.XR.Interaction.Toolkit"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

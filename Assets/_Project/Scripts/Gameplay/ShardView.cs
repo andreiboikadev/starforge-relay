@@ -41,7 +41,7 @@ namespace StarforgeRelay.Gameplay
         public void SetColor(ShardColor color)
         {
             Color = color;
-            ApplyTint(ResolveColor(color));
+            ApplyTint(ShardColorPalette.Resolve(color));
         }
 
         /// <summary>
@@ -68,14 +68,5 @@ namespace StarforgeRelay.Gameplay
             _propertyBlock.SetColor(s_baseColorId, color);
             _renderer.SetPropertyBlock(_propertyBlock);
         }
-
-        // Primitive placeholder palette (GDD §17 colours). Real glow/emission/halos are T19.
-        private static UnityEngine.Color ResolveColor(ShardColor color) => color switch
-        {
-            ShardColor.Solar => new UnityEngine.Color(1f, 0.78f, 0.2f),
-            ShardColor.Ion => new UnityEngine.Color(0.2f, 0.8f, 1f),
-            ShardColor.Pulse => new UnityEngine.Color(1f, 0.25f, 0.8f),
-            _ => UnityEngine.Color.white
-        };
     }
 }
