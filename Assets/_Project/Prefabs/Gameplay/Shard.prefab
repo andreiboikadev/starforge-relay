@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6993721916600903850}
   - component: {fileID: 399269957939076995}
   - component: {fileID: 6405131886661284621}
+  - component: {fileID: 8104476243942300104}
   m_Layer: 0
   m_Name: Shard
   m_TagString: Untagged
@@ -285,3 +286,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.ShardView
   _renderer: {fileID: 0}
   _collider: {fileID: 0}
+--- !u!114 &8104476243942300104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8668061773791253488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 641fc356a4964684bb35c939ef57e56f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.ShardMotion
+  _bobAmplitude: 0.02
+  _bobFrequency: 0.8
+  _spinSpeed: 30
+  _returnDelay: 0.7
+  _returnSpeed: 1.5
+  _grabInteractable: {fileID: 0}

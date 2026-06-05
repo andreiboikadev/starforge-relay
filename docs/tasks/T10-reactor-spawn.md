@@ -7,7 +7,7 @@
 | Design ref | GDD §5 (loop), §9 (play space / reach), §10 (Star Core, Feeder Pads, Energy Shards), §12 (spawn rules, dropped-shard lerp-back); guardrails §6 (Reactor Core; Shard Views — `ShardMotion`), §11 (`ShardMotion.Update` for the ~4 shards is OK), §12 (pooling); [ADR 0001](../architecture/adr/0001-tech-baseline.md) |
 | Depends on | T05 (`ShardSpawnPlanner`, `FeederPadSlot`, `SpawnArea`, `ShardSpawnPlan`, `IRandom`/`SeededRandom`), T08 (`ShardView`, `ShardPool`, `Shard.prefab`) |
 | Touches scenes/prefabs | **yes** — new `ReactorCore` + 4 feeder pads committed to the scene under a `Reactor` root; the 3 T09 ports re-parented under it; new `FeederPad.prefab` + pad material; new `ShardSpawner` object. Extends `ShardView` indirectly (new `ShardMotion` component on `Shard.prefab`). Edits `PortSocket` (wrong-eject → return-to-pad). |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 The **spatial + spawn half** of the VR slice: shards actually appear and live on feeder pads in front of a
@@ -159,4 +159,39 @@ say so at doc review — it's the one open fork.)*
   (brief Status + matrix + current-status).
 
 ## What was actually done
-`—` (not started; implementation begins after the docs commit lands).
+Implemented + verified 2026-06-05 (branch `feature/reactor-spawn`; human commits).
+
+- **Code (4 new + 1 edit):** `ShardSpawner` (builds `ShardSpawnPlanner` (T05) + `ShardPool` (T08); derives
+  `FeederPadSlot[]` from each pad's pose in the `Reactor` local frame; fills 4 colour-distributed shards; dev
+  `LogWarning` on under-fill). `ShardMotion` (idle bob + spin; grab-state by polling
+  `XRGrabInteractable.isSelected` — no hand/socket distinction needed; empty-drop → ~0.7 s wait → lerp home;
+  `ReturnToPad()` for the wrong-insert eject). `ReactorCoreView` + `FeederPadView` (minimal anchors).
+  `PortSocket` edit: wrong-insert eject now calls `ShardMotion.ReturnToPad()` after the deferred `SelectExit`
+  (dropped `_ejectDistance`).
+- **Scene/prefabs (committed):** `Reactor` root → 3 ports (re-parented) + `Reactor Core` (sphere, collider
+  removed) + `Feeder Pad 0-3`; `Shard Spawner` (+ `Shards` container, all 6 refs wired). New `FeederPad.prefab`
+  (thin disc, no collider). `Shard.prefab` += `ShardMotion`.
+- **Scope cut held:** lifetime/expiry + consume-on-accept + RoundController rules/events stay **T11** (matrix
+  title scope only).
+- **Bug caught + fixed by the smoke (the key lesson, mirrors T09):** the wrong-insert eject first regressed —
+  v1 replaced T09's *instant* push-out with `ShardMotion`'s *gradual* lerp, so the shard lingered in the socket
+  trigger and `keepSelectedTargetValid` re-snapped it (every colour stuck in every port). Fix: `ReturnToPad()`
+  now **teleports** the shard to its pad in one frame (every pad is farther than the ~0.24 m socket trigger from
+  every port), clearing the volume so it can't re-select. The smooth lerp is kept for the (trigger-free)
+  empty-space drop.
+- **Checks:** compile clean (0 errors); EditMode **75/75 this session** (×2, no regression — adapter-only
+  change); restricted-API clean (`Interaction.Toolkit` in C# only in `PortSocket` + `ShardMotion`). **MCP Play:**
+  4 shards spawn on the 4 pads, idle bob + spin, `_grabInteractable` auto-resolved, clean Play console. **Human
+  smoke (XR Device Simulator, confirmed):** wrong colour → snaps back to its pad; correct colour → stays socketed
+  (T10-expected); empty-space drop → lerps home.
+- **Deviations / notes:** no custom pad material (pads on default; art = T18-19); pad + core colliders removed
+  (pure visual). MCP gotchas hit: `components_to_remove` / `component_properties` ignored on `manage_gameobject
+  create` (set/removed via `manage_components` + re-read); a component-array serialized ref needs
+  `[{"instanceID":…}]` objects (bare ints resolved to null); the temp GO left by prefab-creation was a stray and
+  was deleted. The first Play after each recompile shows the benign `routine is null` / AABB domain-reload
+  transient (T09) — a settled re-Play is clean.
+- **Deferred → T11 (must own these so they're not lost):** consume accepted shard → beam → pool → free pad →
+  respawn; shard lifetime (14→12 s) + expiry (fizzle, +1 heat / combo-reset-if-held); wire
+  `PortSocket.InsertEvaluated` + `ShardSpawner` into `RoundController` + typed events; **reset `ShardMotion`
+  state on pool release** (stale home/timer otherwise).
+- Commit: `feat(gameplay): add reactor core + feeder pads + spawner + lerp-back (T10)` (code + close-docs in one).
