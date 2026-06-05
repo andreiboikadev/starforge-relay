@@ -7,7 +7,7 @@
 | Design ref | GDD §10 (Reactor Ports), §12 (correct/wrong insert); guardrails §6 (Reactor Core & Ports — **critical "don't color-gate" note**), §13 (XRI: sockets accept any, validate in code), §16 (ownership); [ADR 0001](../architecture/adr/0001-tech-baseline.md) |
 | Depends on | T04 (`PortValidationService`, `InsertOutcome`), T08 (`Shard.prefab`, `ShardView.Color`) |
 | Touches scenes/prefabs | yes — new `Port.prefab` + **3 port instances committed to the scene**. No `Shard.prefab` / rig changes (uses the **Default** interaction layer; the named "Shard" layer is deferred to T14). |
-| Status | 🟡 brief — implement on command |
+| Status | ✅ done |
 
 ## Goal
 The colour-matching mechanic. Each of the 3 reactor ports is an `XRSocketInteractor` that accepts **any**
@@ -106,4 +106,29 @@ files (see Verification).
   then close docs (brief + matrix + current-status).
 
 ## What was actually done
-— (filled on close)
+Implemented + verified 2026-06-05 (branch `feature/port-socket`; human commits).
+
+- **Code:** `PortSocket` (wraps `XRSocketInteractor`, accept-any, validates colour on `selectEntered` via
+  `PortValidationService`, emits `InsertEvaluated(port, shard, outcome)`). `PortView` (MPB tint).
+  `ShardColorPalette` extracted as the single colour source; `ShardView` converted to use it. XRI ref added to
+  `StarforgeRelay.Runtime.asmdef` (first XRI in code; pure rules stay XR-free — verified by the API grep).
+- **Layer:** kept on **Default** (the shared shard/port layer); named "Shard" layer deferred to T14, as planned.
+- **Prefab + scene:** `Port.prefab` (cube + forgiving trigger 0.24 m + socket + `PortSocket` + `PortView`,
+  hover-meshes off); 3 instances **Solar/Ion/Pulse** committed to the scene (forward arc, chest height, facing player).
+- **Checks:** EditMode **75/75** (no new pure rule — `PortValidationService` covers the logic); restricted-API
+  clean incl. `Interaction.Toolkit` confined to `PortSocket`; Console clean.
+- **Smoke (XR Device Simulator, human-driven):** logs confirmed `[Port Solar] Solar → Correct` (accepted) and
+  `[Port Ion] Solar → Wrong` ×6 (ejected; 6 discrete = no re-select loop). Only console errors = the known
+  benign XRI sim-haptic noise (absent on device; re-check at T20).
+- **Eject — bug caught + fixed by the smoke:** v1 used `socketActive`, but `keepSelectedTargetValid` let the
+  socket snap the shard back (looked "accepted"). Fixed to force-release via the **non-obsolete** overload
+  `XRInteractionManager.SelectExit((IXRSelectInteractor)socket, interactable)` (the concrete-type overload is
+  obsolete), deferred one frame to avoid re-entrancy, then push the shard out of the trigger.
+- **Deviations:** no `PortInsert` struct (a typed `Action<PortSocket, ShardView, InsertOutcome>` event suffices);
+  temporary diagnostic `Debug.Log` removed before commit.
+- **MCP gotcha (logged):** never edit scripts while the editor is in Play — a recompile forces a domain reload
+  mid-session and corrupts the live XR state (cascade of `routine is null` / AABB asserts). Edit only when stopped.
+- **Deferred as planned:** RoundController wiring + rich CorrectInsert/WrongInsert events → T11; reactor core +
+  feeder pads + spawner + lerp-back → T10 (also replaces the eject push-out with the real return-to-pad);
+  beam/spark VFX → T17; shape markers/glow → T18–19.
+- Commit: `feat(gameplay): add accept-any port sockets + validate in code (T09)`.
