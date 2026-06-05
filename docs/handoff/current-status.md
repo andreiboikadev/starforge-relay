@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-05
-Updated by: Claude Code (T10 done)
-Branch/context: on **`feature/reactor-spawn`** (off `dev`). **`T07`/`T08`/`T09` ✅ merged** (#6/#7/#8). **`T10` ✅ done & verified** — `Reactor` (core + 4 feeder pads + 3 ports) + `ShardSpawner` (fills 4 colour-distributed shards) + `ShardMotion` (idle bob/spin + lerp-back; wrong-insert eject = **instant** return-to-pad) + `PortSocket` eject→return. EditMode **75/75 this session**, restricted-API clean, MCP-Play spawn verified, **human smoke passed** (wrong→pad, correct→stays socketed, drop→returns). **Code ready to commit → PR → `dev`** (the T10 brief was committed separately first). Next **`T11`** — round-loop wiring. Brief: [`../tasks/T10-reactor-spawn.md`](../tasks/T10-reactor-spawn.md).
+Updated by: Claude Code (T11 authored)
+Branch/context: on **`feature/round-loop-slice`** (off `dev`). **`T07`–`T10` ✅ merged** (#6–#9). **`T11` 🟡 in progress** — brief authored: a `RoundLoopController` adapter wiring `PortSocket.InsertEvaluated` (T09) + `ShardSpawner` (T10) into `RoundController` (T06), + consume/respawn + event forwarding = first end-to-end **playable round**. **Decisions:** lifetime/expiry **split → `T11b`** (matrix row added); the final-score finalization fix (`RoundController.End()` victory bonus + heat penalty) is **folded into T11**. Brief: [`../tasks/T11-round-loop-slice.md`](../tasks/T11-round-loop-slice.md). **Next:** commit T11 docs → implement.
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -13,7 +13,7 @@ Branch/context: on **`feature/reactor-spawn`** (off `dev`). **`T07`/`T08`/`T09` 
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
-- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ (#6)**, **`T08` ✅ (#7)**, **`T09` ✅ (#8)**, **`T10` ✅** (reactor core + 4 feeder pads + spawner + return-to-pad; verified incl. human smoke — **code pending commit/PR**); **next `T11`** — round-loop wiring (consume/respawn + expiry/lifetime + rules/events).
+- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ (#6)**, **`T08` ✅ (#7)**, **`T09` ✅ (#8)**, **`T10` ✅ (#9)**; **`T11` 🟡** (brief authored) — round-loop adapter: wire ports + spawner into `RoundController` + consume/respawn + events + `End()` score-finalization fix (first playable round); **lifetime/expiry → `T11b`** (split).
 - **M2–M6:** not started (VR slice → wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 75/75, re-run this session** (T10 added no new pure rule — adapter-only; planning logic is T05, already
@@ -25,7 +25,8 @@ Branch/context: on **`feature/reactor-spawn`** (off `dev`). **`T07`/`T08`/`T09` 
 ## Still to build / watch
 
 - Scene now has **grab (T08) + 3 colour-validating sockets (T09) + reactor core, 4 feeder pads, and a working
-  spawner with return-to-pad (T10)**. Shard **lifetime/expiry + consume-on-accept + scoring/event wiring** = **T11**.
+  spawner with return-to-pad (T10)**. Consume-on-accept + scoring/event wiring + `End()` score-finalization =
+  **T11**; shard **lifetime/expiry** = **T11b**.
 - **Env note (scene/rig tasks):** `execute_code` is broken on **both** dev machines (CodeDom `mono.exe`
   "filename or extension is too long"; no Roslyn) — re-verified on the work machine 2026-06-05; use
   structural MCP tools. Prefab **unpack** is a manual 1-click editor step; the MCP asset-rename tool reports
@@ -58,9 +59,9 @@ Branch/context: on **`feature/reactor-spawn`** (off `dev`). **`T07`/`T08`/`T09` 
 
 ## Notes for next chat
 
-- **First:** commit the **T10 code** (human; proposed message in the brief) → PR `feature/reactor-spawn` → `dev` (pattern #6/#7/#8). Then read `CLAUDE.md` + this file and **author the `T11` brief** (matrix row is still `·`).
-- **Branch for T11:** `feature/round-loop-slice` off `dev` **before any edits** (assistant: run `git status`; if on `dev`, STOP and ask to branch).
-- **`T11` carry-forward (what it must own):** wire `PortSocket.InsertEvaluated` (T09) + `ShardSpawner` (T10) into `RoundController` (T06) + typed `CorrectInsert`/`WrongInsert`/`ComboMilestone`/round-end events; **consume** an accepted shard → beam → pool → free pad → respawn (extend `ShardSpawner` with the `Despawn`/`planner.Release`/`NextRespawnDelay` loop it deliberately left unbuilt); shard **lifetime** (14→12 s after 10 accepts) + **expiry** (fizzle, +1 heat, combo-reset-if-held); **reset `ShardMotion` state on pool release** (else a reused shard keeps a stale home/return-timer). **Do NOT re-break the wrong-insert eject:** `ShardMotion.ReturnToPad()` is an **instant teleport** on purpose — a gradual lerp lets the socket's `keepSelectedTargetValid` re-snap the shard (the bug fixed in T10). Ports stay on **Default**; named "Shard" layer + rig-mask separation → **T14**.
+- Read `CLAUDE.md` + this file + the **`T11`** brief first. **Workflow:** validate the T11 brief → human commits the T11 docs (one separate commit) → then implement; at close, **one commit for code + close-docs** (the user's T10 preference).
+- **Branch:** already on **`feature/round-loop-slice`** (off `dev`, T10 merged #9); PR → `dev` at T11 close (pattern #6–#9).
+- **`T11` detail is in the brief** ([`../tasks/T11-round-loop-slice.md`](../tasks/T11-round-loop-slice.md)): wire ports + spawner into `RoundController`, consume → pool → respawn, the `RoundController.End()` score-finalization fix, and the **socket-release-before-pool** hazard. Shard **lifetime/expiry → `T11b`**. **Cross-cutting reminder — don't re-break the wrong-insert eject:** `ShardMotion.ReturnToPad()` is an **instant teleport** on purpose (a gradual lerp lets the socket's `keepSelectedTargetValid` re-snap the shard — the T10 bug). Ports stay on **Default**; named "Shard" layer + rig-mask separation → **T14**.
 - **Style covers ALL first-party C#** — runtime **and** tests (`.editorconfig` / IDE1006). New C#: `_camelCase` fields (static `s_camelCase`), `PascalCase` types/methods/properties/consts; C# 9 (block namespace, no `record`/`init`), no `#nullable enable`.
 - **Per-mechanic test gate** (guardrails §17): pure rules ship EditMode tests in-change and the full suite
   re-runs green; interaction mechanics (M2+) also need a smoke / device pass. Pure-rule tasks need no device pass.
