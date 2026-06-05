@@ -7,7 +7,7 @@
 | Design ref | GDD §10 (Energy Shards), §11 (Grip = grab), §26 (pool shards); guardrails §6 (Shard Views), §12 (pooling), §13 (XRI: `throwOnDetach=false`, kinematic, no ballistic throwing); [ADR 0001](../architecture/adr/0001-tech-baseline.md) (pooling = `ObjectPool<T>`; grab-interactor follow-up) |
 | Depends on | T01 (`ShardColor`) |
 | Touches scenes/prefabs | **prefab only** — new `Shard.prefab` + `Shard.mat`. **No committed scene change** (grab smoke uses transient, unsaved instances). |
-| Status | 🟡 brief — implement on command |
+| Status | ✅ done |
 
 ## Goal
 First interactive object in the scene: a poolable, grabbable energy **shard**. Makes the existing
@@ -104,4 +104,23 @@ plain C#, no `MonoBehaviour`/Unity statics) + the restricted-API check, exactly 
   passed; then close docs (brief Status + matrix + current-status) **and** ADR 0001 grab-interactor follow-up.
 
 ## What was actually done
-— (filled on close; remember to close the ADR 0001 grab-interactor follow-up)
+Implemented + verified 2026-06-05 (branch `feature/shard-grab`; human commits).
+
+- **Code (XRI-free):** `ShardView` (colour identity + `MaterialPropertyBlock` `_BaseColor` tint + `ResetForPool`)
+  and `ShardPool` (`ObjectPool<ShardView>`, injected factory, optional container reparent, `Prewarm`,
+  `collectionCheck` → `Debug.isDebugBuild`, edit-mode-safe destroy). **`StarforgeRelay.Runtime.asmdef`
+  untouched** — pure rules keep their XR-free compile guard; XRI enters in T09.
+- **Prefab:** `Prefabs/Gameplay/Shard.prefab` — 0.12 m sphere + `Materials/Shard.mat` (URP Lit); Rigidbody
+  `isKinematic`+no-gravity; SphereCollider r=0.65 (forgiving, non-trigger); `XRGrabInteractable`
+  (`throwOnDetach=false`, `movementType=Kinematic`, `retainTransformParent`, Default layer); `ShardView`.
+- **Tests:** `ShardPoolTests` — 7 EditMode cases. Full suite **75/75** green (68 prior + 7 new, no regression).
+  Restricted-API scan of `Assets/_Project` clean.
+- **Grab smoke (human, XR Device Simulator):** Grip-grab with both controllers, kinematic follow, no throw,
+  no fall — confirmed. Console shows only 2 **benign** XRI haptic-capability errors on the *simulated*
+  controllers (`HapticImpulseCommandChannelGroup`); not from T08 code, absent on real Touch controllers —
+  device console re-checked at T20.
+- **Deviations from plan:** none material. Named "Shard" layer stays on **Default** (T09 owns it); glow/emission
+  deferred to T19 (T08 tints base colour only). The in-scene smoke shard is transient (scene not saved/committed).
+- **Tooling caught:** `manage_gameobject create` silently didn't apply `component_properties` (set via
+  `manage_components set_property` + re-read to verify); `refresh scope=scripts` doesn't import new files (used `scope=all`).
+- **Commits:** `feat(gameplay): add shard prefab + grab + ShardPool (T08)` + this doc-close.

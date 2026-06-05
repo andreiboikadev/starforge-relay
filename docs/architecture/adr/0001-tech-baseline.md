@@ -47,7 +47,9 @@ cross-check against `Packages/manifest.json` and `ProjectSettings/ProjectVersion
 
 ## Follow-Up
 
-- Strip the Starter Assets Locomotion providers from the rig at the first interaction slice.
+- ~~Strip the Starter Assets Locomotion providers from the rig at the first interaction slice.~~ ✓ Done in **T07** (#6).
 - Revisit manual DI if the service graph grows non-trivially beyond the MVP (would be ADR 0002).
 - Revisit single-scene if additive loading becomes worthwhile.
-- Record the chosen grab interactor (Direct vs Near-Far) once the grab slice is implemented and tested.
+- ~~Record the chosen grab interactor (Direct vs Near-Far) once the grab slice is implemented and tested.~~
+  ✓ **T08**: **Near-Far Interactor** (near grab + far ray), grab on **Grip**, `throwOnDetach=false`/kinematic;
+  confirmed in the XR Device Simulator.
