@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-05
-Updated by: Claude Code (T09 done)
-Branch/context: on `feature/port-socket` (off `dev`). **`T09` ✅ done & verified** — 3 reactor ports = accept-any `XRSocketInteractor` + validate colour in code + eject-on-wrong; EditMode **75/75**, smoke passed (XR Device Simulator: correct accepted, wrong ejected, no loop), restricted-API clean. **Ready to commit → PR → `dev`.** Next **`T10`** — reactor core + feeder pads + spawner + lerp-back. Brief: [`../tasks/T09-port-socket.md`](../tasks/T09-port-socket.md). (T07 = #6, T08 = #7.)
+Updated by: Claude Code (T10 authored)
+Branch/context: on **`dev`** (clean). **`T07`/`T08`/`T09` ✅ merged** (#6/#7/#8) — the VR slice now has the rig (locomotion stripped), a poolable grabbable shard, and 3 accept-any ports that validate colour in code + eject-on-wrong. **`T10` authored & 🟡 in progress** — reactor core + feeder pads + spawner + lerp-back (the spatial/spawn half of the slice; lifetime/expiry + rules deferred to T11). Brief: [`../tasks/T10-reactor-spawn.md`](../tasks/T10-reactor-spawn.md). **Next:** branch `feature/reactor-spawn` off `dev`, commit the T10 docs separately, then implement.
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -13,19 +13,20 @@ Branch/context: on `feature/port-socket` (off `dev`). **`T09` ✅ done & verifie
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
-- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ (#6)**, **`T08` ✅ (#7)**, **`T09` ✅** (3 ports: accept-any socket + validate colour in code + eject); **next `T10`** — reactor core + feeder pads + spawner + lerp-back; then T11 (round-loop wiring) in-scene.
+- **M2 — VR slice:** 🟡 in progress — **`T07` ✅ (#6)**, **`T08` ✅ (#7)**, **`T09` ✅ (#8)** (3 ports: accept-any socket + validate colour in code + eject); **`T10` 🟡** (brief authored) — reactor core + feeder pads + spawner + lerp-back; then T11 (round-loop wiring: consume/expiry + rules/events).
 - **M2–M6:** not started (VR slice → wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
-- EditMode suite **green (75/75), re-verified this session** (T08 added 7 `ShardPool` tests; restricted-API clean). T08 adds the
-  **first MonoBehaviours** (`ShardView`, `ShardPool`) + the first prefab/material under `Assets/_Project/`; the M1 pure rules are
-  unchanged and the `StarforgeRelay.Runtime` asmdef stays **XR-free** (XRI enters at T09).
+- EditMode suite **last green at 75/75** (T09 session) — **not re-run this session** (docs-only). T10 is adapter-heavy (spawner /
+  `ShardMotion` / core+pad views) with **no new pure rule expected** (planning logic is T05, already covered); it re-runs the full
+  suite + an XR-sim smoke before close. XRI stays confined to the adapter set (`PortSocket`/`PortView`/`ShardView` + new `ShardMotion`).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
   repo-root `.editorconfig`; the M1 pure-rule classes + `RoundConfig` were conformed (`_camelCase` fields, no
   `this.`). New code must follow it.
 
 ## Still to build / watch
 
-- Scene interaction (grab / sockets / spawn) begins at **T08+** — nothing interactive in the scene yet.
+- Scene now has **grab (T08) + 3 colour-validating sockets (T09)**; **spawn + feeder pads + reactor core land in
+  T10** (in progress). Shard lifetime/expiry + scoring/event wiring come with **T11**.
 - **Env note (scene/rig tasks):** `execute_code` is broken on **both** dev machines (CodeDom `mono.exe`
   "filename or extension is too long"; no Roslyn) — re-verified on the work machine 2026-06-05; use
   structural MCP tools. Prefab **unpack** is a manual 1-click editor step; the MCP asset-rename tool reports
@@ -55,12 +56,12 @@ Branch/context: on `feature/port-socket` (off `dev`). **`T09` ✅ done & verifie
 
 ## Notes for next chat
 
-- Read `CLAUDE.md` + this file + the relevant `Tnn` brief first.
-- **Branch first:** create + switch to `feature/<slug>` off `dev` **before any edits**; PR → `dev` (pattern: #3/#4/#5) — never commit straight to `dev`. (Assistant: at task start run `git status`; if on `dev`, STOP and ask to branch.)
-- **Style check covers ALL first-party C#** — runtime **and** tests (`.editorconfig` / IDE1006). A test-file `s_` violation slipped past a runtime-only check this session; don't repeat.
-- **`T09` ✅ done; `T10` next** (carry-forward) — ports = **accept-any** `XRSocketInteractor` + **validate colour in code** (guardrails §6), *not* colour-gated; on the **Default** interaction layer for now. Named "Shard" layer + rig-mask separation **deferred to T14/UI** (when introduced, update the interactors' mask or grab breaks). Working wrong-insert eject = force-release via `XRInteractionManager.SelectExit((IXRSelectInteractor)socket, interactable)` (the **non-obsolete** overload; the concrete-type one is obsolete) + push the shard out of the trigger — `socketActive`/`keepSelectedTargetValid` alone don't drop a held shard. Don't edit scripts while **in Play** (recompile→domain reload corrupts live XR state).
-- **New C# follows `docs/architecture/csharp-style.md`** (enforced by the repo-root `.editorconfig`):
-  non-public fields `_camelCase` (static `s_camelCase`), `PascalCase` types/methods/properties/consts.
+- Read `CLAUDE.md` + this file + the **`T10`** brief ([`../tasks/T10-reactor-spawn.md`](../tasks/T10-reactor-spawn.md)) first.
+- **Workflow this task:** the **T10 docs commit on their own first** (brief + this refresh + matrix + ADR-index fix), *then* implementation begins — docs commit → go.
+- **Branch first:** create + switch to **`feature/reactor-spawn`** off `dev` **before any edits**; PR → `dev` (pattern #6/#7/#8) — never commit straight to `dev`. (Assistant: at task start run `git status`; if on `dev`, STOP and ask to branch.)
+- **`T10` carry-forward:** scope = the matrix's "core + feeder pads + spawner + lerp-back" only; **lifetime/expiry + consume-on-accept + all RoundController rules/events → T11** (see the brief's "Scope cut"). The wrong-insert **eject becomes the real return-to-pad** (`ShardMotion.ReturnToPad()` after the **non-obsolete** deferred `SelectExit`; drop `PortSocket._ejectDistance`). Ports stay on **Default**; named "Shard" layer + rig-mask separation **deferred to T14** (when introduced, update the interactors' mask or grab breaks).
+- **MCP gotchas (T08/T09):** `manage_gameobject create` may not apply `component_properties` → set via `manage_components set_property` + **re-read** to verify; `refresh scope=all` for new files; asset-rename reports "failed" but succeeds on disk; **never edit scripts while the Editor is in Play** (domain reload corrupts the live XR session).
+- **Style covers ALL first-party C#** — runtime **and** tests (`.editorconfig` / IDE1006). New C#: `_camelCase` fields (static `s_camelCase`), `PascalCase` types/methods/properties/consts; C# 9 (block namespace, no `record`/`init`), no `#nullable enable`.
 - **Per-mechanic test gate** (guardrails §17): pure rules ship EditMode tests in-change and the full suite
   re-runs green; interaction mechanics (M2+) also need a smoke / device pass. Pure-rule tasks need no device pass.
 - **Hard rule — no git writes:** propose a commit message; the human commits. Read-only git only.

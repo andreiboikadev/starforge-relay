@@ -12,3 +12,4 @@ Short, dated records of significant technical decisions, so future sessions don'
 ## Index
 
 - [0001 — Technical baseline](0001-tech-baseline.md) — **Accepted**
+- [0002 — C# code style and enforcement](0002-csharp-style.md) — **Accepted**
