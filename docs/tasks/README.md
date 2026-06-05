@@ -71,7 +71,7 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 | T06 | RoundController (end-state priority, star rating) | `feature/round-controller` | M1 rules | T01–T05 | no | ✓ | ✅ |
 | T07 | Strip Locomotion; rename scene off `SampleScene` default; confirm rig | `chore/strip-locomotion` | M2 slice | — | yes (rig) | ✓ | ✅ |
 | T08 | Shard prefab + grab (Grip) + ShardPool | `feature/shard-grab` | M2 slice | T01 | yes (prefab) | ✓ | ✅ |
-| T09 | Ports as accept-any sockets → validate in code | `feature/port-socket` | M2 slice | T04, T08 | yes | · | ▫ |
+| T09 | Ports as accept-any sockets → validate in code | `feature/port-socket` | M2 slice | T04, T08 | yes | ✓ | 🟡 |
 | T10 | Reactor core + feeder pads + spawner + lerp-back | `feature/reactor-spawn` | M2 slice | T05, T08 | yes | · | ▫ |
 | T11 | Round loop adapter: grab→socket→rules→events | `feature/round-loop-slice` | M2 slice | T06, T09, T10 | yes | · | ▫ |
 | T12 | Composition root (manual DI) | `feature/composition-root` | M3 wiring | T11 | minor | · | ▫ |
