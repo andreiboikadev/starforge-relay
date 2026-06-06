@@ -4,19 +4,15 @@ using UnityEngine;
 namespace StarforgeRelay.Gameplay
 {
     /// <summary>
-    /// Scene adapter that closes the Stabilize Run loop (GDD §5, §12): it builds the pure
-    /// <see cref="RoundController"/> (T06) from <see cref="RoundConfig"/>, routes each port's
-    /// <see cref="PortSocket.InsertEvaluated"/> outcome (T09) into the round rules, ticks the round clock,
-    /// consumes an accepted shard through the spawner (T10), and surfaces the round events for HUD/audio/VFX
-    /// (T14/T16/T17). Thin adapter: it owns no formulas (those are the tested T01–T06 rules) and references no
-    /// XRI type (it talks to <see cref="PortSocket"/> / <see cref="ShardSpawner"/>, not the socket). Service
-    /// composition moves to the composition root at T12.
+    /// Scene adapter that closes the Stabilize Run loop (GDD §5, §12): it receives the pure
+    /// <see cref="RoundController"/> (T06) from the composition root (T12) via <see cref="Initialize"/>, routes
+    /// each port's <see cref="PortSocket.InsertEvaluated"/> outcome (T09) into the round rules, ticks the round
+    /// clock, consumes an accepted shard through the spawner (T10), and surfaces the round events for HUD/audio/
+    /// VFX (T14/T16/T17). Thin adapter: it owns no formulas (those are the tested T01–T06 rules) and references
+    /// no XRI type (it talks to <see cref="PortSocket"/> / <see cref="ShardSpawner"/>, not the socket).
     /// </summary>
     public sealed class RoundLoopController : MonoBehaviour
     {
-        [Tooltip("Round constants (read-only at runtime).")]
-        [SerializeField] private RoundConfig _config;
-
         [Tooltip("The reactor ports whose insert outcomes drive the round.")]
         [SerializeField] private PortSocket[] _ports;
 
@@ -25,20 +21,19 @@ namespace StarforgeRelay.Gameplay
 
         private RoundController _round;
 
-        private void Start()
+        /// <summary>
+        /// Receive the round graph from the composition root (T12) and wire it up. Called from the root's
+        /// <c>Awake</c> (before any <c>Start</c>); the adapter does nothing until it runs.
+        /// </summary>
+        public void Initialize(RoundController roundController)
         {
-            if (_config == null || _ports == null || _ports.Length == 0 || _spawner == null)
+            if (roundController == null || _ports == null || _ports.Length == 0 || _spawner == null)
             {
-                Debug.LogError("[RoundLoopController] Missing config, ports, or spawner — round not started.", this);
+                Debug.LogError("[RoundLoopController] Missing round controller, ports, or spawner — round not started.", this);
                 return;
             }
 
-            _round = new RoundController(
-                new ScoreService(_config.CorrectScore, _config.ComboBonusScore, _config.VictoryTimeBonusPerSecond, _config.HeatPenaltyPerHeat),
-                new ComboTracker(_config.ComboBonusInterval),
-                new HeatService(_config.HeatCap, _config.ComboHeatRelief),
-                new StabilizationProgress(_config.StabilizationRequirement),
-                new RoundTimer(_config.RoundDurationSeconds));
+            _round = roundController;
 
             _round.CorrectInserted += OnCorrectInserted;
             _round.WrongInserted += OnWrongInserted;
@@ -57,7 +52,6 @@ namespace StarforgeRelay.Gameplay
             }
 
             _round.Start();
-            // The spawner fills the pads from its own Start (T10); the round loop only consumes/respawns from here.
         }
 
         private void OnDisable()

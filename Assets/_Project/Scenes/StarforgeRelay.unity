@@ -192,7 +192,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 441ab0d525c240042ab97ab2802aecdd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.RoundLoopController
-  _config: {fileID: 11400000, guid: d2e3ea7970a682f4fb6ce94fe5bc5747, type: 2}
   _ports:
   - {fileID: 993739357808976661}
   - {fileID: 997254335}
@@ -884,6 +883,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d11f7cc38b5f75449de319212aff22c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.PortSocket
+--- !u!1 &1251144816
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1251144818}
+  - component: {fileID: 1251144817}
+  m_Layer: 0
+  m_Name: Composition Root
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1251144817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1251144816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 011995e60d4f3c845bb58a9db7b2779a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Composition.StarforgeRelayCompositionRoot
+  _config: {fileID: 11400000, guid: d2e3ea7970a682f4fb6ce94fe5bc5747, type: 2}
+  _shardPrefab: {fileID: 6405131886661284621, guid: 56995361dd0b5df4895c2d6a990d65fa, type: 3}
+  _shardContainer: {fileID: 205870818}
+  _roundLoop: {fileID: 270399054}
+  _spawner: {fileID: 1714955172}
+--- !u!4 &1251144818
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1251144816}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1714955171
 GameObject:
   m_ObjectHideFlags: 0
@@ -914,8 +962,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Gameplay.ShardSpawner
   _roundConfig: {fileID: 11400000, guid: d2e3ea7970a682f4fb6ce94fe5bc5747, type: 2}
-  _shardPrefab: {fileID: 6405131886661284621, guid: 56995361dd0b5df4895c2d6a990d65fa, type: 3}
-  _shardContainer: {fileID: 205870818}
   _reactorRoot: {fileID: 716758691}
   _pads:
   - {fileID: 2047576586}
@@ -6561,3 +6607,4 @@ SceneRoots:
   - {fileID: 716758691}
   - {fileID: 1714955173}
   - {fileID: 270399055}
+  - {fileID: 1251144818}

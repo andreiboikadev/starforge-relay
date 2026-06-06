@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-06
-Updated by: Claude Code (T12 authoring)
-Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11) — **M2 slice complete** (grab → colour-validate → correct / wrong / expired → win / overload / time-out). Active task **`T12`** (composition root — manual DI) on **`feature/composition-root`** (off `dev`): **brief authored; implementation pending**. Brief: [`../tasks/T12-composition-root.md`](../tasks/T12-composition-root.md). EditMode **85/85** (last run this session), Console clean. **Next:** `T13` (AppStateMachine).
+Updated by: Claude Code (T12 done)
+Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11). **`T12` ✅ done & verified** on **`feature/composition-root`** (off `dev`) — `StarforgeRelayCompositionRoot` centralises construction of the five services + `RoundController` + `ShardPool` (Prewarm + Dispose) and injects them into the adapters via `Initialize`; the round auto-wires through it. EditMode **85/85 this session**, restricted-API clean, **MCP smoke passed** (round wires up via the root, 4 shards spawn, settled Play-stop clean). **Code ready to commit → PR → `dev`.** Brief: [`../tasks/T12-composition-root.md`](../tasks/T12-composition-root.md). **Next:** `T13` (AppStateMachine).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -14,8 +14,9 @@ Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11) — **M2 slice
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
 - **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out. Now **M3 wiring** (`T12` composition root → `T13` state machine → `T14` UI).
-- **M3–M6:** not started (wiring → feedback → art → device). Full matrix + per-task scope:
-  [`../tasks/README.md`](../tasks/README.md).
+- **M3 — wiring:** 🟡 — **`T12` ✅** (composition root): one `StarforgeRelayCompositionRoot` owns construction +
+  pool lifecycle; adapters take their deps via `Initialize`. Next `T13` (state machine) → `T14` (UI). M4–M6 not
+  started (feedback → art → device). Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 85/85 this session** (T11b added 6 `ShardLifetime` cases + a `RoundController`
   expired→overload case; no regression). XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
@@ -26,7 +27,7 @@ Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11) — **M2 slice
 
 - Scene runs the **complete M2 slice**: grab (T08) + 3 colour-validating sockets (T09) + reactor core /
   4 feeder pads / spawner with return-to-pad (T10) + round-loop wiring + consume/respawn + score finalization
-  (T11) + shard **lifetime/expiry** (T11b). Nothing left in M2; next is M3 wiring (`T12`).
+  (T11) + shard **lifetime/expiry** (T11b). Nothing left in M2; M3 wiring underway (`T12` ✅, `T13` next).
 - **Env note (scene/rig tasks):** `execute_code` is broken on **both** dev machines (CodeDom `mono.exe`
   "filename or extension is too long"; no Roslyn) — re-verified on the work machine 2026-06-05; use
   structural MCP tools. Prefab **unpack** is a manual 1-click editor step; the MCP asset-rename tool reports
@@ -59,8 +60,9 @@ Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11) — **M2 slice
 
 ## Notes for next chat
 
-- **First:** implement **`T12`** per its brief ([`../tasks/T12-composition-root.md`](../tasks/T12-composition-root.md)) on `feature/composition-root` — move service/`RoundController`/pool construction out of `RoundLoopController`/`ShardSpawner` `Start` into one `StarforgeRelayCompositionRoot` (`Initialize` injection) + **`ShardPool.Dispose` on teardown** (fixes the Play-stop leak notice). Authoring commit (brief + matrix + this file) first, then implementation → PR `dev`.
-- **Then `T13`** (AppStateMachine): Boot → MainMenu → Calibration → Playing → Paused → RoundComplete → Results.
+- **First:** commit the **T12 implementation** (composition root + adapter `Initialize` refactor + scene + close-docs) → PR `feature/composition-root` → `dev` (pattern #6–#11).
+- **Then `T13`** (AppStateMachine): Boot → MainMenu → Calibration → Playing → Paused → RoundComplete → Results — and **gate the round start** (the composition root currently auto-starts it on scene load).
+- **Diagnosis carry-forward:** the Play-stop `Leak Detected: Persistent N allocations` / `routine is null` cascade is the **first-Play-after-recompile transient** (a settled re-Play is clean) — confirmed at T12; not a code leak.
 - **Tuning (T21, on device — not now):** held-slow `0.25` (≈56 s held) is generous, and idle shards expire in a synchronized wave (equal spawn + lifetime). Both are **GDD-§14 tuning levers confirmed on device**, deliberately **not** changed speculatively in code.
 - **Carry-forward reminders:** **don't re-break the wrong-insert eject** — `ShardMotion.ReturnToPad()` is an **instant teleport** (a gradual lerp lets the socket's `keepSelectedTargetValid` re-snap the shard, the T10 bug). The dev `[Round]` logs in `RoundLoopController` are temporary — **HUD consumes those events at T14** (remove them then). Ports stay on **Default**; named "Shard" layer + rig-mask separation → **T14**. Spawn-colour variety within a round is a planner **tuning candidate (T21)**, not a bug.
 - **Style covers ALL first-party C#** — runtime **and** tests (`.editorconfig` / IDE1006). New C#: `_camelCase` fields (static `s_camelCase`), `PascalCase` types/methods/properties/consts; C# 9 (block namespace, no `record`/`init`), no `#nullable enable`.
