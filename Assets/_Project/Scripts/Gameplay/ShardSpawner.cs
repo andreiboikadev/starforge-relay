@@ -7,25 +7,19 @@ namespace StarforgeRelay.Gameplay
 {
     /// <summary>
     /// Scene adapter that turns the pure <see cref="ShardSpawnPlanner"/> (T05) and pooled <see cref="ShardPool"/>
-    /// (T08) into shards resting on feeder pads (GDD §5, §12). On start it derives the planner's pad slots from
-    /// the scene pads (a single source of truth), pre-warms the pool, and fills to the active target with
-    /// colour-distributed shards. It also ticks each shard's lifetime and raises an expiry for the round loop
-    /// (T11b); consume-on-accept / respawn is T11. XRI-free: it reads held-state via
+    /// (T08) into shards resting on feeder pads (GDD §5, §12). It receives the pool from the composition root
+    /// (T12), derives the planner's pad slots from the scene pads (a single source of truth), and fills to the
+    /// active target with colour-distributed shards. It also ticks each shard's lifetime and raises an expiry
+    /// for the round loop (T11b); consume-on-accept / respawn is T11. XRI-free: it reads held-state via
     /// <see cref="ShardMotion.IsHeld"/> and never references an XRI type.
     /// </summary>
     public sealed class ShardSpawner : MonoBehaviour
     {
         private static readonly ShardColor[] s_colors = { ShardColor.Solar, ShardColor.Ion, ShardColor.Pulse };
 
-        [Header("Config + prefab")]
+        [Header("Config")]
         [Tooltip("Round constants: active target, per-colour cap, respawn delay (read-only at runtime).")]
         [SerializeField] private RoundConfig _roundConfig;
-
-        [Tooltip("Pooled energy-shard prefab (root carries ShardView + ShardMotion + XRGrabInteractable).")]
-        [SerializeField] private ShardView _shardPrefab;
-
-        [Tooltip("Parent for pooled shards. Falls back to this transform if unset.")]
-        [SerializeField] private Transform _shardContainer;
 
         [Header("Pads + reach")]
         [Tooltip("Reactor root the pad angles are measured in (rotation-safe). Falls back to this transform if unset.")]
@@ -70,19 +64,20 @@ namespace StarforgeRelay.Gameplay
         /// <summary>Raised when an active shard's lifetime runs out (T11b); the bool is whether it was held.</summary>
         public event Action<ShardView, bool> ShardLifetimeExpired;
 
-        private void Start()
+        /// <summary>
+        /// Receive the pool from the composition root (T12), build the planner from the scene pads, and fill to
+        /// target. Called from the root's <c>Awake</c>; the spawner does nothing until it runs.
+        /// </summary>
+        public void Initialize(ShardPool pool)
         {
-            if (_roundConfig == null || _shardPrefab == null || _pads == null || _pads.Length == 0)
+            if (pool == null || _roundConfig == null || _pads == null || _pads.Length == 0)
             {
-                Debug.LogError("[ShardSpawner] Missing RoundConfig, shard prefab, or feeder pads — not spawning.", this);
+                Debug.LogError("[ShardSpawner] Missing pool, RoundConfig, or feeder pads — not spawning.", this);
                 return;
             }
 
-            Transform container = _shardContainer != null ? _shardContainer : transform;
-            _pool = new ShardPool(() => Instantiate(_shardPrefab, container), container);
+            _pool = pool;
             _planner = BuildPlanner();
-
-            _pool.Prewarm(_roundConfig.ActiveShardsDefault);
             SpawnToTarget();
             _active = true;
         }
