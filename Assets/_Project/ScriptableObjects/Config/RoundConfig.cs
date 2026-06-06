@@ -23,6 +23,7 @@ namespace StarforgeRelay.Gameplay
         [SerializeField] private float _shardLifetimeStart = 14f;
         [SerializeField] private float _shardLifetimeLate = 12f;
         [SerializeField] private int _lateLifetimeAfterAccepts = 10;
+        [SerializeField] private float _heldLifetimeFactor = 0.25f;
         [SerializeField] private float _respawnDelayMin = 0.3f;
         [SerializeField] private float _respawnDelayMax = 0.8f;
 
@@ -46,6 +47,7 @@ namespace StarforgeRelay.Gameplay
         public float ShardLifetimeStart => _shardLifetimeStart;
         public float ShardLifetimeLate => _shardLifetimeLate;
         public int LateLifetimeAfterAccepts => _lateLifetimeAfterAccepts;
+        public float HeldLifetimeFactor => _heldLifetimeFactor;
         public float RespawnDelayMin => _respawnDelayMin;
         public float RespawnDelayMax => _respawnDelayMax;
 

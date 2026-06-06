@@ -21,6 +21,7 @@ MonoBehaviour:
   _shardLifetimeStart: 14
   _shardLifetimeLate: 12
   _lateLifetimeAfterAccepts: 10
+  _heldLifetimeFactor: 0.25
   _respawnDelayMin: 0.3
   _respawnDelayMax: 0.8
   _comboBonusInterval: 5

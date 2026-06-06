@@ -1,8 +1,8 @@
 # Current Status
 
-Last updated: 2026-06-05
-Updated by: Claude Code (T11 done)
-Branch/context: on **`feature/round-loop-slice`** (off `dev`). **`T07`–`T10` ✅ merged** (#6–#9). **`T11` ✅ done & verified** — `RoundLoopController` wires the 3 ports + spawner into `RoundController` (consume/respawn + tick + events); `RoundController.End()` finalizes the score (victory bonus + heat penalty); `ShardSpawner` gains consume/respawn and the spawn seed is now time-based. EditMode **78/78 this session**, restricted-API clean, **human smoke passed** (correct→consume+respawn, wrong→return, Overload + live score-finalization; console clean). **Code ready to commit → PR → `dev`.** lifetime/expiry split out → **`T11b`** (▫). Brief: [`../tasks/T11-round-loop-slice.md`](../tasks/T11-round-loop-slice.md). **Next:** `T11b` (finish the slice — lifetime/expiry) or `T12` (composition root).
+Last updated: 2026-06-06
+Updated by: Claude Code (T11b done)
+Branch/context: **`T07`–`T11` ✅ merged to `dev`** (#6–#10). **`T11b` ✅ done & verified** on **`feature/shard-lifetime`** (off `dev`) — shard lifetime + expiry completes the **M2 slice**: `ShardLifetime` pure rule (14→12 after 10 accepts; held-slow 0.25) + spawner countdown → `RoundController.ApplyExpired` (+heat, combo reset only if held) → `Despawn` (releases a held shard from the hand, then pools). EditMode **85/85 this session**, restricted-API clean, **human smoke passed** (passive expiry + held-pop `comboReset True` + Overload; console clean bar the sim-haptic noise). **Code ready to commit → PR → `dev`.** Brief: [`../tasks/T11b-shard-lifetime.md`](../tasks/T11b-shard-lifetime.md). **Next:** `T12` (composition root).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -13,20 +13,20 @@ Branch/context: on **`feature/round-loop-slice`** (off `dev`). **`T07`–`T10` �
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
-- **M2 — VR slice:** 🟡 — **`T07`–`T10` ✅ (#6–#9)**, **`T11` ✅** (round-loop adapter: ports + spawner → `RoundController`, consume/respawn, events, `End()` finalization — first **playable round**; verified incl. human smoke, **code pending commit/PR**); **`T11b` ▫** (shard lifetime/expiry, split out — completes the slice). Then M3 wiring (`T12` composition root → `T13` state machine → `T14` UI).
+- **M2 — VR slice:** ✅ complete — **`T07`–`T11` ✅ merged** (#6–#10) + **`T11b` ✅** (shard lifetime + expiry): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out. **`T11b` code pending commit/PR.** Then M3 wiring (`T12` composition root → `T13` state machine → `T14` UI).
 - **M3–M6:** not started (wiring → feedback → art → device). Full matrix + per-task scope:
   [`../tasks/README.md`](../tasks/README.md).
-- EditMode suite **green 78/78, re-run this session** (T11 added 3 `RoundController.End()` finalization cases; no
-  regression). XRI in C# stays confined to `PortSocket` + `ShardMotion` (verified by the API grep).
+- EditMode suite **green 85/85 this session** (T11b added 6 `ShardLifetime` cases + a `RoundController`
+  expired→overload case; no regression). XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
   repo-root `.editorconfig`; the M1 pure-rule classes + `RoundConfig` were conformed (`_camelCase` fields, no
   `this.`). New code must follow it.
 
 ## Still to build / watch
 
-- Scene now has the **first full playable round (T11)**: grab (T08) + 3 colour-validating sockets (T09) +
-  reactor core / 4 feeder pads / spawner with return-to-pad (T10) + round-loop wiring + consume/respawn + score
-  finalization (T11). Remaining in M2: shard **lifetime/expiry** = **`T11b`**.
+- Scene runs the **complete M2 slice**: grab (T08) + 3 colour-validating sockets (T09) + reactor core /
+  4 feeder pads / spawner with return-to-pad (T10) + round-loop wiring + consume/respawn + score finalization
+  (T11) + shard **lifetime/expiry** (T11b). Nothing left in M2; next is M3 wiring (`T12`).
 - **Env note (scene/rig tasks):** `execute_code` is broken on **both** dev machines (CodeDom `mono.exe`
   "filename or extension is too long"; no Roslyn) — re-verified on the work machine 2026-06-05; use
   structural MCP tools. Prefab **unpack** is a manual 1-click editor step; the MCP asset-rename tool reports
@@ -59,8 +59,9 @@ Branch/context: on **`feature/round-loop-slice`** (off `dev`). **`T07`–`T10` �
 
 ## Notes for next chat
 
-- **First:** commit the **T11 code** (one commit, code + close-docs — the user's preference) → PR `feature/round-loop-slice` → `dev` (pattern #6–#9). Then read `CLAUDE.md` + this file + the next `Tnn` brief.
-- **Next task — author its brief first** (draft → validate → implement on command): **`T11b`** (shard lifetime 14→12 s + expiry → `RoundController.ApplyExpired`, reusing T11's `Despawn`/respawn) on `feature/shard-lifetime`, **or** **`T12`** (composition root: centralise service/`RoundController`/pool creation + `Prewarm` + **`ShardPool.Dispose` on teardown** — a leak notice fires on Play-stop) on `feature/composition-root`. Branch off `dev` after the T11 PR merges.
+- **First:** commit the **T11b implementation** (code + tests + `RoundConfig` asset + close-docs) → PR `feature/shard-lifetime` → `dev` (pattern #6–#10). The **scene is not part of T11b** — don't save/commit it.
+- **Then `T12`** (composition root): centralise service/`RoundController`/pool creation + `Prewarm` + **`ShardPool.Dispose` on teardown** (a leak notice fires on Play-stop) + the T11b accepts seam (`ShardSpawner.AcceptsProvider`), on `feature/composition-root`.
+- **Tuning (T21, on device — not now):** held-slow `0.25` (≈56 s held) is generous, and idle shards expire in a synchronized wave (equal spawn + lifetime). Both are **GDD-§14 tuning levers confirmed on device**, deliberately **not** changed speculatively in code.
 - **Carry-forward reminders:** **don't re-break the wrong-insert eject** — `ShardMotion.ReturnToPad()` is an **instant teleport** (a gradual lerp lets the socket's `keepSelectedTargetValid` re-snap the shard, the T10 bug). The dev `[Round]` logs in `RoundLoopController` are temporary — **HUD consumes those events at T14** (remove them then). Ports stay on **Default**; named "Shard" layer + rig-mask separation → **T14**. Spawn-colour variety within a round is a planner **tuning candidate (T21)**, not a bug.
 - **Style covers ALL first-party C#** — runtime **and** tests (`.editorconfig` / IDE1006). New C#: `_camelCase` fields (static `s_camelCase`), `PascalCase` types/methods/properties/consts; C# 9 (block namespace, no `record`/`init`), no `#nullable enable`.
 - **Per-mechanic test gate** (guardrails §17): pure rules ship EditMode tests in-change and the full suite

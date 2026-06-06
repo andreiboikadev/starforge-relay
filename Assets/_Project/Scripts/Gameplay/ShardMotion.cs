@@ -78,6 +78,24 @@ namespace StarforgeRelay.Gameplay
             transform.position = _home.position;
         }
 
+        /// <summary>True while a hand (or a holding socket) selects the shard. Read by the spawner (T11b) so it
+        /// can slow the lifetime while grabbed (GDD §10) without itself referencing XRI.</summary>
+        public bool IsHeld => _grabInteractable != null && _grabInteractable.isSelected;
+
+        /// <summary>
+        /// Force the shard out of whatever interactor holds it, so it can be pooled safely — never pool a
+        /// selected interactable (the T09/T11 hazard). No-op when nothing selects it.
+        /// </summary>
+        public void ForceRelease()
+        {
+            if (_grabInteractable != null
+                && _grabInteractable.interactionManager != null
+                && _grabInteractable.isSelected)
+            {
+                _grabInteractable.interactionManager.CancelInteractableSelection((IXRSelectInteractable)_grabInteractable);
+            }
+        }
+
         private void Update()
         {
             bool selected = _grabInteractable != null && _grabInteractable.isSelected;

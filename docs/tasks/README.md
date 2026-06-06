@@ -74,7 +74,7 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 | T09 | Ports as accept-any sockets → validate in code | `feature/port-socket` | M2 slice | T04, T08 | yes | ✓ | ✅ |
 | T10 | Reactor core + feeder pads + spawner + lerp-back | `feature/reactor-spawn` | M2 slice | T05, T08 | yes | ✓ | ✅ |
 | T11 | Round loop adapter: grab→socket→rules→events | `feature/round-loop-slice` | M2 slice | T06, T09, T10 | yes | ✓ | ✅ |
-| T11b | Shard lifetime + expiry | `feature/shard-lifetime` | M2 slice | T06, T11 | yes | · | ▫ |
+| T11b | Shard lifetime + expiry | `feature/shard-lifetime` | M2 slice | T06, T11 | yes | ✓ | ✅ |
 | T12 | Composition root (manual DI) | `feature/composition-root` | M3 wiring | T11 | minor | · | ▫ |
 | T13 | AppStateMachine (Boot→…→Results) | `feature/app-state-machine` | M3 wiring | T12 | no | · | ▫ |
 | T14 | World-space UI views + presenters (ray+Trigger) | `feature/worldspace-ui` | M3 wiring | T13 | yes | · | ▫ |

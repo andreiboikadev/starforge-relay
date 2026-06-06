@@ -107,6 +107,22 @@ namespace StarforgeRelay.Tests.EditMode
             Assert.AreEqual(2, rc.Combo);
         }
 
+        [Test]
+        public void Expired_Shards_Drive_Overload_End_Once()
+        {
+            var rc = NewStarted();
+            int ended = 0;
+            rc.Ended += _ => ended++;
+
+            for (int i = 0; i < 8; i++)
+            {
+                rc.ApplyExpired(wasHeld: false); // +1 heat each → overload at heatCap 8
+            }
+
+            Assert.AreEqual(RoundPhase.Overloaded, rc.Phase);
+            Assert.AreEqual(1, ended, "Ended must fire exactly once");
+        }
+
         // ---- end states in isolation ----
 
         [Test]
