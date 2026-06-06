@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,9 +9,9 @@ namespace StarforgeRelay.Gameplay
     /// Scene adapter that turns the pure <see cref="ShardSpawnPlanner"/> (T05) and pooled <see cref="ShardPool"/>
     /// (T08) into shards resting on feeder pads (GDD §5, §12). On start it derives the planner's pad slots from
     /// the scene pads (a single source of truth), pre-warms the pool, and fills to the active target with
-    /// colour-distributed shards. The consume-on-accept / expiry / respawn loop and the round rules are T11 —
-    /// this lays the scaffolding and does the initial fill only. XRI-free: it gets <see cref="ShardView"/> /
-    /// <see cref="ShardMotion"/> off the prefab, never an XRI type.
+    /// colour-distributed shards. It also ticks each shard's lifetime and raises an expiry for the round loop
+    /// (T11b); consume-on-accept / respawn is T11. XRI-free: it reads held-state via
+    /// <see cref="ShardMotion.IsHeld"/> and never references an XRI type.
     /// </summary>
     public sealed class ShardSpawner : MonoBehaviour
     {
@@ -54,8 +55,20 @@ namespace StarforgeRelay.Gameplay
         private ShardPool _pool;
         private bool _active;
 
-        // Active shard -> its pad id; the round loop (T11) reads this to free the pad on accept/expire.
-        private readonly Dictionary<ShardView, int> _shardPads = new Dictionary<ShardView, int>();
+        // Active shard -> its pad id + lifetime + cached motion. The round loop (T11) frees the pad on
+        // accept/expire; Update (T11b) ticks the lifetime. One record per shard → no pad/lifetime desync.
+        private readonly Dictionary<ShardView, ActiveShard> _shardPads = new Dictionary<ShardView, ActiveShard>();
+
+        // Reused each frame to collect shards that expired this tick, so we never raise (→ Despawn → mutate
+        // _shardPads) while still enumerating it (T11b).
+        private readonly List<ShardView> _expiredBuffer = new List<ShardView>();
+
+        /// <summary>Current correct-insert count, injected by the round loop so a spawn picks the start/late
+        /// lifetime (GDD §12). Null → 0 (start lifetime) — correct at the initial fill.</summary>
+        public Func<int> AcceptsProvider { get; set; }
+
+        /// <summary>Raised when an active shard's lifetime runs out (T11b); the bool is whether it was held.</summary>
+        public event Action<ShardView, bool> ShardLifetimeExpired;
 
         private void Start()
         {
@@ -72,6 +85,40 @@ namespace StarforgeRelay.Gameplay
             _pool.Prewarm(_roundConfig.ActiveShardsDefault);
             SpawnToTarget();
             _active = true;
+        }
+
+        private void Update()
+        {
+            if (!_active || _shardPads.Count == 0)
+            {
+                return;
+            }
+
+            float deltaTime = Time.deltaTime;
+            float heldFactor = _roundConfig.HeldLifetimeFactor;
+
+            foreach (KeyValuePair<ShardView, ActiveShard> entry in _shardPads)
+            {
+                ActiveShard active = entry.Value;
+                bool held = active.Motion != null && active.Motion.IsHeld;
+                active.Lifetime.Tick(deltaTime, held, heldFactor);
+                if (active.Lifetime.IsExpired)
+                {
+                    _expiredBuffer.Add(entry.Key);
+                }
+            }
+
+            // Raise AFTER the loop: each handler calls Despawn, which removes the shard from _shardPads — which
+            // we are still enumerating above, so raising inside the foreach would throw.
+            for (int i = 0; i < _expiredBuffer.Count; i++)
+            {
+                ShardView shard = _expiredBuffer[i];
+                bool wasHeld = _shardPads.TryGetValue(shard, out ActiveShard active)
+                    && active.Motion != null && active.Motion.IsHeld;
+                ShardLifetimeExpired?.Invoke(shard, wasHeld);
+            }
+
+            _expiredBuffer.Clear();
         }
 
         /// <summary>Fill every free pad up to the active target with colour-distributed shards (GDD §12).</summary>
@@ -92,16 +139,18 @@ namespace StarforgeRelay.Gameplay
             }
         }
 
-        /// <summary>Consume an accepted shard (T11): pool it, free its pad, and schedule a replacement (GDD §12).</summary>
+        /// <summary>Consume a shard — accepted (T11) or expired (T11b): release any holder, pool it, free its
+        /// pad, and schedule a replacement (GDD §12).</summary>
         public void Despawn(ShardView shard)
         {
-            if (shard == null || !_shardPads.TryGetValue(shard, out int padId))
+            if (shard == null || !_shardPads.TryGetValue(shard, out ActiveShard active))
             {
                 return;
             }
 
             _shardPads.Remove(shard);
-            _planner.Release(padId);
+            active.Motion?.ForceRelease(); // never pool a shard an interactor still selects (T09/T11)
+            _planner.Release(active.PadId);
             _pool.Release(shard);
 
             if (_active)
@@ -163,7 +212,27 @@ namespace StarforgeRelay.Gameplay
                 motion.SetHome(anchor);
             }
 
-            _shardPads[shard] = plan.PadId;
+            int accepts = AcceptsProvider != null ? AcceptsProvider() : 0;
+            float duration = ShardLifetime.DurationForAccepts(
+                accepts, _roundConfig.ShardLifetimeStart, _roundConfig.ShardLifetimeLate, _roundConfig.LateLifetimeAfterAccepts);
+
+            _shardPads[shard] = new ActiveShard(plan.PadId, new ShardLifetime(duration), motion);
+        }
+
+        // Per-active-shard state: its pad, lifetime countdown, and a cached motion ref (so Update reads
+        // held-state without a per-frame GetComponent). One record → no pad/lifetime desync.
+        private sealed class ActiveShard
+        {
+            public ActiveShard(int padId, ShardLifetime lifetime, ShardMotion motion)
+            {
+                PadId = padId;
+                Lifetime = lifetime;
+                Motion = motion;
+            }
+
+            public int PadId { get; }
+            public ShardLifetime Lifetime { get; }
+            public ShardMotion Motion { get; }
         }
     }
 }

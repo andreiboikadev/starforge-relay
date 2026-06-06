@@ -7,7 +7,7 @@
 | Design ref | GDD §5 (loop step 8 "expired"), §10 (Energy Shards: lifetime timer; "while grabbed, lifetime slows strongly but does not fully pause"), §12 (lifetime 14 s → 12 s after 10 accepts; expired = +1 heat, combo reset only if held, fizzle + respawn), §14 (lifetime levers); guardrails §6 (Shard Views — lifetime/expired state; Round Gameplay — ApplyExpired), §11 (tick the ≤6 active shards; no `new WaitForSeconds` in loops), §16 (rule ownership), §17 (per-mechanic gate) |
 | Depends on | T06 (`RoundController.ApplyExpired(bool)` — exists; combo/heat already EditMode-tested, first *called from the adapter* here), T11 (`ShardSpawner.Despawn`/respawn + `_shardPads`; `RoundLoopController`) |
 | Touches scenes/prefabs | minor — set the new `RoundConfig._heldLifetimeFactor` on the existing `RoundConfig` asset; no structural scene/prefab change (the shard prefab already carries `ShardView` + `ShardMotion`) |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 Add the pressure layer that completes the M2 vertical slice: each shard runs a lifetime countdown
@@ -106,8 +106,8 @@ step 8 and turns "lose only by wrong-insert / time-out" into the full correct / 
   exists yet — out of scope here, flagged so T13 wires it.
 
 ## Verification
-- **Tests:** new `ShardLifetimeTests` ship in-change (cases above); re-run the **full** EditMode suite (now
-  78/78) — no regression. Combo-on-expire is already covered (`RoundControllerTests`); **add the gap case** —
+- **Tests:** new `ShardLifetimeTests` ship in-change (cases above); re-run the **full** EditMode suite
+  (85/85 — was 78 pre-T11b) — no regression. Combo-on-expire is already covered (`RoundControllerTests`); **add the gap case** —
   expired shards driving heat to `heatCap` → `Ended(Overloaded)` fires once.
 - **Restricted-API:** clean over `Assets/_Project`; XRI in C# still only `PortSocket` + `ShardMotion`
   (`ShardSpawner`/`RoundLoopController` stay XRI-free — held-state via `ShardMotion.IsHeld`, release via
@@ -119,4 +119,26 @@ step 8 and turns "lose only by wrong-insert / time-out" into the full correct / 
   then close docs (brief ✅ + matrix + current-status).
 
 ## What was actually done
-— (filled on close)
+Implemented + verified 2026-06-06 (branch `feature/shard-lifetime`; human commits).
+
+- **Pure rule:** `ShardLifetime` (countdown; held-slow via `heldFactor`; `DurationForAccepts` 14→12 after 10 accepts)
+  + `ShardLifetimeTests` (6 cases). One extra `RoundControllerTests.Expired_Shards_Drive_Overload_End_Once`.
+- **Adapters:** `ShardSpawner` ticks each active shard's lifetime and (per the brief) **collects expiries during the
+  loop and raises `ShardLifetimeExpired` after it** (no enumerator-mutation crash); `Despawn` now
+  `ForceRelease`s any holding interactor before pooling. `RoundLoopController` routes expiry →
+  `RoundController.ApplyExpired(wasHeld)` + `Despawn`, sets `AcceptsProvider = () => Stabilization`, forwards
+  `_round.ShardExpired` as a dev log. `ShardMotion` += `IsHeld` (non-XRI read for the spawner) + `ForceRelease`
+  (verified `CancelInteractableSelection(IXRSelectInteractable)` against XRI 3.3.0 via reflection — the explicit
+  cast avoids the obsolete overload). `RoundConfig` += `_heldLifetimeFactor` (0.25). Active-shard tracking
+  widened `_shardPads` value `int` → `ActiveShard {padId, lifetime, motion}` (one record, no desync).
+- **Checks:** compile clean; EditMode **85/85** this session (78 + 6 + 1); restricted-API clean; XRI in C# still
+  only `PortSocket` + `ShardMotion` (spawner/loop XRI-free via `IsHeld`/`ForceRelease`); `_heldLifetimeFactor:
+  0.25` persisted on the asset.
+- **Smoke (XR Device Simulator, human):** passive expiry (heat climbs, shards fizzle + respawn), **held shard
+  expires → pops out of the hand** (`[Round] expired … comboReset True` at heat 7), Overload@8 fires `Ended`
+  once; 8 individual expiry events (no mass-despawn bug). Console clean (only the known sim-haptic noise).
+- **Deferred (tuning → T21, not a correctness item):** the initial 4 shards share spawn time + lifetime, so when
+  left untouched they expire in a **synchronized wave** (looks like "all vanish at once"); desyncs in real play
+  via staggered respawns. Lifetime jitter / cadence is a T21 tuning candidate. Held-slow `0.25` (≈56 s held) is
+  generous — confirm/tune on device.
+- Commit: `feat(gameplay): shard lifetime countdown + expiry (T11b)`.

@@ -42,7 +42,11 @@ namespace StarforgeRelay.Gameplay
 
             _round.CorrectInserted += OnCorrectInserted;
             _round.WrongInserted += OnWrongInserted;
+            _round.ShardExpired += OnShardExpired;
             _round.Ended += OnEnded;
+
+            _spawner.AcceptsProvider = () => _round.Stabilization;
+            _spawner.ShardLifetimeExpired += OnShardLifetimeExpired;
 
             for (int i = 0; i < _ports.Length; i++)
             {
@@ -69,10 +73,16 @@ namespace StarforgeRelay.Gameplay
                 }
             }
 
+            if (_spawner != null)
+            {
+                _spawner.ShardLifetimeExpired -= OnShardLifetimeExpired;
+            }
+
             if (_round != null)
             {
                 _round.CorrectInserted -= OnCorrectInserted;
                 _round.WrongInserted -= OnWrongInserted;
+                _round.ShardExpired -= OnShardExpired;
                 _round.Ended -= OnEnded;
             }
         }
@@ -132,5 +142,21 @@ namespace StarforgeRelay.Gameplay
 
         private void OnWrongInserted(WrongInsertEvent e) =>
             Debug.Log($"[Round] wrong — heat {e.Heat}");
+
+        // A shard's lifetime ran out (T11b): apply the rule (+heat, combo reset only if held), then consume it
+        // through the same pool/respawn path as an accept. ApplyExpired also self-guards on Phase.
+        private void OnShardLifetimeExpired(ShardView shard, bool wasHeld)
+        {
+            if (_round.Phase != RoundPhase.Playing)
+            {
+                return;
+            }
+
+            _round.ApplyExpired(wasHeld);
+            _spawner.Despawn(shard);
+        }
+
+        private void OnShardExpired(ShardExpiredEvent e) =>
+            Debug.Log($"[Round] expired — heat {e.Heat}, comboReset {e.ComboWasReset}");
     }
 }
