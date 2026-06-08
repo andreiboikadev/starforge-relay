@@ -1,52 +1,70 @@
 # Starforge Relay
 
-## What this is
+A small, polished **stationary VR arcade** for **Meta Quest 2 / 3**, built in Unity (URP)
+with OpenXR + the XR Interaction Toolkit. You stand at a space-station reactor, grab glowing
+energy **shards** with the Touch controllers, and insert each into the matching-coloured
+**port** to stabilise a mini-star before a 90-second timer runs out or the heat meter maxes.
 
-Starforge Relay is a small **stationary VR arcade** built in Unity for **Meta Quest 2/3**. The player
-stands at a space-station reactor, grabs glowing energy **shards** with the Touch controllers, and
-inserts each into the matching colored **port** to stabilize a mini-star before a 90-second timer runs
-out or the heat meter maxes. Tense-but-cozy, readable, one round at a time. *(Working title — re-check
-name availability before any public release.)*
+> Working title. Commercial product, in active development. Source-available under the [PolyForm Strict License](LICENSE) — not open-source.
 
-## Current status
+## Status
 
-**Baseline only.** Unity + URP + OpenXR + XR Interaction Toolkit are configured for Quest, with a
-`StarforgeRelay` scene that contains an XR Origin rig (Starter-Assets Locomotion stripped) and **no gameplay code yet**. Verified building and
-launching on a Quest 2. Latest detailed state:
+A **playable vertical slice** runs in the editor (XR Device Simulator / Quest Link):
+
+- **Gameplay rules — complete, unit-tested:** scoring, combo, heat, stabilisation, round
+  timer, colour-match validation, shard-spawn planning, end-states (victory / overload /
+  time-out) + star rating — **85 EditMode tests, green**.
+- **VR slice — complete:** grab on Grip → insert into a port → correct / wrong / **expired**
+  feedback → win / overload / time-out, with pooled shards, feeder-pad spawning, shard
+  lifetime/expiry, and scripted return-to-pad (no ballistic throwing).
+- **Wiring — in progress:** one composition root wires the object graph; an app/round state
+  machine and world-space UI are next, then audio/VFX polish and on-device tuning.
+
+The engine baseline is verified on a real Quest 2; the gameplay slice is exercised in-editor
+(on-device validation of the full slice is a later milestone). Detailed live state:
 [docs/handoff/current-status.md](docs/handoff/current-status.md).
 
-## Requirements
+## Engineering approach
 
-- **Unity 6.3 LTS** (`6000.3.16f1`) — use this exact version.
-- Unity modules: **Android Build Support** (incl. OpenJDK + Android SDK & NDK).
-- Target device: **Meta Quest 2 or 3** (standalone, Android / Horizon OS) in Developer Mode.
-- Editor testing without a headset: **XR Device Simulator** (XRI Samples) or **Meta XR Simulator**.
-- Optional: **Meta Quest Link** (run from the Editor in the headset), **MCP for Unity** server (editor automation).
+A **thin Unity/XR layer over testable, plain-C# gameplay rules** — the core logic runs
+headless in unit tests, no headset required:
 
-## Quick start
+- **Pure rules** (score, combo, heat, stabilisation, timer, validation, spawn planning) are
+  `MonoBehaviour`-free and dependency-injected — covered by EditMode tests.
+- **Thin adapters** own only Unity/XRI concerns (grab/socket interaction, pooling, motion)
+  and publish typed events to the rules.
+- **Manual dependency injection** through a single composition root — no singletons, no
+  scene-wide lookups in hot paths.
+- **VR-performance discipline:** object pooling, near-zero per-frame allocation in a round,
+  Single Pass Instanced, fake-glow over heavy post-processing (Quest 2 is the baseline).
 
-1. Open this folder in Unity 6.3 LTS via Unity Hub; let it restore packages on first open.
-2. Open `Assets/_Project/Scenes/StarforgeRelay.unity`.
-3. **Test on device (the validated path):** make sure the active platform is **Android**
-   (`File → Build Profiles → Switch Platform` — the active target is *not* version-controlled), then
-   **Build And Run** to a Quest in Developer Mode.
-4. **Faster in-Editor iteration:** OpenXR is enabled for **both Android and Standalone**, so with
-   **Meta Quest Link** running (active OpenXR runtime = Meta) you can press **Play** and the scene
-   renders in the headset; the **XR Device Simulator** (XRI Samples) also works without a headset. See
-   [docs/development/build-and-test.md](docs/development/build-and-test.md).
+Design: [docs/product/game-design.md](docs/product/game-design.md) ·
+engineering contract: [docs/architecture/implementation-guardrails.md](docs/architecture/implementation-guardrails.md).
 
-## Build and test
+## Tech
 
-See [docs/development/build-and-test.md](docs/development/build-and-test.md) — the single source of
-truth for commands.
+- **Unity 6.3 LTS** (`6000.3.16f1`), **URP**, Android / Meta Quest target.
+- **OpenXR 1.16 + XR Interaction Toolkit 3.3** (Oculus Touch), new Input System, IL2CPP /
+  ARM64, Vulkan, Single Pass Instanced.
+
+## Build & run
+
+- **Requires** Unity 6.3 LTS with Android Build Support; a Quest 2/3 in Developer Mode for a
+  device build, or the XR Device Simulator for in-editor play.
+- Open the project, open `Assets/_Project/Scenes/StarforgeRelay.unity`, then **Play**
+  (XR Device Simulator / Quest Link) or **Build And Run** to a Quest.
+- Exact commands: [docs/development/build-and-test.md](docs/development/build-and-test.md).
 
 ## Documentation
 
-Start at [docs/INDEX.md](docs/INDEX.md).
+Documentation-driven; start at [docs/INDEX.md](docs/INDEX.md) — design, architecture,
+build/test, the task plan, and current state.
 
-## AI-assisted development
+## License
 
-Claude Code must read [CLAUDE.md](CLAUDE.md) and
-[docs/handoff/current-status.md](docs/handoff/current-status.md) before editing. Hard rules (no git
-writes, no secret/keystore reads) are enforced in `.claude/settings.json`; C# architecture rules
-auto-load from `.claude/rules/`.
+Licensed under the **[PolyForm Strict License 1.0.0](LICENSE)** — a standardised,
+IP-lawyer-drafted source-available license. You may view and study this project for
+**noncommercial** purposes; **commercial use, redistribution, and derivative works require the
+copyright holder's written permission**. © 2026 Andrei Boika. Third-party components (Unity
+packages; any assets per [docs/assets/asset-ledger.md](docs/assets/asset-ledger.md)) remain
+under their own licenses.
