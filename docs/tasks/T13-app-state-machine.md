@@ -7,7 +7,7 @@
 | Design ref | GDD §15 (user flow), §16 (pause freezes timer/lifetime/spawning; pause-menu options), §23 (practical state machine), §13 (results snapshot); guardrails §6 (App Flow), §11 (tick/coroutines), §15 (events), §16 (rule ownership), §17 (per-mechanic gate); [ADR 0001](../architecture/adr/0001-tech-baseline.md) (manual DI) |
 | Depends on | T12 (composition root) |
 | Touches scenes/prefabs | **no** — the existing `Composition Root` object builds + ticks the machine in code; no new GameObject and no new serialized reference |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 Add the app/round state machine (GDD §23) and **gate the round on it**. Today the round auto-starts at
@@ -194,4 +194,33 @@ Results`, and **reset cleanly on Play-Again / Restart**. Pure, testable state lo
   errors; then close docs (brief Status + matrix + current-status).
 
 ## What was actually done
-—
+Implemented + verified 2026-06-09 (branch `feature/app-state-machine`; human commits).
+
+- **New (`StarforgeRelay.App`, pure C#):** `AppPhase`, `IAppState`, `IRoundLifecycle`, `AppStateMachine` +
+  7 states (Boot/MainMenu/Calibration/Playing/Paused/RoundComplete/Results). Lifecycle calls live in the
+  machine's transition triggers (`RequestStartRound`/`RequestResume`/`RequestPause`/`RequestMainMenu`), so a
+  resume never restarts the round; machine retains `LastResult` for the Results snapshot. No `UnityEngine`.
+- **Adapters:** `RoundLoopController` implements `IRoundLifecycle` — `Initialize(Func<RoundController>)` wires
+  the stable refs only (no auto-start); `StartRound` builds a fresh round via the factory + `BeginFill`;
+  pause = `Time.timeScale = 0` + a `_paused` insert-gate; `StartRound`/`StopRound` `StopAllCoroutines` (no
+  cross-round consume); per-round event (un)subscription. `ShardSpawner`: `Initialize` no longer fills;
+  `BeginFill` (clear + rebuild planner + fill) / `ClearActive` (return active shards to the pool). Composition
+  root builds the `Func<RoundController>` factory + the machine, ticks it on `unscaledDeltaTime`, exposes it
+  (`Machine` getter for T14), and runs temporary Input-System debug keys. `asmdef` += `Unity.InputSystem`.
+- **Checks (this session):** EditMode **96/96** (85 + 11 new `AppStateMachineTests`); restricted-API clean
+  (XRI in C# only `PortSocket`+`ShardMotion`; machine/states `UnityEngine`-free; `Time.timeScale` only in the
+  adapter; no legacy `Input`). **MCP gate-smoke:** round does not auto-start (0 spawned, 4 prewarmed inactive,
+  no exceptions; settled Play-stop clean).
+- **Human smoke (XR Device Simulator):** keys advanced Boot→…→Playing + pause/reset (run 1); a gameplay run
+  ended in **Overloaded** with a rules-correct `[Round]` trace — correct inserts (combo/stabilization),
+  expiry (+heat, no combo reset unheld), the **combo-5 milestone heat relief** (heat 3→2→3), overload at heat
+  8 fired `Ended` **once**, and **finalized score 20 = 5×10 + 50 milestone − 80 heat penalty**, stars 0
+  (overload before 6). Console clean apart from the known benign XR-sim haptic error (absent on device;
+  re-check at T20).
+- **Deviation from the brief:** invalid machine triggers are a **silent no-op** (machine kept
+  `UnityEngine`-free) rather than the `Debug.LogWarning` the brief named — behaviour asserted by the tests.
+  Per-result RoundComplete timing (GDD §12: 2 / 1.5 / 1 s) deferred to **T17** with the feedback content (a
+  single ~1.5 s placeholder for now).
+- **Deferred (as planned):** world-space UI + real buttons + removing the debug keys & `[Round]` logs → T14;
+  recenter + TrackingLost → later; audio/VFX → T16/T17.
+- Commit: `feat(core): app state machine — gate round start, pause, replay (T13)`.
