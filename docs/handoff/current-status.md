@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-09
-Updated by: Claude Code (T14 done)
-Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world-space UI) ✅ done** on `feature/worldspace-ui` — 5 world-space canvases (MainMenu/Calibration/HUD/Pause/Results) on **ray + Trigger** wired to the app state machine; HUD shows live meters; pause via an in-world HUD button; T13 debug keys + `[Round]` logs removed. **EditMode 96/96**, XRI-confined, IDE1006-clean; **in-VR ray smoke passed** (full flow → Overloaded; Results rules-correct: score 30 = 6×10 + 50 − 80, stars 1/3). Brief: [`../tasks/T14-worldspace-ui.md`](../tasks/T14-worldspace-ui.md). **Next:** commit T14 → **T15** (Settings + persistence).
+Updated by: Claude Code (T15 authoring)
+Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world-space UI) ✅ done** on `feature/worldspace-ui` — 5 world-space canvases (MainMenu/Calibration/HUD/Pause/Results) on **ray + Trigger** wired to the app state machine; HUD shows live meters; pause via an in-world HUD button; T13 debug keys + `[Round]` logs removed. **EditMode 96/96**, XRI-confined, IDE1006-clean; **in-VR ray smoke passed** (full flow → Overloaded; Results rules-correct: score 30 = 6×10 + 50 − 80, stars 1/3); **merged to `dev` (#14)**. **Now: `T15`** (Settings + persistence) — brief authored, **in progress** on `feature/settings-persistence`, not yet implemented. Briefs: [`T14`](../tasks/T14-worldspace-ui.md) · [`T15`](../tasks/T15-settings-persistence.md).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -13,9 +13,9 @@ Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
-- **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out. **M3 wiring**: `T12` composition root → `T13` state machine → `T14` UI ✅; **`T15`** (settings) next.
+- **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out. **M3 wiring**: `T12` composition root → `T13` state machine → `T14` UI ✅ (#14); **`T15`** (settings) 🟡 in progress.
 - **M3 — wiring:** 🟡 — **`T12` ✅** (composition root) → **`T13` ✅** (app state machine: round gated on
-  `Playing`, pause/replay) → **`T14` ✅** (world-space UI on ray+Trigger). Next **`T15`** (Settings + persistence). M4–M6 not started (feedback → art → device).
+  `Playing`, pause/replay) → **`T14` ✅** (world-space UI on ray+Trigger, #14). **`T15` 🟡** (Settings + persistence) — brief authored, in progress. M4–M6 not started (feedback → art → device).
   Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 96/96** (T13 added 11 `AppStateMachine` cases; T11b added 7 earlier; no regression).
   XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep); new C# is IDE1006-clean (`dotnet format`).
@@ -60,9 +60,11 @@ Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world
 
 ## Notes for next chat
 
-- **Next:** commit T14 (scene UI + pause-entry code + this doc-close), then start **T15** (Settings:
-  sound/haptics + persistence) — depends on T14; adds the Settings screen (wire MainMenu's Settings
-  placeholder) + a `PlayerPrefs`-backed store. Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
+- **Next:** implement **T15** per its brief ([`../tasks/T15-settings-persistence.md`](../tasks/T15-settings-persistence.md))
+  — Settings (sound/haptics) screen + `PlayerPrefs` persistence. **Key calls already in the brief:** Settings as an
+  **overlay**, not a new `AppPhase` (keeps the tested machine untouched); `SettingsService` behind `ISettingsStore`,
+  loaded at boot; **no consumer until T16** (AudioService/HapticService read it); best score fenced/optional.
+  Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
 - **Diagnosis carry-forward:** the Play-stop `Leak Detected: Persistent N allocations` / `routine is null` cascade is the **first-Play-after-recompile transient** (a settled re-Play is clean) — confirmed at T12; not a code leak.
 - **Tuning (T21, on device — not now):** held-slow `0.25` (≈56 s held) is generous, and idle shards expire in a synchronized wave (equal spawn + lifetime). Both are **GDD-§14 tuning levers confirmed on device**, deliberately **not** changed speculatively in code.
 - **Carry-forward reminders:** **don't re-break the wrong-insert eject** — `ShardMotion.ReturnToPad()` is an **instant teleport** (a gradual lerp lets the socket's `keepSelectedTargetValid` re-snap the shard, the T10 bug). Shards/ports stay on the **Default** interaction layer — the named "Shard" layer stayed **deferred** (T14: Near-Far's near/far region split + `blockUIOnInteractableSelection` already separate grab from the UI ray; revisit only if a conflict surfaces). Spawn-colour variety within a round is a planner **tuning candidate (T21)**, not a bug.
