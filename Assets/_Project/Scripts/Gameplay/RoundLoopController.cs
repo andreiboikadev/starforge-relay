@@ -28,6 +28,33 @@ namespace StarforgeRelay.Gameplay
         /// <inheritdoc />
         public event Action<RoundEndedEvent> RoundEnded;
 
+        /// <summary>Raised when a fresh round starts (T14 — the HUD resets/refreshes).</summary>
+        public event Action RoundStarted;
+
+        /// <summary>Round events re-raised for the HUD (T14).</summary>
+        public event Action<CorrectInsertEvent> CorrectInserted;
+
+        /// <inheritdoc cref="CorrectInserted" />
+        public event Action<WrongInsertEvent> WrongInserted;
+
+        /// <inheritdoc cref="CorrectInserted" />
+        public event Action<ShardExpiredEvent> ShardExpired;
+
+        /// <summary>Live meters for the HUD (T14); 0 when no round is active. The rule services own the values.</summary>
+        public int Score => _round != null ? _round.Score : 0;
+
+        /// <inheritdoc cref="Score" />
+        public int Combo => _round != null ? _round.Combo : 0;
+
+        /// <inheritdoc cref="Score" />
+        public int Heat => _round != null ? _round.Heat : 0;
+
+        /// <inheritdoc cref="Score" />
+        public int Stabilization => _round != null ? _round.Stabilization : 0;
+
+        /// <inheritdoc cref="Score" />
+        public float TimeRemaining => _round != null ? _round.TimeRemaining : 0f;
+
         /// <summary>
         /// Receive the round factory from the composition root (T12/T13) and wire the stable scene refs (port
         /// insert events + the spawner's expiry). Does <b>not</b> start a round — the app state machine starts
@@ -77,6 +104,7 @@ namespace StarforgeRelay.Gameplay
 
             _round.Start();
             _spawner.BeginFill();
+            RoundStarted?.Invoke();
         }
 
         /// <inheritdoc />
@@ -192,17 +220,14 @@ namespace StarforgeRelay.Gameplay
         {
             _spawner.StopRespawns();
             RoundEnded?.Invoke(e);
-            Debug.Log($"[Round] {e.Result} — score {e.Score}, stars {e.Stars}, stabilization {e.Stabilization}, heat {e.Heat}");
         }
 
-        private void OnCorrectInserted(CorrectInsertEvent e) =>
-            Debug.Log($"[Round] correct — combo {e.Combo}, stabilization {e.Stabilization}{(e.IsMilestone ? " (milestone)" : string.Empty)}");
+        // Re-raise the round's events for the HUD (T14). The [Round] dev logs they replaced are gone.
+        private void OnCorrectInserted(CorrectInsertEvent e) => CorrectInserted?.Invoke(e);
 
-        private void OnWrongInserted(WrongInsertEvent e) =>
-            Debug.Log($"[Round] wrong — heat {e.Heat}");
+        private void OnWrongInserted(WrongInsertEvent e) => WrongInserted?.Invoke(e);
 
-        private void OnShardExpired(ShardExpiredEvent e) =>
-            Debug.Log($"[Round] expired — heat {e.Heat}, comboReset {e.ComboWasReset}");
+        private void OnShardExpired(ShardExpiredEvent e) => ShardExpired?.Invoke(e);
 
         private void UnsubscribeRound()
         {
