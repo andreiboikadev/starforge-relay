@@ -65,8 +65,9 @@ namespace StarforgeRelay.Gameplay
         public event Action<ShardView, bool> ShardLifetimeExpired;
 
         /// <summary>
-        /// Receive the pool from the composition root (T12), build the planner from the scene pads, and fill to
-        /// target. Called from the root's <c>Awake</c>; the spawner does nothing until it runs.
+        /// Receive the pool from the composition root (T12). Stores it and validates the scene refs; the planner
+        /// build + fill happen on <see cref="BeginFill"/> at round start (T13), not here — so the round no longer
+        /// auto-starts on scene load.
         /// </summary>
         public void Initialize(ShardPool pool)
         {
@@ -77,9 +78,6 @@ namespace StarforgeRelay.Gameplay
             }
 
             _pool = pool;
-            _planner = BuildPlanner();
-            SpawnToTarget();
-            _active = true;
         }
 
         private void Update()
@@ -132,6 +130,38 @@ namespace StarforgeRelay.Gameplay
                     "reach zone (SpawnArea) or there are fewer pads than the target.",
                     this);
             }
+        }
+
+        /// <summary>
+        /// Start a fresh fill (T13 round start): clear any leftover shards, rebuild the planner (clean per-round
+        /// state — pad reservations, colour counts; with seed 0 also fresh variety), then fill to target. Called
+        /// by the round lifecycle on Play / Play-Again / Restart.
+        /// </summary>
+        public void BeginFill()
+        {
+            if (_pool == null)
+            {
+                return;
+            }
+
+            ClearActive();
+            _planner = BuildPlanner();
+            SpawnToTarget();
+            _active = true;
+        }
+
+        /// <summary>Return every active shard to the pool and forget it (round reset / teardown, T13). Safe when
+        /// empty; cancels pending respawns.</summary>
+        public void ClearActive()
+        {
+            foreach (KeyValuePair<ShardView, ActiveShard> entry in _shardPads)
+            {
+                entry.Value.Motion?.ForceRelease();
+                _pool.Release(entry.Key);
+            }
+
+            _shardPads.Clear();
+            StopAllCoroutines();
         }
 
         /// <summary>Consume a shard — accepted (T11) or expired (T11b): release any holder, pool it, free its

@@ -1,17 +1,19 @@
+using System;
 using System.Collections;
+using StarforgeRelay.App;
 using UnityEngine;
 
 namespace StarforgeRelay.Gameplay
 {
     /// <summary>
-    /// Scene adapter that closes the Stabilize Run loop (GDD §5, §12): it receives the pure
-    /// <see cref="RoundController"/> (T06) from the composition root (T12) via <see cref="Initialize"/>, routes
-    /// each port's <see cref="PortSocket.InsertEvaluated"/> outcome (T09) into the round rules, ticks the round
-    /// clock, consumes an accepted shard through the spawner (T10), and surfaces the round events for HUD/audio/
-    /// VFX (T14/T16/T17). Thin adapter: it owns no formulas (those are the tested T01–T06 rules) and references
-    /// no XRI type (it talks to <see cref="PortSocket"/> / <see cref="ShardSpawner"/>, not the socket).
+    /// Scene adapter that closes the Stabilize Run loop (GDD §5, §12) and implements <see cref="IRoundLifecycle"/>
+    /// for the app state machine (T13). The composition root (T12) injects a <see cref="RoundController"/>
+    /// factory; this adapter builds a fresh round on <see cref="StartRound"/>, routes each port's
+    /// <see cref="PortSocket.InsertEvaluated"/> outcome into the rules, ticks the clock, consumes accepted
+    /// shards through the spawner (T10), pauses via <c>Time.timeScale</c> + an insert gate, and re-surfaces the
+    /// round events for HUD/audio/VFX (T14/T16/T17). Thin adapter: it owns no formulas and references no XRI type.
     /// </summary>
-    public sealed class RoundLoopController : MonoBehaviour
+    public sealed class RoundLoopController : MonoBehaviour, IRoundLifecycle
     {
         [Tooltip("The reactor ports whose insert outcomes drive the round.")]
         [SerializeField] private PortSocket[] _ports;
@@ -19,28 +21,27 @@ namespace StarforgeRelay.Gameplay
         [Tooltip("Spawner that fills the pads and consumes/respawns shards (T10).")]
         [SerializeField] private ShardSpawner _spawner;
 
+        private Func<RoundController> _roundFactory;
         private RoundController _round;
+        private bool _paused;
+
+        /// <inheritdoc />
+        public event Action<RoundEndedEvent> RoundEnded;
 
         /// <summary>
-        /// Receive the round graph from the composition root (T12) and wire it up. Called from the root's
-        /// <c>Awake</c> (before any <c>Start</c>); the adapter does nothing until it runs.
+        /// Receive the round factory from the composition root (T12/T13) and wire the stable scene refs (port
+        /// insert events + the spawner's expiry). Does <b>not</b> start a round — the app state machine starts
+        /// it on entering Playing.
         /// </summary>
-        public void Initialize(RoundController roundController)
+        public void Initialize(Func<RoundController> roundFactory)
         {
-            if (roundController == null || _ports == null || _ports.Length == 0 || _spawner == null)
+            if (roundFactory == null || _ports == null || _ports.Length == 0 || _spawner == null)
             {
-                Debug.LogError("[RoundLoopController] Missing round controller, ports, or spawner — round not started.", this);
+                Debug.LogError("[RoundLoopController] Missing round factory, ports, or spawner — round disabled.", this);
                 return;
             }
 
-            _round = roundController;
-
-            _round.CorrectInserted += OnCorrectInserted;
-            _round.WrongInserted += OnWrongInserted;
-            _round.ShardExpired += OnShardExpired;
-            _round.Ended += OnEnded;
-
-            _spawner.AcceptsProvider = () => _round.Stabilization;
+            _roundFactory = roundFactory;
             _spawner.ShardLifetimeExpired += OnShardLifetimeExpired;
 
             for (int i = 0; i < _ports.Length; i++)
@@ -50,8 +51,62 @@ namespace StarforgeRelay.Gameplay
                     _ports[i].InsertEvaluated += OnInsertEvaluated;
                 }
             }
+        }
+
+        /// <inheritdoc />
+        public void StartRound()
+        {
+            if (_roundFactory == null)
+            {
+                return;
+            }
+
+            // Cancel any in-flight consume from a prior round before it can touch a re-used shard.
+            StopAllCoroutines();
+            UnsubscribeRound();
+
+            _round = _roundFactory();
+            _round.CorrectInserted += OnCorrectInserted;
+            _round.WrongInserted += OnWrongInserted;
+            _round.ShardExpired += OnShardExpired;
+            _round.Ended += OnEnded;
+
+            _spawner.AcceptsProvider = () => _round.Stabilization;
+            _paused = false;
+            Time.timeScale = 1f;
 
             _round.Start();
+            _spawner.BeginFill();
+        }
+
+        /// <inheritdoc />
+        public void PauseRound()
+        {
+            _paused = true;
+            Time.timeScale = 0f;
+        }
+
+        /// <inheritdoc />
+        public void ResumeRound()
+        {
+            _paused = false;
+            Time.timeScale = 1f;
+        }
+
+        /// <inheritdoc />
+        public void StopRound()
+        {
+            StopAllCoroutines();
+            UnsubscribeRound();
+            _round = null;
+            _paused = false;
+            Time.timeScale = 1f;
+
+            if (_spawner != null)
+            {
+                _spawner.StopRespawns();
+                _spawner.ClearActive();
+            }
         }
 
         private void OnDisable()
@@ -72,18 +127,13 @@ namespace StarforgeRelay.Gameplay
                 _spawner.ShardLifetimeExpired -= OnShardLifetimeExpired;
             }
 
-            if (_round != null)
-            {
-                _round.CorrectInserted -= OnCorrectInserted;
-                _round.WrongInserted -= OnWrongInserted;
-                _round.ShardExpired -= OnShardExpired;
-                _round.Ended -= OnEnded;
-            }
+            UnsubscribeRound();
+            Time.timeScale = 1f;
         }
 
         private void Update()
         {
-            if (_round != null && _round.Phase == RoundPhase.Playing)
+            if (_round != null && !_paused && _round.Phase == RoundPhase.Playing)
             {
                 _round.Tick(Time.deltaTime);
             }
@@ -91,7 +141,7 @@ namespace StarforgeRelay.Gameplay
 
         private void OnInsertEvaluated(PortSocket port, ShardView shard, InsertOutcome outcome)
         {
-            if (_round.Phase != RoundPhase.Playing)
+            if (_paused || _round == null || _round.Phase != RoundPhase.Playing)
             {
                 return;
             }
@@ -125,9 +175,23 @@ namespace StarforgeRelay.Gameplay
             }
         }
 
+        // A shard's lifetime ran out (T11b): apply the rule (+heat, combo reset only if held), then consume it
+        // through the same pool/respawn path as an accept.
+        private void OnShardLifetimeExpired(ShardView shard, bool wasHeld)
+        {
+            if (_paused || _round == null || _round.Phase != RoundPhase.Playing)
+            {
+                return;
+            }
+
+            _round.ApplyExpired(wasHeld);
+            _spawner.Despawn(shard);
+        }
+
         private void OnEnded(RoundEndedEvent e)
         {
             _spawner.StopRespawns();
+            RoundEnded?.Invoke(e);
             Debug.Log($"[Round] {e.Result} — score {e.Score}, stars {e.Stars}, stabilization {e.Stabilization}, heat {e.Heat}");
         }
 
@@ -137,20 +201,18 @@ namespace StarforgeRelay.Gameplay
         private void OnWrongInserted(WrongInsertEvent e) =>
             Debug.Log($"[Round] wrong — heat {e.Heat}");
 
-        // A shard's lifetime ran out (T11b): apply the rule (+heat, combo reset only if held), then consume it
-        // through the same pool/respawn path as an accept. ApplyExpired also self-guards on Phase.
-        private void OnShardLifetimeExpired(ShardView shard, bool wasHeld)
-        {
-            if (_round.Phase != RoundPhase.Playing)
-            {
-                return;
-            }
-
-            _round.ApplyExpired(wasHeld);
-            _spawner.Despawn(shard);
-        }
-
         private void OnShardExpired(ShardExpiredEvent e) =>
             Debug.Log($"[Round] expired — heat {e.Heat}, comboReset {e.ComboWasReset}");
+
+        private void UnsubscribeRound()
+        {
+            if (_round != null)
+            {
+                _round.CorrectInserted -= OnCorrectInserted;
+                _round.WrongInserted -= OnWrongInserted;
+                _round.ShardExpired -= OnShardExpired;
+                _round.Ended -= OnEnded;
+            }
+        }
     }
 }

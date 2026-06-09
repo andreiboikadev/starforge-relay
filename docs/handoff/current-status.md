@@ -1,8 +1,8 @@
 # Current Status
 
-Last updated: 2026-06-06
-Updated by: Claude Code (T12 done)
-Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11). **`T12` ✅ done & verified** on **`feature/composition-root`** (off `dev`) — `StarforgeRelayCompositionRoot` centralises construction of the five services + `RoundController` + `ShardPool` (Prewarm + Dispose) and injects them into the adapters via `Initialize`; the round auto-wires through it. EditMode **85/85 this session**, restricted-API clean, **MCP smoke passed** (round wires up via the root, 4 shards spawn, settled Play-stop clean). **Code ready to commit → PR → `dev`.** Brief: [`../tasks/T12-composition-root.md`](../tasks/T12-composition-root.md). **Next:** `T13` (AppStateMachine).
+Last updated: 2026-06-09
+Updated by: Claude Code (T13 done)
+Branch/context: **`T07`–`T12` ✅ merged to `dev`** (#6–#12) — the M2 slice + the T12 composition root are in. **`T13` (AppStateMachine) ✅ done** on `feature/app-state-machine` — `AppStateMachine` + 7 states + an `IRoundLifecycle` seam; round start **gated on the `Playing` state** (the composition root no longer auto-starts at scene load), pause = `timeScale=0` + an insert gate, Play-Again/Restart rebuilds the round via a `Func<RoundController>` factory, machine retains `LastResult` for Results. **EditMode 96/96** (85 + 11 new), restricted-API + XRI/`UnityEngine` confinement clean, **MCP gate-smoke + human XR-sim smoke passed** (a gameplay run ended in Overloaded with a rules-correct trace — combo-5 milestone heat-relief, overload at heat 8, finalized score 20 = 5×10 + 50 − 80, stars 0; console clean apart from the benign sim-haptic). Brief: [`../tasks/T13-app-state-machine.md`](../tasks/T13-app-state-machine.md). **Next:** commit T13 → **T14** (world-space UI).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -14,11 +14,11 @@ Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11). **`T12` ✅ d
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
 - **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out. Now **M3 wiring** (`T12` composition root → `T13` state machine → `T14` UI).
-- **M3 — wiring:** 🟡 — **`T12` ✅** (composition root): one `StarforgeRelayCompositionRoot` owns construction +
-  pool lifecycle; adapters take their deps via `Initialize`. Next `T13` (state machine) → `T14` (UI). M4–M6 not
-  started (feedback → art → device). Full matrix: [`../tasks/README.md`](../tasks/README.md).
-- EditMode suite **green 85/85 this session** (T11b added 6 `ShardLifetime` cases + a `RoundController`
-  expired→overload case; no regression). XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep).
+- **M3 — wiring:** 🟡 — **`T12` ✅** (composition root) → **`T13` ✅** (app state machine: round gated on
+  `Playing`, pause/replay). Next **`T14`** (world-space UI). M4–M6 not started (feedback → art → device).
+  Full matrix: [`../tasks/README.md`](../tasks/README.md).
+- EditMode suite **green 96/96** (T13 added 11 `AppStateMachine` cases; T11b added 7 earlier; no regression).
+  XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep); new C# is IDE1006-clean (`dotnet format`).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
   repo-root `.editorconfig`; the M1 pure-rule classes + `RoundConfig` were conformed (`_camelCase` fields, no
   `this.`). New code must follow it.
@@ -27,7 +27,7 @@ Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11). **`T12` ✅ d
 
 - Scene runs the **complete M2 slice**: grab (T08) + 3 colour-validating sockets (T09) + reactor core /
   4 feeder pads / spawner with return-to-pad (T10) + round-loop wiring + consume/respawn + score finalization
-  (T11) + shard **lifetime/expiry** (T11b). Nothing left in M2; M3 wiring underway (`T12` ✅, `T13` next).
+  (T11) + shard **lifetime/expiry** (T11b). Nothing left in M2; M3 wiring underway (`T12` ✅, `T13` ✅; `T14` next).
 - **Env note (scene/rig tasks):** `execute_code` is broken on **both** dev machines (CodeDom `mono.exe`
   "filename or extension is too long"; no Roslyn) — re-verified on the work machine 2026-06-05; use
   structural MCP tools. Prefab **unpack** is a manual 1-click editor step; the MCP asset-rename tool reports
@@ -60,8 +60,12 @@ Branch/context: **`T07`–`T11b` ✅ merged to `dev`** (#6–#11). **`T12` ✅ d
 
 ## Notes for next chat
 
-- **First:** commit the **T12 implementation** (composition root + adapter `Initialize` refactor + scene + close-docs) → PR `feature/composition-root` → `dev` (pattern #6–#11).
-- **Then `T13`** (AppStateMachine): Boot → MainMenu → Calibration → Playing → Paused → RoundComplete → Results — and **gate the round start** (the composition root currently auto-starts it on scene load).
+- **Next:** commit T13 (implementation + doc-close), then start **T14** (world-space UI).
+- **T14 hooks (from T13):** the composition root exposes the `AppStateMachine` (`Machine` getter); the machine
+  raises `PhaseChanged` and holds `LastResult` — T14 presenters subscribe/read those and drive the triggers
+  (`RequestStartRound`/`RequestResume`/`RequestPause`/`RequestMainMenu`/`RequestCalibration`). T14 **removes**
+  the temporary Input-System debug keys (Space/P/R/M) in the composition root and the dev `[Round]` logs in
+  `RoundLoopController` (HUD consumes the events). Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) is a T17 item.
 - **Diagnosis carry-forward:** the Play-stop `Leak Detected: Persistent N allocations` / `routine is null` cascade is the **first-Play-after-recompile transient** (a settled re-Play is clean) — confirmed at T12; not a code leak.
 - **Tuning (T21, on device — not now):** held-slow `0.25` (≈56 s held) is generous, and idle shards expire in a synchronized wave (equal spawn + lifetime). Both are **GDD-§14 tuning levers confirmed on device**, deliberately **not** changed speculatively in code.
 - **Carry-forward reminders:** **don't re-break the wrong-insert eject** — `ShardMotion.ReturnToPad()` is an **instant teleport** (a gradual lerp lets the socket's `keepSelectedTargetValid` re-snap the shard, the T10 bug). The dev `[Round]` logs in `RoundLoopController` are temporary — **HUD consumes those events at T14** (remove them then). Ports stay on **Default**; named "Shard" layer + rig-mask separation → **T14**. Spawn-colour variety within a round is a planner **tuning candidate (T21)**, not a bug.
