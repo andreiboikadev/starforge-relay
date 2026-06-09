@@ -41,6 +41,7 @@ namespace StarforgeRelay.App
             _pauseMenu.MainMenuClicked += OnMainMenu;
             _results.PlayAgainClicked += OnStartRound;
             _results.MainMenuClicked += OnMainMenu;
+            _hud.PauseClicked += OnPause;
         }
 
         // Enter the initial Boot state once, after the root has injected (Awake) — Start runs after all Awakes.
@@ -77,6 +78,7 @@ namespace StarforgeRelay.App
             _pauseMenu.MainMenuClicked -= OnMainMenu;
             _results.PlayAgainClicked -= OnStartRound;
             _results.MainMenuClicked -= OnMainMenu;
+            _hud.PauseClicked -= OnPause;
         }
 
         private void OnPlay() => _machine.RequestCalibration();
@@ -86,6 +88,8 @@ namespace StarforgeRelay.App
         private void OnResume() => _machine.RequestResume();
 
         private void OnMainMenu() => _machine.RequestMainMenu();
+
+        private void OnPause() => _machine.RequestPause();
 
         private void OnPhaseChanged(AppPhase phase)
         {

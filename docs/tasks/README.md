@@ -77,7 +77,7 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 | T11b | Shard lifetime + expiry | `feature/shard-lifetime` | M2 slice | T06, T11 | yes | ✓ | ✅ |
 | T12 | Composition root (manual DI) | `feature/composition-root` | M3 wiring | T11 | minor | ✓ | ✅ |
 | T13 | AppStateMachine (Boot→…→Results) | `feature/app-state-machine` | M3 wiring | T12 | no | ✓ | ✅ |
-| T14 | World-space UI views + presenters (ray+Trigger) | `feature/worldspace-ui` | M3 wiring | T13 | yes | ✓ | 🟡 |
+| T14 | World-space UI views + presenters (ray+Trigger) | `feature/worldspace-ui` | M3 wiring | T13 | yes | ✓ | ✅ |
 | T15 | Settings (sound/haptics) + persistence | `feature/settings-persistence` | M3 wiring | T14 | minor | · | ▫ |
 | T16 | AudioService + HapticService + configs | `feature/audio-haptics` | M4 feedback | T11 | no | · | ▫ |
 | T17 | VFX pool + core state visuals | `feature/vfx-pool` | M4 feedback | T11 | yes | · | ▫ |

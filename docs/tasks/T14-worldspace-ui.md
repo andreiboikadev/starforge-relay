@@ -7,7 +7,7 @@
 | Design ref | GDD §15 (user flow), §16 (screens / HUD / pause / results), §11 (Trigger = UI select), §27 (large readable world-space UI); guardrails §6 (UI), §14 (UI architecture), §13 (XR UI: Ray Interactor + XR UI Input Module, Trigger); [ADR 0001](../architecture/adr/0001-tech-baseline.md) |
 | Depends on | T13 (AppStateMachine: triggers + `PhaseChanged` + `LastResult`) |
 | Touches scenes/prefabs | **yes** — new world-space canvases + `EventSystem`/XR UI Input Module; rig interaction-layer tweak ("Shard"); new UI prefabs; edits the scene |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 Turn the debug-key-driven flow (T13) into an **in-VR playable demo**: world-space UI for
@@ -140,4 +140,35 @@ GDD §25 demo bar, minus final art/audio).
   files + the in-VR flow smoke + no Console errors; then close docs (brief + matrix + current-status).
 
 ## What was actually done
-—
+Implemented + verified 2026-06-09 (branch `feature/worldspace-ui`; human commits). Two commits: the code
+foundation (`e024091`) + the scene-UI completion (this commit).
+
+- **Code (`StarforgeRelay.UI` + `StarforgeRelay.App`):** 5 dumb world-space views (MainMenu/Calibration/HUD/
+  PauseMenu/Results) on uGUI + TMP; `AppFlowController` (owns + ticks the `AppStateMachine` on unscaled time,
+  shows/hides screens on `PhaseChanged`, routes button events → triggers); `HUDPresenter` (round meters +
+  mm:ss timer, refreshed on the round-loop's surfaced events) + `ResultsPresenter` (`LastResult` snapshot →
+  title/stars/score). Composition root → **construction-only** (machine tick + debug keys removed; injects
+  the 3 UI components). `RoundLoopController` surfaces round events/meters for the HUD; the `[Round]` dev logs
+  removed. `asmdef` += `UnityEngine.UI` + `Unity.TextMeshPro`.
+- **Pause entry:** an in-world **Pause button on the HUD** (`HUDView.PauseClicked` → `RequestPause`) — chosen
+  over the controller Menu-button binding (decision 5's fallback) for ray-UI reliability.
+- **Scene (uGUI, world-space):** `EventSystem` + `XRUIInputModule`; the rig's `NearFarInteractor` was already
+  UI-ready (`enableUIInteraction` + `uiPressInput`→UI-Press, confirmed by reflection) → no rig change; 5
+  world-space canvases (≈0.6×0.4 m, facing the player), each with a `TrackedDeviceGraphicRaycaster`, buttons
+  (Image+Button+TMP child) + TMP readouts, all View refs wired; an `App Flow` object (the 3 UI components) +
+  Composition Root's 3 refs wired. TMP Essentials imported.
+- **Checks:** compile clean; **EditMode 96/96** (no regression — UI is adapter/view code, no new pure rule);
+  XRI in C# still only `PortSocket`+`ShardMotion` (UI is uGUI); `dotnet format` **0 IDE1006** (the IDE0044 are
+  the project-wide `[SerializeField]` false positive, not introduced here); MCP structural Play-smoke clean
+  (boots to MainMenu, round gated, no errors; settled play/stop clean — the first-stop XRI teardown cascade
+  incl. the `TrackedDeviceGraphicRaycaster` `KeyNotFound` was the documented domain-reload transient).
+- **Human in-VR smoke (XR Device Simulator):** clicked the full flow via ray+Trigger → reached **Overloaded**;
+  Results showed a rules-correct snapshot (**Score 30 = 6×10 + 50 milestone − 80 heat penalty**, **Stars 1/3**
+  for 6 shards, Heat 8); buttons clicked via the ray. Console clean apart from the known benign sim-haptic
+  errors (absent on device; re-check at T20).
+- **Deferred / deviations:** Settings → T15; HowTo/Credits, recenter, TrackingLost → later; UI audio → T16;
+  final glow/art + layout polish → T18-19 (T14 = functional primitive UI); per-result RoundComplete timing →
+  T17. The "Shard" interaction layer stayed deferred (Near-Far's region split + `blockUIOnInteractableSelection`
+  separate grab from UI — no conflict surfaced). `MainMenuView` exposes only Play. The in-view title/timer
+  formatters are trivial display strings (no separate EditMode test — no gameplay logic).
+- Commits: `e024091` (code + UI foundation) + `feat(ui): T14 world-space UI — 5 screens wired …` (this).

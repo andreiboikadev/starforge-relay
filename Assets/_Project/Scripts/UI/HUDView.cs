@@ -1,5 +1,7 @@
+using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace StarforgeRelay.UI
 {
@@ -14,6 +16,30 @@ namespace StarforgeRelay.UI
         [SerializeField] private TextMeshProUGUI _comboText;
         [SerializeField] private TextMeshProUGUI _chargeText;
         [SerializeField] private TextMeshProUGUI _heatText;
+
+        [Tooltip("Pause button on the HUD — enters the Paused state.")]
+        [SerializeField] private Button _pauseButton;
+
+        /// <summary>Raised when the player clicks Pause on the HUD (enters Paused).</summary>
+        public event Action PauseClicked;
+
+        private void OnEnable()
+        {
+            if (_pauseButton != null)
+            {
+                _pauseButton.onClick.AddListener(RaisePause);
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_pauseButton != null)
+            {
+                _pauseButton.onClick.RemoveListener(RaisePause);
+            }
+        }
+
+        private void RaisePause() => PauseClicked?.Invoke();
 
         /// <summary>Set the timer readout (already formatted as mm:ss by the presenter).</summary>
         public void SetTimer(string text)
