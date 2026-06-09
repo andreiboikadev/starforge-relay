@@ -1,8 +1,8 @@
 # Current Status
 
 Last updated: 2026-06-09
-Updated by: Claude Code (T13 done)
-Branch/context: **`T07`–`T12` ✅ merged to `dev`** (#6–#12) — the M2 slice + the T12 composition root are in. **`T13` (AppStateMachine) ✅ done** on `feature/app-state-machine` — `AppStateMachine` + 7 states + an `IRoundLifecycle` seam; round start **gated on the `Playing` state** (the composition root no longer auto-starts at scene load), pause = `timeScale=0` + an insert gate, Play-Again/Restart rebuilds the round via a `Func<RoundController>` factory, machine retains `LastResult` for Results. **EditMode 96/96** (85 + 11 new), restricted-API + XRI/`UnityEngine` confinement clean, **MCP gate-smoke + human XR-sim smoke passed** (a gameplay run ended in Overloaded with a rules-correct trace — combo-5 milestone heat-relief, overload at heat 8, finalized score 20 = 5×10 + 50 − 80, stars 0; console clean apart from the benign sim-haptic). Brief: [`../tasks/T13-app-state-machine.md`](../tasks/T13-app-state-machine.md). **Next:** commit T13 → **T14** (world-space UI).
+Updated by: Claude Code (T14 authored)
+Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13) — the M2 slice + M3 wiring through the app state machine are in (T13: round gated on `Playing`, pause via `timeScale`, Play-Again/Restart rebuild; the round no longer auto-starts on scene load). **`T14` (world-space UI) 🟡 authored** on `feature/worldspace-ui` (off `dev`) — brief written, **implementation not started**: world-space MainMenu / Calibration / HUD / Pause / Results on **ray + Trigger**, wired to the machine triggers + `PhaseChanged` + `LastResult`; builds the XR-UI pipeline from scratch (scene has 0 Canvas / 0 EventSystem); removes the T13 debug keys + `[Round]` logs. Brief: [`../tasks/T14-worldspace-ui.md`](../tasks/T14-worldspace-ui.md). EditMode last green **96/96**. **Next:** human creates `feature/worldspace-ui` + commits the brief → implement T14 on command.
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -15,7 +15,7 @@ Branch/context: **`T07`–`T12` ✅ merged to `dev`** (#6–#12) — the M2 slic
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
 - **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out. Now **M3 wiring** (`T12` composition root → `T13` state machine → `T14` UI).
 - **M3 — wiring:** 🟡 — **`T12` ✅** (composition root) → **`T13` ✅** (app state machine: round gated on
-  `Playing`, pause/replay). Next **`T14`** (world-space UI). M4–M6 not started (feedback → art → device).
+  `Playing`, pause/replay) → **`T14`** 🟡 authored (world-space UI). M4–M6 not started (feedback → art → device).
   Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 96/96** (T13 added 11 `AppStateMachine` cases; T11b added 7 earlier; no regression).
   XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep); new C# is IDE1006-clean (`dotnet format`).
@@ -60,7 +60,8 @@ Branch/context: **`T07`–`T12` ✅ merged to `dev`** (#6–#12) — the M2 slic
 
 ## Notes for next chat
 
-- **Next:** commit T13 (implementation + doc-close), then start **T14** (world-space UI).
+- **Next:** create `feature/worldspace-ui` off `dev`, commit the T14 brief, then implement T14 on command
+  (the brief flags one open fork: HUD could split to `T14b` if it balloons).
 - **T14 hooks (from T13):** the composition root exposes the `AppStateMachine` (`Machine` getter); the machine
   raises `PhaseChanged` and holds `LastResult` — T14 presenters subscribe/read those and drive the triggers
   (`RequestStartRound`/`RequestResume`/`RequestPause`/`RequestMainMenu`/`RequestCalibration`). T14 **removes**
