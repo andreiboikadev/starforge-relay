@@ -1,8 +1,8 @@
 # Current Status
 
-Last updated: 2026-06-09
-Updated by: Claude Code (T14 done)
-Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world-space UI) ✅ done** on `feature/worldspace-ui` — 5 world-space canvases (MainMenu/Calibration/HUD/Pause/Results) on **ray + Trigger** wired to the app state machine; HUD shows live meters; pause via an in-world HUD button; T13 debug keys + `[Round]` logs removed. **EditMode 96/96**, XRI-confined, IDE1006-clean; **in-VR ray smoke passed** (full flow → Overloaded; Results rules-correct: score 30 = 6×10 + 50 − 80, stars 1/3). Brief: [`../tasks/T14-worldspace-ui.md`](../tasks/T14-worldspace-ui.md). **Next:** commit T14 → **T15** (Settings + persistence).
+Last updated: 2026-06-10
+Updated by: Claude Code (T15 done)
+Branch/context: **`T07`–`T14` ✅ merged to `dev`** (#6–#14). **`T15` (Settings + persistence) ✅ done** on `feature/settings-persistence` — Settings screen (Sound/Haptics toggles + Back, an **overlay** over MainMenu/Pause) + a `PlayerPrefs`-backed store loaded at boot; **EditMode 103/103**, console clean, **human XR-sim smoke passed** (toggles via ray; persistence held across Play sessions); in the working tree awaiting the human's commit. Best score **cut** → follow-up. **Next: `T16`** (audio + haptics — the settings consumer). Brief: [`../tasks/T15-settings-persistence.md`](../tasks/T15-settings-persistence.md).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -13,11 +13,12 @@ Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world
 - **M0 — engine setup:** ✅ OpenXR + XRI rig, Android/Quest config, **verified on a real Quest 2** (see
   [ADR 0001](../architecture/adr/0001-tech-baseline.md)).
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
-- **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out. **M3 wiring**: `T12` composition root → `T13` state machine → `T14` UI ✅; **`T15`** (settings) next.
-- **M3 — wiring:** 🟡 — **`T12` ✅** (composition root) → **`T13` ✅** (app state machine: round gated on
-  `Playing`, pause/replay) → **`T14` ✅** (world-space UI on ray+Trigger). Next **`T15`** (Settings + persistence). M4–M6 not started (feedback → art → device).
+- **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out.
+- **M3 — wiring:** ✅ **complete** — **`T12`** (composition root) → **`T13`** (app state machine) →
+  **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence). **Next: M4 —
+  `T16`** (AudioService + HapticService, reads `SettingsService`); M5–M6 after (art → device).
   Full matrix: [`../tasks/README.md`](../tasks/README.md).
-- EditMode suite **green 96/96** (T13 added 11 `AppStateMachine` cases; T11b added 7 earlier; no regression).
+- EditMode suite **green 103/103** (T15 added 7 `SettingsService`/`GameSettings` cases; no regression).
   XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep); new C# is IDE1006-clean (`dotnet format`).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
   repo-root `.editorconfig`; the M1 pure-rule classes + `RoundConfig` were conformed (`_camelCase` fields, no
@@ -27,7 +28,8 @@ Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world
 
 - Scene runs the **complete M2 slice**: grab (T08) + 3 colour-validating sockets (T09) + reactor core /
   4 feeder pads / spawner with return-to-pad (T10) + round-loop wiring + consume/respawn + score finalization
-  (T11) + shard **lifetime/expiry** (T11b). Nothing left in M2; M3 wiring: `T12`–`T14` ✅, **`T15` next**.
+  (T11) + shard **lifetime/expiry** (T11b) + the **T14–T15 UI** (5 screens + Settings overlay). Nothing
+  left in M2; **M3 wiring complete** (`T12`–`T15` ✅); **next `T16`** (M4 feedback).
 - **Env note (scene/rig tasks):** `execute_code` is broken on **both** dev machines (CodeDom `mono.exe`
   "filename or extension is too long"; no Roslyn) — re-verified on the work machine 2026-06-05; use
   structural MCP tools. Prefab **unpack** is a manual 1-click editor step; the MCP asset-rename tool reports
@@ -38,7 +40,10 @@ Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world
   serialized ref must be set with `[{"instanceID":…}]` objects (bare ints resolve to `null`); `create
   save_as_prefab` leaves a **stray temp instance** in the scene (delete it); the **first Play after each
   recompile** throws a benign `routine is null` / AABB domain-reload cascade (a settled re-Play is clean), and
-  for the same reason **never edit scripts while the Editor is in Play**.
+  for the same reason **never edit scripts while the Editor is in Play**. **T15 additions:** creating/
+  duplicating UI **under the 0.001-scaled world-space canvas** corrupts the child RectTransform (scale
+  ×1000, garbage pos/rot) — reset `localScale` / `anchoredPosition3D` / `localEulerAngles` after every
+  create/duplicate; `manage_components` `target` takes a **GameObject** id — a *component* id fails "not found".
 - **Env note (XR-sim smoke):** grabbing in the **XR Device Simulator** logs 2 benign XRI errors —
   `Failed to get haptic capabilities of XRSimulatedController … Continuing assuming a single haptic channel`
   (simulated controllers have no haptics; XRI falls back). Not a code defect; absent on real Touch
@@ -60,9 +65,13 @@ Branch/context: **`T07`–`T13` ✅ merged to `dev`** (#6–#13); **`T14` (world
 
 ## Notes for next chat
 
-- **Next:** commit T14 (scene UI + pause-entry code + this doc-close), then start **T15** (Settings:
-  sound/haptics + persistence) — depends on T14; adds the Settings screen (wire MainMenu's Settings
-  placeholder) + a `PlayerPrefs`-backed store. Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
+- **Next:** **author the `T16` brief first** (matrix-only `·` row — expand per `tasks/README.md`
+  Authoring; branch `feature/audio-haptics`), then implement **AudioService + HapticService + configs**
+  consuming `SettingsService` (`Current` + `Changed` — the seam T15 left ready in the composition root).
+  Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
+- **T15 carry-forwards:** the Settings toggles **persist but mute/buzz nothing yet — by design** (no
+  consumer until T16; don't mistake silent toggles for a bug). **Best score** was cut from T15 → a small
+  follow-up on the persistence seam (GDD §13/§16: store the max, show it on Results).
 - **Diagnosis carry-forward:** the Play-stop `Leak Detected: Persistent N allocations` / `routine is null` cascade is the **first-Play-after-recompile transient** (a settled re-Play is clean) — confirmed at T12; not a code leak.
 - **Tuning (T21, on device — not now):** held-slow `0.25` (≈56 s held) is generous, and idle shards expire in a synchronized wave (equal spawn + lifetime). Both are **GDD-§14 tuning levers confirmed on device**, deliberately **not** changed speculatively in code.
 - **Carry-forward reminders:** **don't re-break the wrong-insert eject** — `ShardMotion.ReturnToPad()` is an **instant teleport** (a gradual lerp lets the socket's `keepSelectedTargetValid` re-snap the shard, the T10 bug). Shards/ports stay on the **Default** interaction layer — the named "Shard" layer stayed **deferred** (T14: Near-Far's near/far region split + `blockUIOnInteractableSelection` already separate grab from the UI ray; revisit only if a conflict surfaces). Spawn-colour variety within a round is a planner **tuning candidate (T21)**, not a bug.

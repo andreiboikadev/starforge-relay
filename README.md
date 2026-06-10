@@ -13,12 +13,14 @@ A **playable vertical slice** runs in the editor (XR Device Simulator / Quest Li
 
 - **Gameplay rules — complete, unit-tested:** scoring, combo, heat, stabilisation, round
   timer, colour-match validation, shard-spawn planning, end-states (victory / overload /
-  time-out) + star rating — **85 EditMode tests, green**.
+  time-out) + star rating — **103 EditMode tests, green**.
 - **VR slice — complete:** grab on Grip → insert into a port → correct / wrong / **expired**
   feedback → win / overload / time-out, with pooled shards, feeder-pad spawning, shard
   lifetime/expiry, and scripted return-to-pad (no ballistic throwing).
-- **Wiring — in progress:** one composition root wires the object graph; an app/round state
-  machine and world-space UI are next, then audio/VFX polish and on-device tuning.
+- **Wiring — complete:** one composition root wires the object graph; an app state machine
+  drives the full flow through world-space menus, HUD, pause, and results, with sound/haptics
+  settings persisted between sessions. Next: audio/VFX/haptics feedback, then art and
+  on-device tuning.
 
 The engine baseline is verified on a real Quest 2; the gameplay slice is exercised in-editor
 (on-device validation of the full slice is a later milestone). Detailed live state:
