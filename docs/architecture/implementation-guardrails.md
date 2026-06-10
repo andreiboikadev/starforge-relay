@@ -313,6 +313,7 @@ Recommended assets:
   - `stabilizationRequirement` (20)
   - `heatCap` (8)
   - `activeShardsDefault` (4), `activeShardsMax` (6)
+  - `activeShards5AfterAccepts` (8), `activeShards6AfterAccepts` (15) — escalation applies only if the extra feeder pads exist (GDD §12); not in the as-built `RoundConfig` (MVP has 4 pads)
   - `shardLifetimeStart` (14), `shardLifetimeLate` (12), `lateLifetimeAfterAccepts` (10)
   - `respawnDelayMin` (0.3), `respawnDelayMax` (0.8)
   - `comboBonusInterval` (5), `comboBonusScore` (50), `comboHeatRelief` (1)

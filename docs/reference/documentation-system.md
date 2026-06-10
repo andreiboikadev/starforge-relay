@@ -101,7 +101,7 @@ docs/
     claude-code-rules.md           how Claude Code rules work (background, not live config)
     documentation-system.md        this blueprint (background)
   development/
-    setup.md
+    setup.md                       as-built setup record from the setup stage (template: setup-playbook.md)
     build-and-test.md
     unity-workflow.md              XR + MCP for Unity habits
     ai-workflow.md                 optional if CLAUDE.md is enough
@@ -113,12 +113,14 @@ docs/
     asset-ledger.md
   handoff/
     current-status.md
+  release/                         created at the first distributable build (template: release-playbook.md)
+    store-checklist-<store>.md     dated per-store requirement snapshot — regenerated each release
   tasks/                           graduate-to when the backlog outgrows current-status's "next actions"
     README.md                      matrix (plan to ship) + brief template (template: task-system.md)
     Tnn-….md                       one self-contained brief per task (+ a "what was actually done" field)
 ```
 
-The GDD and the engineering guardrails are **consolidated in-repo** — GDD → `docs/product/game-design.md`, guardrails → `docs/architecture/implementation-guardrails.md`, the two reference docs → `docs/reference/` — and `docs/INDEX.md` links them (one source of truth per fact, no duplication). Do not create optional files as empty stubs.
+The GDD and the engineering guardrails are **consolidated in-repo** — GDD → `docs/product/game-design.md`, guardrails → `docs/architecture/implementation-guardrails.md`, the two reference docs → `docs/reference/` — and `docs/INDEX.md` links them (one source of truth per fact, no duplication). Do not create optional files as empty stubs. Template annotations in the tree ("template: …") point at the reusable **docs base** kept outside the repo (machine-local) — vendor a template into the repo only when it is first used.
 
 ---
 
@@ -137,9 +139,17 @@ For the first setup pass, create only what makes the next coding session safe an
 
 Consolidated in-repo and linked from `INDEX.md`: the GDD → `docs/product/game-design.md`, guardrails → `docs/architecture/implementation-guardrails.md`, the reference docs → `docs/reference/` (link, don't duplicate). The C# style guide → `docs/architecture/csharp-style.md` (a portable asset — swap only its engine overlay), machine-enforced by the repo-root `.editorconfig`.
 
-Create if immediately useful: `docs/development/setup.md` (if setup needs more than the README), `.github/pull_request_template.md`, `.claude/rules/unity-code.md`. Create skills/subagents/hooks only after the basic docs exist and a real need appears — not in the first pass.
+Also consolidated (not optional): `docs/development/setup.md` — the **as-built setup record** from the setup stage, i.e. the filled `setup-playbook.md` overlay with what actually happened (see the playbook's Phase B½ / Gate B½). Create if immediately useful: `.github/pull_request_template.md`, `.claude/rules/unity-code.md`. Create skills/subagents/hooks only after the basic docs exist and a real need appears — not in the first pass.
 
-**Graduate-when-needed (not bootstrap):** a **task system** (`docs/tasks/` — a matrix planning the arc to ship + self-contained per-task briefs, each with a *"what was actually done"* field) and a **verification protocol** (`docs/development/agent-verification.md` — how to confirm work is really done before claiming it). Add them the moment the backlog outgrows `current-status.md`'s "next actions" bullets, or a second contributor appears. They are **portable assets** — copy the `task-system.md` and `agent-verification.md` templates and grow them, don't re-derive each project.
+**Graduate-when-needed (not bootstrap):** a **task system** (`docs/tasks/` — a matrix planning the arc to ship + self-contained per-task briefs, each with a *"what was actually done"* field) and a **verification protocol** (`docs/development/agent-verification.md` — how to confirm work is really done before claiming it). Add them the moment the backlog outgrows `current-status.md`'s "next actions" bullets, or a second contributor appears. They are **portable assets** — copy the `task-system.md` and `agent-verification.md` templates and grow them, don't re-derive each project. The **release stage** is the same kind of graduate-when-needed asset: at the first distributable build, generate `docs/release/store-checklist-<store>.md` from the `release-playbook.md` template (stable categories + the method; requirement *values* are fetched from the store's official source and dated at release time, never baked in).
+
+A **code-navigation graph layer** (Graphify-class tools: a queryable knowledge graph built over the codebase, so agents traverse a map instead of re-reading raw files) graduates the same way — it sits *between* the docs hierarchy and the source, automating only code navigation, never replacing the docs (which carry intent, rules, and as-built state a graph cannot). Adopt it only when a **real trigger** fires:
+
+- the codebase has outgrown navigation by `INDEX.md` + guardrails + naming conventions — roughly beyond ~50k LOC, or a multi-project / monorepo workspace where no single map fits the docs;
+- session transcripts show agents spending most of their tool calls **re-Reading/Grepping code they have already read** (the observable symptom, not a guess);
+- the project has entered **long-lived post-release maintenance** *and* the codebase is near the size threshold above — lifetime amortizes only the **one-time indexing** cost, while the per-session tax below keeps recurring, so the first two triggers remain the primary signals.
+
+Below those triggers it is a standing tax — tool schemas in every session's context, graph-freshness hooks to maintain, one more moving part — paid for savings the docs hierarchy already delivers on a small codebase. On adoption: **re-verify the current tooling at use time** (this tool class moves fast — process over values); record the choice plus its freshness/update discipline in an **ADR**; keep the hard safety rules (git denies, hooks) unaffected by the tool's own hook setup; and confirm the indexer's **ingestion scope excludes secrets/keystores** — the `settings.json` read-denies bind the assistant's tools, **not** an external indexing process — recording the ingestion scope and the index storage location in the same ADR.
 
 ---
 
@@ -165,6 +175,7 @@ Every important fact has one home:
 | Performance targets (VR FPS budget) | `docs/quality/performance-budget.md` |
 | Asset sources and licenses | `docs/assets/asset-ledger.md` |
 | Current active state | `docs/handoff/current-status.md` |
+| Store/release requirement snapshots | `docs/release/store-checklist-<store>.md` (dated; regenerated per release) |
 | Task plan + per-task briefs (when the backlog grows) | `docs/tasks/` — matrix + `Tnn-*.md` |
 | State-claim verification discipline | `docs/development/agent-verification.md` |
 | Release notes | `CHANGELOG.md` |
@@ -272,26 +283,7 @@ Hard safety boundaries and shared config. Permission rules are enforced by Claud
 
 **Critical (Windows):** the agent's shell tool here is **PowerShell**, a separate permission tool from Bash. Git-write denies must cover **both**, or the rule is a no-op.
 
-````json
-{
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "permissions": {
-    "deny": [
-      "Bash(git add *)",        "PowerShell(git add *)",
-      "Bash(git commit *)",     "PowerShell(git commit *)",
-      "Bash(git push *)",       "PowerShell(git push *)",
-      "Bash(git reset *)",      "PowerShell(git reset *)",
-      "Bash(git rebase *)",     "PowerShell(git rebase *)",
-      "Bash(git restore *)",    "PowerShell(git restore *)",
-      "Bash(git checkout *)",  "PowerShell(git checkout *)",
-      "Bash(git switch *)",    "PowerShell(git switch *)",
-      "Bash(git merge *)",     "PowerShell(git merge *)",
-      "Bash(git clean *)",      "PowerShell(git clean *)",
-      "Read(./.env)", "Read(./.env.*)", "Read(./secrets/**)"
-    ]
-  }
-}
-````
+The full worked deny list — git writes for **Bash and PowerShell** (including the bare argless verbs) + secret/keystore read-denies — lives in **`claude-code-rules.md` §5** (one home; this blueprint links rather than duplicates it). The repo's live `.claude/settings.json` is the enforced instance.
 
 Notes: this policy assumes the human reviews, stages, commits, and pushes. Keep personal settings in `.claude/settings.local.json` (auto-gitignored). Do not enable bypass modes in shared settings. Confirm the live PowerShell tool name in `/permissions`. Argument-level Bash/PowerShell filtering is fragile — use a hook for argument logic.
 
@@ -541,10 +533,10 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `chore`, `ci`
 1. Confirm no other agent is editing the repo; confirm the repo root.
 2. Create the bootstrap docs only (§5).
 3. Create `CLAUDE.md` (§7).
-4. Create `.claude/settings.json` with the Bash + PowerShell git-write deny rules (§10).
+4. Create `.claude/settings.json` with the Bash + PowerShell git-write deny rules (worked list: `claude-code-rules.md` §5; policy notes: §10).
 5. Create `docs/INDEX.md` linking the consolidated GDD (`docs/product/game-design.md`), guardrails, and reference docs.
 6. Create `docs/development/build-and-test.md`, `docs/handoff/current-status.md`, `docs/assets/asset-ledger.md`; and (once C# code is added) a repo-root `.editorconfig` from `editorconfig.template` + `docs/architecture/csharp-style.md` (swap its engine overlay).
-7. Add `docs/development/setup.md` if setup doesn't fit the README.
+7. Consolidate the filled setup plan as `docs/development/setup.md` (the as-built record; template: `setup-playbook.md`).
 8. Add `.github/pull_request_template.md` and `.claude/rules/unity-code.md` if useful.
 9. Add ADR 0001 only if an architecture choice is already locked.
 10. Run a docs audit before feature coding.

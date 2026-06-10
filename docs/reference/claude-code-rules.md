@@ -172,29 +172,13 @@ Configured in a `hooks` block in `settings.json`; the `matcher` filters the tool
 
 This is the exact setup we want: the assistant does the work via direct file edits and MCP-for-Unity editor operations, but **you review the diff and commit yourself**.
 
-**`./CLAUDE.md`** (committed) — soft rules:
-```markdown
-# Project: Starforge Relay (VR)
-
-## What this is
-Stationary VR arcade for Meta Quest 2/3. Unity 6.3 + OpenXR + XR Interaction Toolkit (URP).
-Design: docs/product/game-design.md. Engineering contract: docs/architecture/implementation-guardrails.md.
-
-## Division of labor
-- You (assistant): edit C#/text/asset files directly (clean `git diff`); do Editor operations
-  via the MCP for Unity server (GameObjects/components, scenes, materials, run tests, read the
-  Console); add package deps by editing `Packages/manifest.json`. Read-only git only.
-- Me (human): GUI toggles unreliable via MCP (platform switch, parts of Player/OpenXR settings),
-  running/building on the Quest and Quest Link, and ALL git commits.
-
-## Hard rule
-- Never run `git commit`, `git push`, or `git add`. After a logical unit of work, stop,
-  summarize the change, and propose a Conventional Commit message. I review the diff and commit.
-
-## Conventions
-- First-party code/content under `Assets/_Project/`; commit `.meta` files with their assets.
-- Before "ready for review": compiles with no Console errors (check via MCP); EditMode tests pass.
-```
+**`./CLAUDE.md`** (committed) — the soft layer. The recommended template lives in
+`documentation-system.md` §7 (one home — don't maintain two variants; this guide links instead of
+duplicating), and **this repo's live `./CLAUDE.md` is the authoritative instance.** Whatever template you
+start from, the policy-critical lines it must carry are: the **division of labor** (assistant edits files
+directly + does editor ops via MCP, read-only git), the **hard git rule** (never `git add` / `commit` /
+`push` — stop, summarize, propose a Conventional Commit message; the human reviews the diff and commits),
+and **links** to the GDD / guardrails instead of restated content.
 
 **`./.claude/settings.json`** (committed) — the hard rule that backs up the soft one. **Note the PowerShell rules** — on Windows the agent commits through the PowerShell tool, so Bash-only denies would not hold:
 ```json
@@ -212,12 +196,16 @@ Design: docs/product/game-design.md. Engineering contract: docs/architecture/imp
       "Bash(git switch *)",    "PowerShell(git switch *)",
       "Bash(git merge *)",     "PowerShell(git merge *)",
       "Bash(git clean *)",     "PowerShell(git clean *)",
-      "Read(./.env)", "Read(./.env.*)", "Read(./secrets/**)"
+      "Bash(git push)",        "PowerShell(git push)",
+      "Bash(git commit)",      "PowerShell(git commit)",
+      "Bash(git reset)",       "PowerShell(git reset)",
+      "Read(./.env)", "Read(./.env.*)", "Read(./secrets/**)",
+      "Read(./**/*.keystore)", "Read(./**/*.jks)", "Read(./**/*.p12)", "Read(./**/*.pem)"
     ]
   }
 }
 ```
-*Deny rules merge across scopes and a deny at any scope wins, so these hold even if user/local settings allow git. They are enforced by the client — the agent literally cannot run them. Your own terminal git is unaffected; only the agent's shell tools are.*
+*Deny rules merge across scopes and a deny at any scope wins, so these hold even if user/local settings allow git. They are enforced by the client — the agent literally cannot run them. Your own terminal git is unaffected; only the agent's shell tools are. The key-file read-denies are belt-and-suspenders: the primary control is storing signing keys **outside the repo**; the denies cover any key file that lands inside it. The three bare-verb entries close the argless forms (`git push` alone pushes the current branch; `git reset` alone unstages everything) — a trailing-`*` pattern may not match a bare verb, and the explicit entries make that fine print moot.*
 
 **Optional — ironclad block via hook** (only if you want a guarantee that survives unusual phrasings). `./.claude/settings.json` + `./.claude/hooks/block-commit.sh`:
 ```json
@@ -240,6 +228,23 @@ if echo "$cmd" | grep -Eq '\bgit\b.*\b(commit|push|add|reset|rebase|restore|clea
 fi
 exit 0            # exit 0 with no output = no decision; the call continues normally
 ```
+
+> **Windows caveat:** the script above is bash + `jq` — on a Windows dev host it runs only under Git
+> Bash/WSL, and `jq` is not preinstalled. Native PowerShell equivalent (`.claude/hooks/block-commit.ps1`;
+> point the hook's `command` at it and **verify the exact hook invocation on Windows against the official
+> hooks docs at use time**):
+
+```powershell
+# PreToolUse hook (PowerShell variant). The tool call arrives as JSON on stdin.
+$payload = [Console]::In.ReadToEnd() | ConvertFrom-Json
+$cmd = "$($payload.tool_input.command)"
+if ($cmd -match '\bgit\b.*\b(commit|push|add|reset|rebase|restore|clean)\b') {
+    [Console]::Error.WriteLine('Commits/pushes are reserved for the human; blocked by project policy.')
+    exit 2
+}
+exit 0
+```
+
 For most projects the `deny` rules + `CLAUDE.md` are enough; add the hook only if you want the extra guarantee. (MCP-for-Unity tools are namespaced `mcp__…` and are unrelated to git — they don't need git denies.)
 
 **Why this matches a multi-machine / multi-chat setup:** `CLAUDE.md`, `.claude/settings.json`, and `.claude/hooks/` are all committed, so anyone who clones the repo — any machine, any new chat — inherits the same rules with zero extra setup.

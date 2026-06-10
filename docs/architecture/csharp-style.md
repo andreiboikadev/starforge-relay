@@ -39,37 +39,40 @@
 
 | Element | Casing | Example |
 |---|---|---|
-| Namespace, class, struct, enum, delegate, record | `PascalCase` | `ReactorCore`, `ShardColor` |
+| Namespace, class, struct, enum, delegate, record | `PascalCase` | `ScoreService`, `ItemKind` |
 | Interface | `I` + `PascalCase` | `IClock`, `IRandomSource` |
-| Method, property, event (**any** accessibility) | `PascalCase` | `RegisterWrongInsert()`, `Current` |
+| Method, property, event (**any** accessibility) | `PascalCase` | `ResetScore()`, `Current` |
 | Public field *(avoid — prefer a property)* | `PascalCase` | `Origin` |
-| Private / protected / internal **instance** field | `_camelCase` | `_heatCap`, `_comboHeatRelief` |
+| Private / protected / internal **instance** field | `_camelCase` | `_maxRetries`, `_scoreMultiplier` |
 | Private / protected / internal **static** field (incl. `static readonly`) | `s_camelCase` | `s_sharedBuffer` |
 | Thread-static field | `t_camelCase` | `t_scratch` |
-| Constant (`const`) — any accessibility | `PascalCase` | `DefaultHeatCap` (not `DEFAULT_HEAT_CAP`) |
+| Constant (`const`) — any accessibility | `PascalCase` | `DefaultTimeout` (not `DEFAULT_TIMEOUT`) |
 | **Public** `static readonly` value (constant-like) | `PascalCase` | `Identity`, `Zero` |
-| Local variable, parameter | `camelCase` | `heatCap`, `deltaTime` |
+| Local variable, parameter | `camelCase` | `maxRetries`, `deltaTime` |
 | Type parameter (generics) | `T` or `T` + `PascalCase` | `T`, `TKey`, `TResult` |
-| Enum members | `PascalCase` | `Solar`, `Ion`, `Pulse` |
-| File name | = the public type it contains | `HeatService.cs` |
+| Enum members | `PascalCase` | `Idle`, `Running`, `Done` |
+| File name | = the public type it contains | `ScoreService.cs` |
 
 Rules and rationale:
 
 - **The `_`/`s_`/`t_` prefixes are for FIELDS only.** Methods and properties stay `PascalCase` regardless of
   accessibility (the .NET runtime / Roslyn convention). This is the single biggest difference from "just
-  camelCase fields": a non-public field is `_heatCap`, never `heatCap`.
+  camelCase fields": a non-public field is `_maxRetries`, never `maxRetries`.
 - **For static fields, accessibility (not `readonly`) picks the style:** a non-public `static` /
   `static readonly` field is `s_camelCase`; only a **public** static-readonly constant is `PascalCase`;
   a `const` is always `PascalCase` at any accessibility.
+- **`t_` (thread-static) is doc-only:** `[ThreadStatic]` cannot be targeted by `.editorconfig` naming
+  rules, so a `t_*` field will be flagged by the `s_` rule — suppress `IDE1006` for that line (thread-
+  statics should be rare anyway).
 - **Why the underscore:** it disambiguates a field from a parameter/local **without `this.`** — so write
-  `_heatCap = heatCap;`, not `this.heatCap = heatCap;`. (MS conventions: qualify with `this.` is unnecessary
-  once the prefix makes scope obvious.)
-- **No legacy Hungarian / `m_` prefix** for new code (`m_` is old Unity-internal style). No type-encoding
-  prefixes (`strName`, `iCount`).
+  `_maxRetries = maxRetries;`, not `this.maxRetries = maxRetries;`. (MS conventions: qualify with `this.`
+  is unnecessary once the prefix makes scope obvious.)
+- **No legacy Hungarian / `m_` prefix** for new code (`m_` is a legacy engine-internal style). No
+  type-encoding prefixes (`strName`, `iCount`).
 - **Acronyms:** 3+ letters are cased as words (`HttpClient`, `XmlReader`, `MyRpc` — not `HTTPClient`,
-  `MyRPC`); **2-letter acronyms stay upper** (`IO`, `UI`, `XR` — e.g. `XROrigin`, matching Unity's own `XR*`
-  types). Be consistent with the surrounding API.
-- **Booleans read as assertions:** `IsOverloaded`, `HasSpawned`, `CanGrab`.
+  `MyRPC`); **2-letter acronyms stay upper** (`IO`, `UI`, `OS` — e.g. `IOException`,
+  `Environment.OSVersion`). Be consistent with the surrounding API.
+- **Booleans read as assertions:** `IsRunning`, `HasExpired`, `CanUndo`.
 - **Constants are `PascalCase`, not `ALL_CAPS`** — `ALL_CAPS` is C/Java style, not idiomatic C#.
 - **`async` methods that return `Task`/`Task<T>` end in `Async`** — `LoadAsync()` (skip the suffix only for
   event handlers and entry points where it adds nothing).
@@ -92,14 +95,14 @@ Rules and rationale:
   `static readonly`, then other statics) → **instance fields** → properties → constructors (then finalizer)
   → methods. Within each group, **static members come before instance members**, then order by accessibility
   `public` → `internal` → `protected` → `private`. (Google C# guide.)
-- **`var` only when the type is obvious from the right-hand side** — `var core = new ReactorCore();` yes;
+- **`var` only when the type is obvious from the right-hand side** — `var service = new ScoreService();` yes;
   `var x = Compute();` no (write the type). Don't use `var` for built-in types where it hides intent
   (`int count = 0;`, not `var count = 0;`).
-- **Use the concise object-creation form when the type is on the left:** `ReactorCore core = new();`
-  (target-typed `new()` is C# 9 — fine on Unity 6; see Part 2 for the ceiling).
+- **Use the concise object-creation form when the type is on the left:** `ScoreService service = new();`
+  (target-typed `new()` is C# 9 — allowed when the Part 2 overlay's language ceiling permits).
 - **Strings:** interpolation for short concatenation (`$"{a}-{b}"`); `StringBuilder` for loops; verbatim
-  (`@"..."`) for multi-line. (Raw string literals are **C# 11+** — gated by the overlay's C# ceiling, so
-  **not** available on Unity 6.) Don't build strings with `+` in hot loops.
+  (`@"..."`) for multi-line. (Raw string literals are **C# 11+** — gated by the Part 2 overlay's C#
+  ceiling.) Don't build strings with `+` in hot loops.
 - **Parentheses to make precedence obvious** in non-trivial boolean/arithmetic expressions.
 
 ### 3. Types & language usage
@@ -133,9 +136,10 @@ Rules and rationale:
 
 ### 5. Enforcement — `.editorconfig` (the "embed once, enforced everywhere" lever)
 
-- Copy `editorconfig.template` to the repo root as **`.editorconfig`**. It encodes Part 1's naming +
-  formatting rules and is honored by **VS, VS Code (C# Dev Kit), Rider, and `dotnet format`** — any OS, any
-  editor — and by Unity's bundled Roslyn for the IDE diagnostics it surfaces.
+- Copy `editorconfig.template` to the repo root as **`.editorconfig`**. It encodes Part 1's **naming rules
+  and the machine-checkable formatting** (member ordering, blank-line habits, and XML-doc coverage stay
+  doc-only — catch those in review) and is honored by **VS, VS Code (C# Dev Kit), Rider, and
+  `dotnet format`** — any OS, any editor.
 - Naming violations surface as **`IDE1006`**; set `dotnet_diagnostic.IDE1006.severity` to enforce on build.
 - Run `dotnet format` (or the IDE's "Reformat/Cleanup") to auto-apply; wire `dotnet format --verify-no-changes`
   into CI once the codebase conforms.

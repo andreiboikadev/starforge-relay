@@ -1,8 +1,13 @@
 # Current Status
 
 Last updated: 2026-06-10
-Updated by: Claude Code (T15 done)
-Branch/context: **`T07`–`T14` ✅ merged to `dev`** (#6–#14). **`T15` (Settings + persistence) ✅ done** on `feature/settings-persistence` — Settings screen (Sound/Haptics toggles + Back, an **overlay** over MainMenu/Pause) + a `PlayerPrefs`-backed store loaded at boot; **EditMode 103/103**, console clean, **human XR-sim smoke passed** (toggles via ray; persistence held across Play sessions); in the working tree awaiting the human's commit. Best score **cut** → follow-up. **Next: `T16`** (audio + haptics — the settings consumer). Brief: [`../tasks/T15-settings-persistence.md`](../tasks/T15-settings-persistence.md).
+Updated by: Claude Code (docs sync with the upstream docs base)
+Branch/context: **`T07`–`T15` ✅ merged to `dev`** (#6–#15; T15 = Settings + persistence, EditMode 103/103,
+human XR-sim smoke passed; best score **cut** → follow-up). **This session: docs-only sync** — the upstream
+docs base was upgraded & validated (setup/release playbooks, Phase B½ gate, hardened deny policy, style-spine
+genericization, code-graph-layer guidance), and the repo's live docs were aligned (see "Decisions"). No code,
+scene, or test changes. **Next: `T16`** (audio + haptics — the settings consumer). Brief:
+[`../tasks/T15-settings-persistence.md`](../tasks/T15-settings-persistence.md).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -59,6 +64,12 @@ Branch/context: **`T07`–`T14` ✅ merged to `dev`** (#6–#14). **`T15` (Setti
   XRI 3.3.0 + Meta Quest + Oculus Touch, Single Pass Instanced, Vulkan, IL2CPP/ARM64, manual DI, single
   scene, Floor origin, pooling via `ObjectPool<T>`.
 - In-repo docs are the single source of truth.
+- **2026-06-10 — docs synced with the upstream docs base** (validated that day by a cold-run test):
+  `.claude/settings.json` hardened (bare-verb `git push/commit/reset` denies + `*.p12`/`*.pem` read-denies);
+  `csharp-style.md` Part 1 aligned with the genericized spine + `t_` enforcement note (`.editorconfig`
+  comments updated to match); guardrails §7 records the GDD-§12 shard-escalation config fields (not in
+  as-built `RoundConfig` — 4 pads in MVP); `docs/reference/*` refreshed (deny-list one-home dedup, Windows
+  PowerShell hook variant, release-stage + code-navigation-graph-layer graduate guidance). Docs-only change.
 - **C# code style** = the package convention (.NET-runtime naming: `_camelCase` / `s_camelCase` fields,
   `PascalCase` types/methods/properties/consts), home in `docs/architecture/csharp-style.md`, enforced by the
   repo-root `.editorconfig` (rule `IDE1006`) — recorded in [ADR 0002](../architecture/adr/0002-csharp-style.md).

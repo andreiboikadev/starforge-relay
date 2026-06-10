@@ -78,9 +78,13 @@ dotnet_style_null_propagation = true:suggestion
 dotnet_style_coalesce_expression = true:suggestion
 
 # =============================================================================
-# Naming rules  (rule ID IDE1006). More-specific symbol groups win automatically.
-# Convention (dotnet/runtime): _ / s_ / t_ are for FIELDS ONLY; methods & properties are
+# Naming rules  (rule ID IDE1006). Ordered most-specific FIRST — keep this order
+# (rule precedence follows declaration order; the const rule must stay above the
+# static/instance field rules).
+# Convention (dotnet/runtime): _ / s_ are for FIELDS ONLY; methods & properties are
 # PascalCase at every accessibility. (Google also prefixes non-public PROPERTIES with _ — we don't.)
+# NOTE: thread-static t_ fields (csharp-style.md) are NOT expressible here —
+# [ThreadStatic] is not a naming-rule modifier; suppress IDE1006 per case if used.
 # =============================================================================
 dotnet_diagnostic.IDE1006.severity = warning
 
@@ -149,7 +153,7 @@ dotnet_naming_rule.members_are_pascal.symbols = members
 dotnet_naming_rule.members_are_pascal.style = pascal_case
 dotnet_naming_rule.members_are_pascal.severity = warning
 
-# const wins over the static-field rule (const is implicitly static)
+# const must stay above the static/instance field rules (const is implicitly static)
 dotnet_naming_rule.constants_are_pascal.symbols = constants
 dotnet_naming_rule.constants_are_pascal.style = pascal_case
 dotnet_naming_rule.constants_are_pascal.severity = warning

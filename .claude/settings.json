@@ -11,6 +11,9 @@
       "Bash(git clean:*)",
       "Bash(git rebase:*)",
       "Bash(git merge:*)",
+      "Bash(git push)",
+      "Bash(git commit)",
+      "Bash(git reset)",
       "PowerShell(git add:*)",
       "PowerShell(git commit:*)",
       "PowerShell(git push:*)",
@@ -21,11 +24,16 @@
       "PowerShell(git clean:*)",
       "PowerShell(git rebase:*)",
       "PowerShell(git merge:*)",
+      "PowerShell(git push)",
+      "PowerShell(git commit)",
+      "PowerShell(git reset)",
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./secrets/**)",
       "Read(./**/*.keystore)",
-      "Read(./**/*.jks)"
+      "Read(./**/*.jks)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.pem)"
     ],
     "allow": [
       "Bash(git status:*)",
