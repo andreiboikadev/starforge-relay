@@ -1,13 +1,14 @@
 # Current Status
 
 Last updated: 2026-06-10
-Updated by: Claude Code (docs sync with the upstream docs base)
+Updated by: Claude Code (T16 brief authored)
 Branch/context: **`T07`–`T15` ✅ merged to `dev`** (#6–#15; T15 = Settings + persistence, EditMode 103/103,
-human XR-sim smoke passed; best score **cut** → follow-up). **This session: docs-only sync** — the upstream
-docs base was upgraded & validated (setup/release playbooks, Phase B½ gate, hardened deny policy, style-spine
-genericization, code-graph-layer guidance), and the repo's live docs were aligned (see "Decisions"). No code,
-scene, or test changes. **Next: `T16`** (audio + haptics — the settings consumer). Brief:
-[`../tasks/T15-settings-persistence.md`](../tasks/T15-settings-persistence.md).
+human XR-sim smoke passed; best score **cut** → follow-up). **This session: T16 authoring (docs-only)** —
+the **`T16` brief is written and awaiting human validation** (workflow: draft → validate → commit →
+implement; nothing implemented yet). Acceptance criteria were cross-checked against GDD §12/§16/§18/§22/§27,
+guardrails §6–§8/§15–§17, **and the live code/scene** (round-loop events, `ShardSpawner.IsHeld` tick,
+`SettingsService` seam, the rig's 2 `HapticImpulsePlayer` + 4 `SimpleHapticFeedback`, `SendHapticImpulse`
+verified via reflection). Brief: [`../tasks/T16-audio-haptics.md`](../tasks/T16-audio-haptics.md).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -20,9 +21,9 @@ scene, or test changes. **Next: `T16`** (audio + haptics — the settings consum
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
 - **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out.
 - **M3 — wiring:** ✅ **complete** — **`T12`** (composition root) → **`T13`** (app state machine) →
-  **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence). **Next: M4 —
-  `T16`** (AudioService + HapticService, reads `SettingsService`); M5–M6 after (art → device).
-  Full matrix: [`../tasks/README.md`](../tasks/README.md).
+  **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence). **Now: M4 —
+  `T16`** (AudioService + HapticService, reads `SettingsService`) — **brief authored 🟡, validation
+  pending**; M5–M6 after (art → device). Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 103/103** (T15 added 7 `SettingsService`/`GameSettings` cases; no regression).
   XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep); new C# is IDE1006-clean (`dotnet format`).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
@@ -76,10 +77,14 @@ scene, or test changes. **Next: `T16`** (audio + haptics — the settings consum
 
 ## Notes for next chat
 
-- **Next:** **author the `T16` brief first** (matrix-only `·` row — expand per `tasks/README.md`
-  Authoring; branch `feature/audio-haptics`), then implement **AudioService + HapticService + configs**
-  consuming `SettingsService` (`Current` + `Changed` — the seam T15 left ready in the composition root).
-  Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
+- **Next:** the **`T16` brief is authored** ([`../tasks/T16-audio-haptics.md`](../tasks/T16-audio-haptics.md))
+  — **human validates it, commits, and only then implementation starts** (branch `feature/audio-haptics`).
+  Key authoring decisions to confirm: `AudioListener.volume` as the central sound gate (single-writer);
+  haptics to **both** controllers + gating the rig's 4 `SimpleHapticFeedback`; grab/release cues from
+  `ShardSpawner` held-state transitions (`ShardMotion.IsHeldByHand`); ~10-clip Kenney CC0 subset → asset
+  ledger flips at import; **Git LFS fork** — T16 is the first binary-asset import (the `.gitattributes`
+  trigger), brief recommends **deferring LFS to T18** (history-rewrite cost) but it's a **human git
+  decision**. Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
 - **T15 carry-forwards:** the Settings toggles **persist but mute/buzz nothing yet — by design** (no
   consumer until T16; don't mistake silent toggles for a bug). **Best score** was cut from T15 → a small
   follow-up on the persistence seam (GDD §13/§16: store the max, show it on Results).
