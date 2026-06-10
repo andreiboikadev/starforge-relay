@@ -1,6 +1,7 @@
 using System;
 using StarforgeRelay.App;
 using StarforgeRelay.Gameplay;
+using StarforgeRelay.Persistence;
 using StarforgeRelay.UI;
 using UnityEngine;
 
@@ -38,6 +39,7 @@ namespace StarforgeRelay.Composition
         [SerializeField] private AppFlowController _appFlow;
         [SerializeField] private HUDPresenter _hudPresenter;
         [SerializeField] private ResultsPresenter _resultsPresenter;
+        [SerializeField] private SettingsPresenter _settingsPresenter;
 
         private ShardPool _pool;
 
@@ -46,7 +48,8 @@ namespace StarforgeRelay.Composition
         {
             if (_config == null || _shardPrefab == null || _shardContainer == null
                 || _roundLoop == null || _spawner == null
-                || _appFlow == null || _hudPresenter == null || _resultsPresenter == null)
+                || _appFlow == null || _hudPresenter == null || _resultsPresenter == null
+                || _settingsPresenter == null)
             {
                 Debug.LogError("[CompositionRoot] Missing a serialized reference — nothing wired.", this);
                 return;
@@ -72,6 +75,11 @@ namespace StarforgeRelay.Composition
             _appFlow.Initialize(machine);
             _resultsPresenter.Initialize(machine);
             _hudPresenter.Initialize(_roundLoop, _config);
+
+            // Settings: load persisted values now (Awake, before the flow's Begin) and seed the Settings UI.
+            // No consumer mutes audio/haptics yet — AudioService / HapticService read SettingsService in T16.
+            var settings = new SettingsService(new PlayerPrefsSettingsStore());
+            _settingsPresenter.Initialize(settings);
         }
 
         private void OnDestroy()

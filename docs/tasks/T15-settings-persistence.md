@@ -7,7 +7,7 @@
 | Design ref | GDD §16 (Settings screen; Pause "Settings"), §15 (user flow), §27 (sound/haptics off — accessibility), §29 (persistence: sound/haptics, best score if trivial), §13/§16 (best score on Results); guardrails §6 (Persistence — wrap `PlayerPrefs` behind an interface; UI views+presenters), §8 (manual DI), §14 (UI MVP split), §16 (Results reads, never recomputes), §17 (per-mechanic test gate); [ADR 0001](../architecture/adr/0001-tech-baseline.md) (manual DI, single scene) |
 | Depends on | T14 (XR-UI pipeline + `AppFlowController` + the 5 screens) |
 | Touches scenes/prefabs | **yes** — new world-space **Settings** canvas (2 toggles + Back, own `TrackedDeviceGraphicRaycaster`) + a **Settings** button on the MainMenu & Pause canvases; *(best score)* a Best readout on the Results canvas; new serialized refs on the composition root. |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 Give the player the GDD's required **Settings** (Sound on/off, Haptics on/off) on a world-space screen
@@ -168,4 +168,34 @@ persistence seam that **T16** (AudioService/HapticService) and the Results **bes
   matrix row (Status `▫→✅`, Brief `·→✓`, Scenes `minor→yes`), and `current-status.md`.
 
 ## What was actually done
-— (filled on close: what shipped, any deviation, the commit/PR, the date.)
+Implemented + verified 2026-06-10 (branch `feature/settings-persistence`; the human commits — code +
+scene + this doc-close ride one commit).
+
+- **Persistence (`StarforgeRelay.Persistence`, new):** `GameSettings` (readonly struct, `Default` = both
+  on) + `ISettingsStore` + `PlayerPrefsSettingsStore` (the **only** `PlayerPrefs` toucher — confirmed by
+  grep; absent keys read as ON) + `SettingsService` (`Current` + `Changed`; persists and raises **only on
+  an actual change**). Constructed + loaded at boot in the composition root (`Awake`, before `Begin()`).
+- **UI (`StarforgeRelay.UI`):** `SettingsView` (2 uGUI `Toggle`s + Back; seeded via
+  `SetIsOnWithoutNotify`) + `SettingsPresenter` (seeds from `Current`, routes toggles to the service);
+  `MainMenuView` + `PauseMenuView` gained a Settings button + `SettingsClicked`.
+- **Flow:** Settings is an **overlay** in `AppFlowController` (decision 2 as planned) —
+  `OnOpenSettings`/`OnCloseSettings` (named per the file's `On*` handler convention, not the brief's
+  `OpenSettings`/`CloseSettings`); `_settings` deliberately **not** in `OnPhaseChanged`; Back restores via
+  `OnPhaseChanged(_machine.Phase)`. `AppStateMachine` untouched (0 changes to its 11 tested cases).
+- **Scene:** world-space `Canvas - Settings` (starts **inactive**; own `TrackedDeviceGraphicRaycaster` —
+  the T14 per-canvas pattern) + Settings buttons on the MainMenu/Pause canvases; every new serialized ref
+  wired and **re-read to verify**.
+- **Checks (this session):** compile + Play-boot console clean; **EditMode 103/103** (96 + 7 new
+  `SettingsServiceTests` over an in-memory `FakeSettingsStore`; no regression); restricted-API grep clean;
+  `dotnet format` **0 IDE1006** (only the known project-wide IDE0044 `[SerializeField]` false positive);
+  XRI-in-C# still confined to `PortSocket` + `ShardMotion`. **Human XR Device Simulator smoke passed**
+  (2026-06-10): Settings from MainMenu **and** Pause via ray+Trigger; toggles + Back work; the pause stays
+  frozen; **persistence held across Play sessions**; console clean bar the known benign sim-haptic errors.
+- **Deviations / deferred:** **best score cut** (the fenced decision-5 block; nothing of it was built) →
+  its own small follow-up on this persistence seam. **No audio/haptic consumer yet — by design**
+  (decision 3): T16's AudioService/HapticService read `SettingsService.Current` + `Changed`. Optional GDD
+  §16 settings (brightness / color-assist / height) stay out per decision 1.
+- **New MCP gotchas** (recorded in current-status): creating/duplicating UI under the 0.001-scaled
+  world-space canvas corrupts the child RectTransform (reset `localScale` / `anchoredPosition3D` /
+  `localEulerAngles` after every create/duplicate); `manage_components` `target` takes a **GameObject**
+  id — a component id fails "not found".

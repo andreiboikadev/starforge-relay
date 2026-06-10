@@ -17,6 +17,7 @@ namespace StarforgeRelay.App
         [SerializeField] private HUDView _hud;
         [SerializeField] private PauseMenuView _pauseMenu;
         [SerializeField] private ResultsView _results;
+        [SerializeField] private SettingsView _settings;
 
         private AppStateMachine _machine;
 
@@ -24,7 +25,7 @@ namespace StarforgeRelay.App
         public void Initialize(AppStateMachine machine)
         {
             if (machine == null || _mainMenu == null || _calibration == null || _hud == null
-                || _pauseMenu == null || _results == null)
+                || _pauseMenu == null || _results == null || _settings == null)
             {
                 Debug.LogError("[AppFlowController] Missing machine or a view reference — flow disabled.", this);
                 return;
@@ -42,6 +43,10 @@ namespace StarforgeRelay.App
             _results.PlayAgainClicked += OnStartRound;
             _results.MainMenuClicked += OnMainMenu;
             _hud.PauseClicked += OnPause;
+
+            _mainMenu.SettingsClicked += OnOpenSettings;
+            _pauseMenu.SettingsClicked += OnOpenSettings;
+            _settings.BackClicked += OnCloseSettings;
         }
 
         // Enter the initial Boot state once, after the root has injected (Awake) — Start runs after all Awakes.
@@ -79,6 +84,10 @@ namespace StarforgeRelay.App
             _results.PlayAgainClicked -= OnStartRound;
             _results.MainMenuClicked -= OnMainMenu;
             _hud.PauseClicked -= OnPause;
+
+            _mainMenu.SettingsClicked -= OnOpenSettings;
+            _pauseMenu.SettingsClicked -= OnOpenSettings;
+            _settings.BackClicked -= OnCloseSettings;
         }
 
         private void OnPlay() => _machine.RequestCalibration();
@@ -90,6 +99,25 @@ namespace StarforgeRelay.App
         private void OnMainMenu() => _machine.RequestMainMenu();
 
         private void OnPause() => _machine.RequestPause();
+
+        // Settings is an overlay, not an AppPhase: open hides every phase view and shows Settings; close hides
+        // Settings and restores the views for the (unchanged) current phase. Reachable from MainMenu and Paused
+        // only, where no PhaseChanged can fire while it is open — so _machine.Phase is still the caller.
+        private void OnOpenSettings()
+        {
+            SetActive(_mainMenu, false);
+            SetActive(_calibration, false);
+            SetActive(_hud, false);
+            SetActive(_pauseMenu, false);
+            SetActive(_results, false);
+            SetActive(_settings, true);
+        }
+
+        private void OnCloseSettings()
+        {
+            SetActive(_settings, false);
+            OnPhaseChanged(_machine.Phase);
+        }
 
         private void OnPhaseChanged(AppPhase phase)
         {
