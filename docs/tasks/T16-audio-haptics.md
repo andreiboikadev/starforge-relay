@@ -7,7 +7,7 @@
 | Design ref | GDD §18 (audio direction + the required-sound list + volume guidance), §12 (correct insert: "short controller haptic pulse"; wrong insert: "no harsh sound"), §16 (Settings: Sound/Haptics on/off), §22 (cut line: basic sound feedback = must-keep; ambient loop = cut-first), §27 (accessibility: sound/haptics off must work); guardrails §6 (Audio/VFX/Haptics — semantic events, gameplay never references clips/haptics, respect settings centrally), §7 (`AudioCueConfig` / `HapticConfig` SOs), §8 (Unity statics wrapped at boundaries), §15 (typed events), §16 (audio/haptic choice owner = services + configs), §17 (per-mechanic gate); [ADR 0001](../architecture/adr/0001-tech-baseline.md) (manual DI) |
 | Depends on | T11 (round-loop events), T13 (`RoundStarted` / gated lifecycle), T15 (`SettingsService.Current` + `Changed` — the consumer seam) |
 | Touches scenes/prefabs | **minor** — one `Audio Source` object + one `Feedback` object + new serialized refs on the composition root; 2 new SO assets; imported audio clips. **No canvas/prefab/rig structural change** (the rig's existing haptic components are only toggled at runtime). *(Matrix said "no" — corrected at authoring.)* |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 The first **feedback layer**: every GDD-§18-required sound and the §12 correct-insert haptic pulse, driven by
@@ -234,4 +234,37 @@ channels **actually gated** by the T15 settings — the first real consumer of `
   brief Status ✅ + **What was actually done**, matrix row, `current-status.md`, **asset ledger**.
 
 ## What was actually done
-—
+Implemented + verified 2026-06-11 (commit `086cbd5` `feat(audio): T16 audio + haptics feedback layer`;
+human commits). Device smoke passed on a real **Quest 2** (standalone).
+
+- **New (`StarforgeRelay.Audio`):** `FeedbackCue` (11 cues) + `AudioCueConfig`/`HapticConfig` SOs;
+  `AudioService` (plain C#, `IDisposable`) — the single writer of `AudioListener.volume`, gating Sound
+  on/off from `SettingsService`; `HapticService` (plain C#, `IDisposable`) — pulses **both** controllers'
+  `HapticImpulsePlayer`s and toggles the rig's **4** `SimpleHapticFeedback` from the Haptics setting;
+  `FeedbackController` (MonoBehaviour) maps semantic events → cues and drives both services.
+- **Event seams (no rule changes):** `AppFlowController.UiSelected` (raised in all 7 button handlers);
+  `ShardMotion.IsHeldByHand` (non-socket selector check); `ShardSpawner` `ShardGrabbed`/`ShardReleased`
+  edges (release only on hand→empty, not hand→socket); `RoundLoopController.IsPaused`. Composition root
+  builds/injects/disposes both services.
+- **Scene:** `Audio Source` (2D, playOnAwake off) + `Feedback` (FeedbackController); 7 new root refs
+  resolved + verified. **Assets:** full Kenney **Sci-fi Sounds** + **Interface Sounds** (CC0) under
+  `Assets/ThirdParty/…`; **10 clips** mapped in `AudioCueConfig`; `HapticConfig` carries 5 cues
+  (Correct/Wrong/ComboMilestone/Victory/Overload). Asset ledger updated.
+- **Verified:** compile clean; **EditMode 103/103** (no regression — no new pure rule, adapter/config task);
+  restricted-API clean — XRI in C# now `PortSocket` + `ShardMotion` + **`HapticService`** +
+  **`StarforgeRelayCompositionRoot`** (field-only wiring); MCP Play boot/teardown 0 errors. **Human device
+  smoke (Quest 2, standalone): audio cues fire + Sound-OFF silences; haptics pulse both controllers +
+  Haptics-OFF stops the pulse and the rig select-buzz.**
+- **Deviations / notes:** clip picks are **first-pass** (chosen by filename, swappable in the
+  `AudioCueConfig` Inspector; final mix → T21). **Git LFS deferred to T18** (the `.gitattributes` plan) —
+  the `.ogg` committed as plain binary. **`dotnet format` not re-run this session** (no `.sln` on disk post-commit), but a field-naming grep over the
+  touched files found **0** IDE1006 violations (private fields `_camelCase`, members `PascalCase`) and the code
+  compiles clean; fold a full `dotnet format --verify-no-changes` into T18/T20 (project files regenerate then)
+  or CI (ADR 0002 follow-up). `XR Device Simulator` still logs the benign haptic-capability warnings (its controllers have no
+  haptics) — absent on the Quest 2 device run, as expected.
+- **Device finding → T20 (not a T16 defect):** this was the **first standalone build of the full game**;
+  it runs immersive on Quest 2 (OpenXR reached `XR_SESSION_STATE_FOCUSED`, no crashes). An initial
+  "empty scene" was **start-orientation** — the reactor + world-space UI sit at a fixed world pose, and with
+  **no in-app recenter** (deferred T13/T14) a player starting off-centre/mis-facing sees the empty bay;
+  standing centred + the system recenter brings the content in front. Fix = wire the deferred
+  **Recenter/calibration** (GDD §9) at **T20**.
