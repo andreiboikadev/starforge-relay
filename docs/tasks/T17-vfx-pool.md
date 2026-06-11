@@ -7,7 +7,7 @@
 | Design ref | GDD §10 (Star Core states + port correct/wrong visuals), §12 (RoundComplete per-result timing 2 / 1.5 / 1 s), §17 (Visual Direction — the VFX list + "keep particle counts low", fake glow), §22 (cut line — victory = scale-up + ring spin + burst, wrong = red flash, expired = disappear + sound), §26 (perf — bursts < 0.5–1.0 s, pool VFX, ≤6 shards, no real-time shadows, avoid transparent overdraw); guardrails §6 (Audio/VFX/Haptics are **peers** reacting to shared semantic events; `VfxPool`/`BeamVfx`/`SparkVfx`/`FizzleVfx`/`ComboPulseVfx`/`StabilizeVfx`/`CoreStatePresenter`; "core presents states driven by events — the view does not compute progress/heat"), §11 (short animation coroutines owned by views; cancel on disable), §12 (pooling — beam 4–6, VFX 6–10 per effect; reset on release; **don't** pool the single core/rings/ports), §15 (typed events), §16 (rule ownership — core/ring visuals = `ReactorCoreView`/`CoreStatePresenter`; Results reads final state), §18 (fake glow over bloom); [ADR 0001](../architecture/adr/0001-tech-baseline.md) (manual DI, `ObjectPool<T>`, Single Pass Instanced) |
 | Depends on | T11 (round-loop events + the new spatial seams), T16 (the sibling-controller pattern). Soft: T13/T14 (`AppStateMachine.PhaseChanged` for Dormant; the RoundComplete delay seam) |
 | Touches scenes/prefabs | **yes** — extend `ReactorCoreView` visuals; new pooled-VFX prefabs (beam / spark / fizzle) + core-anchored burst effects (combo-pulse / victory / overload); a `Vfx` object holding `VfxController` + `CoreStatePresenter`; new serialized refs on the composition root; 3 new `RoundConfig` delay fields |
-| Status | 🟡 in progress (authoring — pending human validation; nothing implemented yet) |
+| Status | ✅ done |
 
 ## Goal
 The **second feedback peer** (sibling to T16's audio/haptics): pooled, short-lived **VFX** for every GDD-§17
@@ -299,4 +299,42 @@ This task also lands the deferred **per-result RoundComplete timing** (GDD §12)
   third-party asset in T17; that's T18.)
 
 ## What was actually done
-— (not started; implementation begins only on explicit command after this brief is validated and committed.)
+Implemented + smoked 2026-06-11 (not yet committed — human commits). **Automated verification green +
+human XR-sim interaction smoke passed** (this session, XR Device Simulator: beams in all three colours,
+spark on wrong insert, fizzle on expiry, core charge/heat/stabilized/overload glow, combo pulse, and the
+per-result RoundComplete beat all confirmed).
+
+- **New (`StarforgeRelay.Vfx`):** `PooledVfx` (base — view-owned auto-return coroutine, cancel on
+  disable/reset), `VfxPool<T>` (generic `ObjectPool<T>` wrapper mirroring `ShardPool`; binds the
+  return-to-pool callback once per instance), `BeamVfx` (port→core stretch+tint), `BurstVfx` (shared
+  point-burst base) + `SparkVfx`/`FizzleVfx`, `VfxController` (subscribes the 3 spatial companions only),
+  `CoreStatePresenter` (round events + `PhaseChanged` → `CoreVisualState`, reads **live** `Heat`/`Stabilization`).
+  **New (`StarforgeRelay.Gameplay`):** `CoreVisualState` enum. **New (`StarforgeRelay.App`):**
+  `RoundCompleteDelays` struct.
+- **Edited (no rule change):** `RoundLoopController` (+3 gated companion events `CorrectInsertedAt` /
+  `WrongInsertedAt` / `ShardExpiredAt`; expiry raised before `Despawn`); `ReactorCoreView` (state glow via
+  `MaterialPropertyBlock` + ring spin + combo/victory/overload bursts, default Dormant, view-only);
+  `RoundConfig` (+3 per-result delay fields 2/1.5/1 s); `AppStateMachine` + `RoundCompleteState` (per-result
+  delay via `RoundCompleteDelays`); `StarforgeRelayCompositionRoot` (3 VFX pools built/prewarmed/injected/
+  disposed + 7 serialized refs); `AppStateMachineTests` (ctor update + Victory/Overload timing cases).
+- **Scene/prefabs:** 3 pooled-VFX prefabs under `Assets/_Project/Prefabs/VFX/` (Beam = cube, Spark/Fizzle =
+  0.08 m spheres, **colliders removed** so VFX never touch physics/XRI); a `Vfx` object holds
+  `VfxController` + `CoreStatePresenter` with a `Vfx/Pooled` container; all 7 root refs wired + **re-read
+  verified**; `ReactorCoreView._glowRenderer` set explicitly. Scene saved.
+- **Verified this session (MCP + tools):** compile **0 errors / 0 warnings**; **EditMode 105/105** (was 103
+  + 2 new per-result-timing cases, no regression); MCP **Play boot clean (0 errors)** with the pools
+  prewarming **16 instances** (4 beam + 6 spark + 6 fizzle) under `Vfx/Pooled` — proves the pool factory +
+  prefab refs end-to-end; restricted-API **clean**, XRI grep set **unchanged**
+  (`{PortSocket, ShardMotion, HapticService, StarforgeRelayCompositionRoot}` — VFX code is XRI-free).
+- **Deviations / pending:** (1) **Placeholder visuals** (primitive emissive, no particle systems assigned —
+  combo pulse uses the glow-spike fallback; victory/overload carried by the Stabilized/Overloaded glow) —
+  final glow/particles are T19, by design. (2) **Wrong-insert "port red flash"** is realised as the spark
+  burst at the port; a dedicated `PortView` material-flash would touch `PortView`/`PortSocket` (outside this
+  task's declared edit set) → deferred to T19. (3) No ring child on the core yet (ring spin is a no-op until
+  a ring mesh is added at T18/T19). (4) **`dotnet format --verify-no-changes` (IDE1006 naming +
+  whitespace) run this session** on the touched files via the `StarforgeRelay.Runtime` / `.Tests.EditMode`
+  `.csproj` (no `.sln` needed) — **clean**. This is the local/manual equivalent of the `dotnet format
+  --verify-no-changes` gate ADR 0002's follow-up earmarks for CI; wiring it into CI + raising IDE1006 to
+  `error` stays an open follow-up. Full `style` skipped on purpose (IDE0044 `[SerializeField]`-readonly = the
+  known project-wide false positive). (5) Real glow/particles, the core ring, and the
+  dedicated `PortView` red-flash are **T18–T19**; full **on-device** validation in the headset is **T20**.

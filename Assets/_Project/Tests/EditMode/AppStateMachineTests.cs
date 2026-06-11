@@ -7,7 +7,10 @@ namespace StarforgeRelay.Tests.EditMode
 {
     public class AppStateMachineTests
     {
-        private const float Delay = 1f;
+        // Per-result RoundComplete display delays (GDD §12), mirrored by the production RoundConfig defaults.
+        private const float WonDelay = 2f;
+        private const float OverloadDelay = 1.5f;
+        private const float TimeoutDelay = 1f;
 
         // Records lifecycle calls so the tests can assert what the machine asked for (and what it did NOT).
         private sealed class FakeRoundLifecycle : IRoundLifecycle
@@ -27,7 +30,8 @@ namespace StarforgeRelay.Tests.EditMode
             public void RaiseEnded(RoundEndedEvent e) => RoundEnded?.Invoke(e);
         }
 
-        private static AppStateMachine NewMachine(FakeRoundLifecycle fake) => new AppStateMachine(fake, Delay);
+        private static AppStateMachine NewMachine(FakeRoundLifecycle fake) =>
+            new AppStateMachine(fake, new RoundCompleteDelays(WonDelay, OverloadDelay, TimeoutDelay));
 
         private static AppStateMachine InPlaying(FakeRoundLifecycle fake)
         {
@@ -103,10 +107,39 @@ namespace StarforgeRelay.Tests.EditMode
             AppStateMachine machine = InPlaying(fake);
             fake.RaiseEnded(new RoundEndedEvent(RoundPhase.TimedOut, 2, 120, 14, 1));
 
-            machine.Tick(Delay * 0.5f);
+            machine.Tick(TimeoutDelay * 0.5f);
             Assert.AreEqual(AppPhase.RoundComplete, machine.Phase, "not before the delay elapses");
 
-            machine.Tick(Delay);
+            machine.Tick(TimeoutDelay);
+            Assert.AreEqual(AppPhase.Results, machine.Phase);
+        }
+
+        [Test]
+        public void RoundComplete_Victory_HoldsForVictoryDelay()
+        {
+            var fake = new FakeRoundLifecycle();
+            AppStateMachine machine = InPlaying(fake);
+            fake.RaiseEnded(new RoundEndedEvent(RoundPhase.Won, 3, 250, 20, 0));
+
+            // Past the time-out delay (1 s) but before the victory delay (2 s): still showing the victory beat.
+            machine.Tick(WonDelay - 0.1f);
+            Assert.AreEqual(AppPhase.RoundComplete, machine.Phase, "victory holds for its full 2 s beat");
+
+            machine.Tick(0.2f);
+            Assert.AreEqual(AppPhase.Results, machine.Phase);
+        }
+
+        [Test]
+        public void RoundComplete_Overload_HoldsForOverloadDelay()
+        {
+            var fake = new FakeRoundLifecycle();
+            AppStateMachine machine = InPlaying(fake);
+            fake.RaiseEnded(new RoundEndedEvent(RoundPhase.Overloaded, 0, 0, 5, 8));
+
+            machine.Tick(OverloadDelay - 0.1f);
+            Assert.AreEqual(AppPhase.RoundComplete, machine.Phase, "overload holds for its full 1.5 s beat");
+
+            machine.Tick(0.2f);
             Assert.AreEqual(AppPhase.Results, machine.Phase);
         }
 
@@ -116,7 +149,7 @@ namespace StarforgeRelay.Tests.EditMode
             var fake = new FakeRoundLifecycle();
             AppStateMachine machine = InPlaying(fake);
             fake.RaiseEnded(new RoundEndedEvent(RoundPhase.Won, 3, 250, 20, 0));
-            machine.Tick(Delay); // RoundComplete -> Results
+            machine.Tick(WonDelay); // RoundComplete -> Results
 
             machine.RequestStartRound();
 
@@ -130,7 +163,7 @@ namespace StarforgeRelay.Tests.EditMode
             var fake = new FakeRoundLifecycle();
             AppStateMachine machine = InPlaying(fake);
             fake.RaiseEnded(new RoundEndedEvent(RoundPhase.Overloaded, 0, 0, 5, 8));
-            machine.Tick(Delay); // -> Results
+            machine.Tick(OverloadDelay); // -> Results
 
             machine.RequestMainMenu();
 

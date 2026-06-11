@@ -1,16 +1,19 @@
 # Current Status
 
 Last updated: 2026-06-11
-Updated by: Claude Code (T16 ✅ closed — device smoke passed)
-Branch/context: **`T07`–`T16` ✅ on `dev`** (#6–#15; **T16 = audio + haptics, commit `086cbd5`**). T16 shipped
-`FeedbackCue` + `AudioCueConfig`/`HapticConfig` SOs + `AudioService` (central `AudioListener.volume` gate) +
-`HapticService` (both controllers + gates the rig's 4 `SimpleHapticFeedback`) + `FeedbackController`; event
-seams (`AppFlowController.UiSelected`, `ShardSpawner` grab/release via `ShardMotion.IsHeldByHand`,
-`RoundLoopController.IsPaused`); 10 Kenney CC0 clips in `AudioCueConfig`. **Verified:** EditMode **103/103**,
-restricted-API clean (XRI in C# now `PortSocket`/`ShardMotion`/`HapticService`/`StarforgeRelayCompositionRoot`),
-MCP Play clean, **+ human device smoke on a real Quest 2 (standalone): audio cues + Sound-OFF gate, and
-haptics on both controllers + Haptics-OFF gate (incl. rig select-buzz) all confirmed.** **Next: `T17`**
-(VFX pool + core state visuals). Brief: [`../tasks/T16-audio-haptics.md`](../tasks/T16-audio-haptics.md).
+Updated by: Claude Code (T17 ✅ — automated verification + human XR-sim smoke passed; awaiting commit)
+Branch/context: **`T07`–`T16` ✅ on `dev`** (#6–#15); **`T17` ✅ on `dev` (implemented + smoked, awaiting
+commit).** T17 (VFX pool + core state visuals) added the second feedback peer (sibling to T16 audio/
+haptics): `StarforgeRelay.Vfx` = `PooledVfx`/`VfxPool<T>` (mirrors `ShardPool`) + `BeamVfx`/`SparkVfx`/
+`FizzleVfx` + `VfxController` (3 new **gated spatial companion events** on `RoundLoopController` —
+`CorrectInsertedAt`/`WrongInsertedAt`/`ShardExpiredAt`) + `CoreStatePresenter` (round events + `PhaseChanged`
+→ `CoreVisualState`, reads live `Heat`/`Stabilization`); `ReactorCoreView` now state-driven (emissive glow +
+ring + bursts, default Dormant); **per-result RoundComplete timing** (GDD §12 2/1.5/1 s) via
+`RoundCompleteDelays` + `RoundConfig` fields. **No gameplay-rule change.** **Verified this session:** compile
+0 errors; **EditMode 105/105** (103 + 2 per-result-timing cases, no regression); MCP **Play boot clean** with
+the pools prewarming **16 instances** (4+6+6); restricted-API clean, XRI grep set **unchanged**. **Human
+XR-sim smoke passed** (beams in all 3 colours, spark on wrong, fizzle on expiry, core charge/heat/stabilized/
+overload glow, combo pulse, per-result RoundComplete beat). Brief: [`../tasks/T17-vfx-pool.md`](../tasks/T17-vfx-pool.md).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -24,11 +27,14 @@ haptics on both controllers + Haptics-OFF gate (incl. rig select-buzz) all confi
 - **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out.
 - **M3 — wiring:** ✅ **complete** — **`T12`** (composition root) → **`T13`** (app state machine) →
   **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence).
-- **M4 — feedback:** **`T16`** (AudioService + HapticService + configs) ✅ **done** (commit `086cbd5`;
-  device smoke passed on Quest 2). **Next: `T17`** (VFX pool + core state visuals); then M5–M6 (art →
-  device). Full matrix: [`../tasks/README.md`](../tasks/README.md).
-- EditMode suite **green 103/103** (T15 added 7 `SettingsService`/`GameSettings` cases; no regression).
-  XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep); new C# is IDE1006-clean (`dotnet format`).
+- **M4 — feedback:** ✅ **complete** — **`T16`** (AudioService + HapticService + configs, commit `086cbd5`,
+  device smoke on Quest 2) + **`T17`** (VFX pool + core state visuals + per-result RoundComplete timing;
+  XR-sim smoke passed, **awaiting commit**). Next: **M5 art** (`T18` import + dress → `T19` final glow), then
+  **M6 device** (`T20`–`T21`). Full matrix: [`../tasks/README.md`](../tasks/README.md).
+- EditMode suite **green 105/105** (T17 added 2 per-result RoundComplete-timing cases to `AppStateMachineTests`;
+  no regression). XRI in C# stays confined to `PortSocket`/`ShardMotion`/`HapticService`/`StarforgeRelayCompositionRoot`
+  (API grep — the new `StarforgeRelay.Vfx` code is XRI-free); new C# is **`dotnet format`-clean** (IDE1006
+  naming + whitespace, `--verify-no-changes`, run this session on the touched files via the project `.csproj`).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
   repo-root `.editorconfig`; the M1 pure-rule classes + `RoundConfig` were conformed (`_camelCase` fields, no
   `this.`). New code must follow it.
@@ -80,10 +86,11 @@ haptics on both controllers + Haptics-OFF gate (incl. rig select-buzz) all confi
 
 ## Notes for next chat
 
-- **Next: `T17`** (VFX pool + core state visuals). **Reuse the T16 seam:** VFX reacts to the **same** surfaced
-  round/spawner events via its **own sibling controller** — keep `FeedbackController` audio+haptics-only; do
-  **not** route VFX through `AudioService` or widen `FeedbackCue` (guardrails §6: Audio/VFX/Haptics are peers).
-  **Per-result RoundComplete timing** (GDD §12: 2/1.5/1 s) folds into T17 with the feedback content.
+- **Next: commit `T17`**, then **`T18`** (import Kenney + dress bay + fake-glow materials). T17's VFX are
+  **primitive emissive placeholders** — T18/T19 re-skin them (real glow/particles).
+  **T17 carry-forwards:** wrong-insert "port red flash" is realised as the spark burst (dedicated `PortView`
+  material-flash → T19); core has **no ring child** yet (ring spin is a no-op until T18/T19 adds one);
+  AlmostStable/Heating thresholds + burst sizes/durations are **T21 tuning levers** (sensible defaults now).
 - **T16 carry-forwards:** clip picks are **first-pass** (swappable in the `AudioCueConfig` Inspector; final
   mix/levels → T21). **Git LFS still deferred to T18** — the T16 `.ogg` are committed as plain binary; the
   T18 `git lfs migrate` (when the bulk art lands) sweeps them in (the `.gitattributes` plan). On the **Quest 2
