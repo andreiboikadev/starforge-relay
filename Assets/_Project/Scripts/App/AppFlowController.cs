@@ -1,3 +1,4 @@
+using System;
 using StarforgeRelay.UI;
 using UnityEngine;
 
@@ -20,6 +21,9 @@ namespace StarforgeRelay.App
         [SerializeField] private SettingsView _settings;
 
         private AppStateMachine _machine;
+
+        /// <summary>Raised when any screen button is clicked (T16 UI-select cue). Every button routes through here.</summary>
+        public event Action UiSelected;
 
         /// <summary>Receive the state machine from the composition root and wire the views to its triggers.</summary>
         public void Initialize(AppStateMachine machine)
@@ -90,21 +94,42 @@ namespace StarforgeRelay.App
             _settings.BackClicked -= OnCloseSettings;
         }
 
-        private void OnPlay() => _machine.RequestCalibration();
+        private void OnPlay()
+        {
+            UiSelected?.Invoke();
+            _machine.RequestCalibration();
+        }
 
-        private void OnStartRound() => _machine.RequestStartRound();
+        private void OnStartRound()
+        {
+            UiSelected?.Invoke();
+            _machine.RequestStartRound();
+        }
 
-        private void OnResume() => _machine.RequestResume();
+        private void OnResume()
+        {
+            UiSelected?.Invoke();
+            _machine.RequestResume();
+        }
 
-        private void OnMainMenu() => _machine.RequestMainMenu();
+        private void OnMainMenu()
+        {
+            UiSelected?.Invoke();
+            _machine.RequestMainMenu();
+        }
 
-        private void OnPause() => _machine.RequestPause();
+        private void OnPause()
+        {
+            UiSelected?.Invoke();
+            _machine.RequestPause();
+        }
 
         // Settings is an overlay, not an AppPhase: open hides every phase view and shows Settings; close hides
         // Settings and restores the views for the (unchanged) current phase. Reachable from MainMenu and Paused
         // only, where no PhaseChanged can fire while it is open — so _machine.Phase is still the caller.
         private void OnOpenSettings()
         {
+            UiSelected?.Invoke();
             SetActive(_mainMenu, false);
             SetActive(_calibration, false);
             SetActive(_hud, false);
@@ -115,6 +140,7 @@ namespace StarforgeRelay.App
 
         private void OnCloseSettings()
         {
+            UiSelected?.Invoke();
             SetActive(_settings, false);
             OnPhaseChanged(_machine.Phase);
         }

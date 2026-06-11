@@ -1,13 +1,16 @@
 # Current Status
 
-Last updated: 2026-06-10
-Updated by: Claude Code (docs sync with the upstream docs base)
-Branch/context: **`T07`–`T15` ✅ merged to `dev`** (#6–#15; T15 = Settings + persistence, EditMode 103/103,
-human XR-sim smoke passed; best score **cut** → follow-up). **This session: docs-only sync** — the upstream
-docs base was upgraded & validated (setup/release playbooks, Phase B½ gate, hardened deny policy, style-spine
-genericization, code-graph-layer guidance), and the repo's live docs were aligned (see "Decisions"). No code,
-scene, or test changes. **Next: `T16`** (audio + haptics — the settings consumer). Brief:
-[`../tasks/T15-settings-persistence.md`](../tasks/T15-settings-persistence.md).
+Last updated: 2026-06-11
+Updated by: Claude Code (T16 ✅ closed — device smoke passed)
+Branch/context: **`T07`–`T16` ✅ on `dev`** (#6–#15; **T16 = audio + haptics, commit `086cbd5`**). T16 shipped
+`FeedbackCue` + `AudioCueConfig`/`HapticConfig` SOs + `AudioService` (central `AudioListener.volume` gate) +
+`HapticService` (both controllers + gates the rig's 4 `SimpleHapticFeedback`) + `FeedbackController`; event
+seams (`AppFlowController.UiSelected`, `ShardSpawner` grab/release via `ShardMotion.IsHeldByHand`,
+`RoundLoopController.IsPaused`); 10 Kenney CC0 clips in `AudioCueConfig`. **Verified:** EditMode **103/103**,
+restricted-API clean (XRI in C# now `PortSocket`/`ShardMotion`/`HapticService`/`StarforgeRelayCompositionRoot`),
+MCP Play clean, **+ human device smoke on a real Quest 2 (standalone): audio cues + Sound-OFF gate, and
+haptics on both controllers + Haptics-OFF gate (incl. rig select-buzz) all confirmed.** **Next: `T17`**
+(VFX pool + core state visuals). Brief: [`../tasks/T16-audio-haptics.md`](../tasks/T16-audio-haptics.md).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -20,9 +23,10 @@ scene, or test changes. **Next: `T16`** (audio + haptics — the settings consum
 - **M1 — pure rules:** ✅ **complete & merged to `dev`** (`T01`–`T06`; T06 = PR #5).
 - **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out.
 - **M3 — wiring:** ✅ **complete** — **`T12`** (composition root) → **`T13`** (app state machine) →
-  **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence). **Next: M4 —
-  `T16`** (AudioService + HapticService, reads `SettingsService`); M5–M6 after (art → device).
-  Full matrix: [`../tasks/README.md`](../tasks/README.md).
+  **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence).
+- **M4 — feedback:** **`T16`** (AudioService + HapticService + configs) ✅ **done** (commit `086cbd5`;
+  device smoke passed on Quest 2). **Next: `T17`** (VFX pool + core state visuals); then M5–M6 (art →
+  device). Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 103/103** (T15 added 7 `SettingsService`/`GameSettings` cases; no regression).
   XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep); new C# is IDE1006-clean (`dotnet format`).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
@@ -76,10 +80,20 @@ scene, or test changes. **Next: `T16`** (audio + haptics — the settings consum
 
 ## Notes for next chat
 
-- **Next:** **author the `T16` brief first** (matrix-only `·` row — expand per `tasks/README.md`
-  Authoring; branch `feature/audio-haptics`), then implement **AudioService + HapticService + configs**
-  consuming `SettingsService` (`Current` + `Changed` — the seam T15 left ready in the composition root).
-  Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
+- **Next: `T17`** (VFX pool + core state visuals). **Reuse the T16 seam:** VFX reacts to the **same** surfaced
+  round/spawner events via its **own sibling controller** — keep `FeedbackController` audio+haptics-only; do
+  **not** route VFX through `AudioService` or widen `FeedbackCue` (guardrails §6: Audio/VFX/Haptics are peers).
+  **Per-result RoundComplete timing** (GDD §12: 2/1.5/1 s) folds into T17 with the feedback content.
+- **T16 carry-forwards:** clip picks are **first-pass** (swappable in the `AudioCueConfig` Inspector; final
+  mix/levels → T21). **Git LFS still deferred to T18** — the T16 `.ogg` are committed as plain binary; the
+  T18 `git lfs migrate` (when the bulk art lands) sweeps them in (the `.gitattributes` plan). On the **Quest 2
+  device run the sim haptic-capability warnings were absent**, as expected (resolves the §"Env note" T20 recheck).
+- **Device finding → T20 (confirmed 2026-06-11):** the **first standalone build of the full game runs
+  immersive on Quest 2** (OpenXR `XR_SESSION_STATE_FOCUSED`, no crashes). An initial "empty scene" was
+  **start-orientation**, not a defect — the reactor + world-space UI sit at a fixed world pose and there is
+  **no in-app recenter** yet (deferred T13/T14), so a player starting off-centre/mis-facing sees the empty bay;
+  standing centred + the system recenter brings content in front. **T20: wire the deferred Recenter/calibration
+  (GDD §9)** so the player always starts facing the reactor.
 - **T15 carry-forwards:** the Settings toggles **persist but mute/buzz nothing yet — by design** (no
   consumer until T16; don't mistake silent toggles for a bug). **Best score** was cut from T15 → a small
   follow-up on the persistence seam (GDD §13/§16: store the max, show it on Results).

@@ -1,6 +1,6 @@
 # Asset Ledger
 
-Last verified: 2026-06-02
+Last verified: 2026-06-11
 
 Every third-party asset used in a build must have a row here. **Nothing enters a showable build without
 a ledger row and a confirmed license.** Re-verify the license on the page at download time and, if the
@@ -9,17 +9,17 @@ distribution workflow requires it, include the license text in the repo. Record 
 
 ## Status
 
-**Nothing imported yet.** The rows below are the GDD's recommended **CC0** set (§19), marked **PLANNED**
-/ **OPTIONAL**. Fill in Download date / Local path / Modifications when each is actually imported, and
-change the status.
+**First imports landed (T16, 2026-06-11): Kenney Sci-fi Sounds + Interface Sounds** (the audio feedback
+layer). The remaining rows are the GDD's recommended **CC0** set (§19), still **PLANNED** / **OPTIONAL**.
+Fill in Download date / Local path / Modifications when each is actually imported, and change the status.
 
 | Asset | Use | Source | Author | License | Download date | Local path | Modifications | Status |
 |---|---|---|---|---|---|---|---|---|
 | Kenney Space Station Kit | Station bay walls, floor, sci-fi interior props | https://kenney.nl/assets/space-station-kit | Kenney | CC0 | — | — | — | PLANNED |
 | Kenney Space Kit | Background planets, asteroids, small ships | https://kenney.nl/assets/space-kit | Kenney | CC0 | — | — | — | PLANNED |
 | Kenney Particle Pack | Glow sprites, sparkles, beam / fizzle textures | https://kenney.nl/assets/particle-pack | Kenney | CC0 | — | — | — | PLANNED |
-| Kenney Sci-fi Sounds | Reactor / energy / laser SFX | https://kenney.nl/assets/sci-fi-sounds | Kenney | CC0 | — | — | — | PLANNED |
-| Kenney Interface Sounds | UI clicks / menu feedback | https://kenney.nl/assets/interface-sounds | Kenney | CC0 | — | — | — | PLANNED |
+| Kenney Sci-fi Sounds | Reactor / energy / laser SFX | https://kenney.nl/assets/sci-fi-sounds | Kenney | CC0 | 2026-06-11 | `Assets/ThirdParty/Kenney Sci-fi Sounds/` | None; full Audio pack imported, **3** clips referenced (RoundStart / ShardExpired / Overload) | ✅ IMPORTED |
+| Kenney Interface Sounds | UI clicks / menu feedback | https://kenney.nl/assets/interface-sounds | Kenney | CC0 | 2026-06-11 | `Assets/ThirdParty/Kenney Interface Sounds/` | None; full Audio pack imported, **7** clips referenced (UiSelect / Grab / Release / Correct / Wrong / ComboMilestone / Victory) | ✅ IMPORTED |
 | Kenney Modular Space Kit | Extra modular station pieces, rails, panels | https://kenney.nl/assets/modular-space-kit | Kenney | CC0 | — | — | — | OPTIONAL |
 | Quaternius Ultimate Space Kit | Backup / alternate space props | https://quaternius.com/packs/ultimatespacekit.html | Quaternius | CC0 | — | — | — | OPTIONAL |
 | Magic Spell SFX | Energy pickup / stabilization sweeteners | https://opengameart.org/content/magic-spell-sfx | JaggedStone | CC0 | — | — | — | OPTIONAL |
@@ -35,3 +35,8 @@ change the status.
 - Core, shards, ports, and beams can be **primitives + emissive materials + halo billboards** — fake glow
   over URP bloom (GDD §17 / guardrails §18). Don't block the prototype on perfect art.
 - Downscale large textures / HDRIs for Quest; keep unique materials and texture sizes low.
+- **T16 audio (2026-06-11):** both sound packs are CC0 (Kenney). The full `Audio/` folders were dropped
+  under `Assets/ThirdParty/…`; only the 10 clips above are referenced by `AudioCueConfig` (unreferenced
+  clips are stripped from the build). Clip picks are first-pass — swappable in the `AudioCueConfig`
+  Inspector; final mix/levels are a T21 tuning pass. Keep each pack's `License.txt` alongside the audio.
+  **Git LFS stays deferred to T18** (the `.gitattributes` plan) — these `.ogg` commit as plain binary.

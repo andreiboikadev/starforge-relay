@@ -36,6 +36,9 @@ dropped — add it back only if the team or scope grows (see "Scaling up" below)
 ## Goal
 1–2 sentences: what we build and why; what it unblocks.
 
+## Decisions (optional — used by T13+)
+Resolved-at-authoring choices with rejected alternatives; the human validates them before coding.
+
 ## Acceptance criteria
 Concrete, testable bullets — exact type / field / file names, exact GDD numbers.
 For pure rules, list the EditMode assertions.
@@ -79,7 +82,7 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 | T13 | AppStateMachine (Boot→…→Results) | `feature/app-state-machine` | M3 wiring | T12 | no | ✓ | ✅ |
 | T14 | World-space UI views + presenters (ray+Trigger) | `feature/worldspace-ui` | M3 wiring | T13 | yes | ✓ | ✅ |
 | T15 | Settings (sound/haptics) + persistence | `feature/settings-persistence` | M3 wiring | T14 | yes | ✓ | ✅ |
-| T16 | AudioService + HapticService + configs | `feature/audio-haptics` | M4 feedback | T11 | no | · | ▫ |
+| T16 | AudioService + HapticService + configs | `feature/audio-haptics` | M4 feedback | T11, T13, T15 | minor | ✓ | ✅ |
 | T17 | VFX pool + core state visuals | `feature/vfx-pool` | M4 feedback | T11 | yes | · | ▫ |
 | T18 | Import Kenney + dress bay + fake-glow materials | `feature/art-dressing` | M5 art | T11 | yes | · | ▫ |
 | T19 | Final-ish colors / glow on core / shards / ports | `feature/final-glow` | M5 art | T18 | yes | · | ▫ |

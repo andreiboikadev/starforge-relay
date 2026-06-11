@@ -55,6 +55,10 @@ namespace StarforgeRelay.Gameplay
         /// <inheritdoc cref="Score" />
         public float TimeRemaining => _round != null ? _round.TimeRemaining : 0f;
 
+        /// <summary>True while the round is paused. The feedback layer (T16) reads this to suppress grab/release
+        /// cues, which bypass the round loop's own insert/expiry gates (XRI selection runs at <c>timeScale 0</c>).</summary>
+        public bool IsPaused => _paused;
+
         /// <summary>
         /// Receive the round factory from the composition root (T12/T13) and wire the stable scene refs (port
         /// insert events + the spawner's expiry). Does <b>not</b> start a round — the app state machine starts
