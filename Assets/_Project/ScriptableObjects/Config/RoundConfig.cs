@@ -37,6 +37,11 @@ namespace StarforgeRelay.Gameplay
         [SerializeField] private int _heatPenaltyPerHeat = 10;
         [SerializeField] private int _victoryTimeBonusPerSecond = 2;
 
+        [Header("Round complete (GDD §12 — display beat before Results)")]
+        [SerializeField] private float _victoryResultDelaySeconds = 2f;
+        [SerializeField] private float _overloadResultDelaySeconds = 1.5f;
+        [SerializeField] private float _timeoutResultDelaySeconds = 1f;
+
         public float RoundDurationSeconds => _roundDurationSeconds;
         public int StabilizationRequirement => _stabilizationRequirement;
         public int HeatCap => _heatCap;
@@ -58,5 +63,9 @@ namespace StarforgeRelay.Gameplay
         public int CorrectScore => _correctScore;
         public int HeatPenaltyPerHeat => _heatPenaltyPerHeat;
         public int VictoryTimeBonusPerSecond => _victoryTimeBonusPerSecond;
+
+        public float VictoryResultDelaySeconds => _victoryResultDelaySeconds;
+        public float OverloadResultDelaySeconds => _overloadResultDelaySeconds;
+        public float TimeoutResultDelaySeconds => _timeoutResultDelaySeconds;
     }
 }

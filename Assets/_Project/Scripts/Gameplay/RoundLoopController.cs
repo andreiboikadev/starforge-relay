@@ -40,6 +40,18 @@ namespace StarforgeRelay.Gameplay
         /// <inheritdoc cref="CorrectInserted" />
         public event Action<ShardExpiredEvent> ShardExpired;
 
+        /// <summary>Spatial companion to <see cref="CorrectInserted"/> for VFX (T17): the port the shard inserted
+        /// into, for the port→core beam. Raised from the same gated handler, so it inherits the pause/phase
+        /// gate — no beam fires while paused or after the round ends.</summary>
+        public event Action<PortSocket> CorrectInsertedAt;
+
+        /// <summary>Spatial companion to <see cref="WrongInserted"/> for VFX (T17): the rejected port, for the spark.</summary>
+        public event Action<PortSocket> WrongInsertedAt;
+
+        /// <summary>Spatial companion to <see cref="ShardExpired"/> for VFX (T17): the expiring shard, for the
+        /// fizzle. Raised before the shard is pooled, so a handler can read its position synchronously.</summary>
+        public event Action<ShardView> ShardExpiredAt;
+
         /// <summary>Live meters for the HUD (T14); 0 when no round is active. The rule services own the values.</summary>
         public int Score => _round != null ? _round.Score : 0;
 
@@ -182,11 +194,13 @@ namespace StarforgeRelay.Gameplay
             {
                 _round.ApplyCorrect();
                 StartCoroutine(ConsumeRoutine(port, shard));
+                CorrectInsertedAt?.Invoke(port); // VFX beam (T17) — gated like the rule event above.
             }
             else if (outcome == InsertOutcome.Wrong)
             {
                 _round.ApplyWrong();
                 // The wrong shard returns to its pad via the port's eject (T10); it is not consumed.
+                WrongInsertedAt?.Invoke(port); // VFX spark (T17).
             }
         }
 
@@ -217,6 +231,7 @@ namespace StarforgeRelay.Gameplay
             }
 
             _round.ApplyExpired(wasHeld);
+            ShardExpiredAt?.Invoke(shard); // VFX fizzle (T17) — before Despawn pools the shard (read pos synchronously).
             _spawner.Despawn(shard);
         }
 

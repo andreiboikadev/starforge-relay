@@ -4,6 +4,7 @@ using StarforgeRelay.Audio;
 using StarforgeRelay.Gameplay;
 using StarforgeRelay.Persistence;
 using StarforgeRelay.UI;
+using StarforgeRelay.Vfx;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Feedback;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics;
@@ -22,9 +23,8 @@ namespace StarforgeRelay.Composition
     /// </summary>
     public sealed class StarforgeRelayCompositionRoot : MonoBehaviour
     {
-        // Brief beat between a round ending and the Results screen (GDD §12). Per-result timing (victory 2 s /
-        // overload 1.5 s / time-out 1 s) lands with the feedback content in T17.
-        private const float RoundCompleteDelaySeconds = 1.5f;
+        // Pooled correct-insert beam capacity (guardrails §12: beam 4–6). Spark/fizzle use the pool default (6).
+        private const int BeamPoolCapacity = 4;
 
         [Header("Config + pooling")]
         [Tooltip("Round constants (read-only at runtime).")]
@@ -67,10 +67,35 @@ namespace StarforgeRelay.Composition
 
         [SerializeField] private FeedbackController _feedbackController;
 
+        [Header("VFX (T17)")]
+        [Tooltip("Reactor core view — beam target + core-state visuals.")]
+        [SerializeField] private ReactorCoreView _coreView;
+
+        [Tooltip("Pooled positional VFX adapter (beam/spark/fizzle).")]
+        [SerializeField] private VfxController _vfxController;
+
+        [Tooltip("Core-state visuals presenter (Dormant→Charging→…→Stabilized/Overloaded).")]
+        [SerializeField] private CoreStatePresenter _coreStatePresenter;
+
+        [Tooltip("Parent for pooled VFX instances (keep unscaled, at origin).")]
+        [SerializeField] private Transform _vfxContainer;
+
+        [Tooltip("Pooled correct-insert beam prefab (root carries BeamVfx).")]
+        [SerializeField] private BeamVfx _beamPrefab;
+
+        [Tooltip("Pooled wrong-insert spark prefab (root carries SparkVfx).")]
+        [SerializeField] private SparkVfx _sparkPrefab;
+
+        [Tooltip("Pooled expired-shard fizzle prefab (root carries FizzleVfx).")]
+        [SerializeField] private FizzleVfx _fizzlePrefab;
+
         private ShardPool _pool;
         private SettingsService _settings;
         private AudioService _audioService;
         private HapticService _hapticService;
+        private VfxPool<BeamVfx> _beamPool;
+        private VfxPool<SparkVfx> _sparkPool;
+        private VfxPool<FizzleVfx> _fizzlePool;
 
         // Build the graph and inject it before the adapters act — Awake runs before any Start/Update.
         private void Awake()
@@ -82,7 +107,9 @@ namespace StarforgeRelay.Composition
                 || _audioCueConfig == null || _hapticConfig == null || _audioSource == null
                 || _leftHaptic == null || _rightHaptic == null
                 || _rigSelectHaptics == null || _rigSelectHaptics.Length == 0
-                || _feedbackController == null)
+                || _feedbackController == null
+                || _coreView == null || _vfxController == null || _coreStatePresenter == null
+                || _vfxContainer == null || _beamPrefab == null || _sparkPrefab == null || _fizzlePrefab == null)
             {
                 Debug.LogError("[CompositionRoot] Missing a serialized reference — nothing wired.", this);
                 return;
@@ -104,7 +131,10 @@ namespace StarforgeRelay.Composition
             _spawner.Initialize(_pool);
 
             // The round loop implements IRoundLifecycle; the machine gates round start on the Playing state.
-            var machine = new AppStateMachine(_roundLoop, RoundCompleteDelaySeconds);
+            // Per-result RoundComplete beat (GDD §12) comes from the config (T17).
+            var roundCompleteDelays = new RoundCompleteDelays(
+                _config.VictoryResultDelaySeconds, _config.OverloadResultDelaySeconds, _config.TimeoutResultDelaySeconds);
+            var machine = new AppStateMachine(_roundLoop, roundCompleteDelays);
             _appFlow.Initialize(machine);
             _resultsPresenter.Initialize(machine);
             _hudPresenter.Initialize(_roundLoop, _config);
@@ -118,6 +148,18 @@ namespace StarforgeRelay.Composition
             _audioService = new AudioService(_audioCueConfig, _audioSource, _settings);
             _hapticService = new HapticService(_hapticConfig, _leftHaptic, _rightHaptic, _rigSelectHaptics, _settings);
             _feedbackController.Initialize(_audioService, _hapticService, _roundLoop, _spawner, _appFlow, _settings);
+
+            // VFX (T17): the second feedback peer (guardrails §6) — pooled positional effects + the core-state
+            // presenter, reacting to the same surfaced events as audio/haptics. Pools disposed in OnDestroy.
+            _beamPool = new VfxPool<BeamVfx>(() => Instantiate(_beamPrefab, _vfxContainer), _vfxContainer, BeamPoolCapacity);
+            _sparkPool = new VfxPool<SparkVfx>(() => Instantiate(_sparkPrefab, _vfxContainer), _vfxContainer);
+            _fizzlePool = new VfxPool<FizzleVfx>(() => Instantiate(_fizzlePrefab, _vfxContainer), _vfxContainer);
+            _beamPool.Prewarm(BeamPoolCapacity);
+            _sparkPool.Prewarm(VfxPool<SparkVfx>.DefaultCapacity);
+            _fizzlePool.Prewarm(VfxPool<FizzleVfx>.DefaultCapacity);
+
+            _vfxController.Initialize(_roundLoop, _coreView, _beamPool, _sparkPool, _fizzlePool);
+            _coreStatePresenter.Initialize(_roundLoop, _coreView, machine, _config);
         }
 
         private void OnDestroy()
@@ -125,6 +167,9 @@ namespace StarforgeRelay.Composition
             _pool?.Dispose();
             _audioService?.Dispose();
             _hapticService?.Dispose();
+            _beamPool?.Dispose();
+            _sparkPool?.Dispose();
+            _fizzlePool?.Dispose();
         }
     }
 }

@@ -18,8 +18,8 @@ namespace StarforgeRelay.App
         private readonly Dictionary<AppPhase, IAppState> _states;
         private IAppState _current;
 
-        /// <summary>Build the machine over a round lifecycle and the RoundComplete display delay (GDD §12).</summary>
-        public AppStateMachine(IRoundLifecycle lifecycle, float roundCompleteDelaySeconds)
+        /// <summary>Build the machine over a round lifecycle and the per-result RoundComplete display delays (GDD §12).</summary>
+        public AppStateMachine(IRoundLifecycle lifecycle, RoundCompleteDelays roundCompleteDelays)
         {
             _lifecycle = lifecycle;
             _states = new Dictionary<AppPhase, IAppState>
@@ -29,7 +29,7 @@ namespace StarforgeRelay.App
                 [AppPhase.Calibration] = new CalibrationState(),
                 [AppPhase.Playing] = new PlayingState(),
                 [AppPhase.Paused] = new PausedState(),
-                [AppPhase.RoundComplete] = new RoundCompleteState(this, roundCompleteDelaySeconds),
+                [AppPhase.RoundComplete] = new RoundCompleteState(this, roundCompleteDelays),
                 [AppPhase.Results] = new ResultsState()
             };
             _current = _states[AppPhase.Boot];
