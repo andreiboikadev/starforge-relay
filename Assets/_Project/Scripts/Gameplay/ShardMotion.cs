@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace StarforgeRelay.Gameplay
 {
@@ -81,6 +82,16 @@ namespace StarforgeRelay.Gameplay
         /// <summary>True while a hand (or a holding socket) selects the shard. Read by the spawner (T11b) so it
         /// can slow the lifetime while grabbed (GDD §10) without itself referencing XRI.</summary>
         public bool IsHeld => _grabInteractable != null && _grabInteractable.isSelected;
+
+        /// <summary>
+        /// True while a <b>hand</b> (a non-socket interactor) selects the shard — selected, but not by an
+        /// <see cref="XRSocketInteractor"/>. The spawner reads this (T16) to emit grab/release cues without
+        /// itself referencing XRI; a socket snap therefore raises no grab cue.
+        /// </summary>
+        public bool IsHeldByHand =>
+            _grabInteractable != null
+            && _grabInteractable.isSelected
+            && !(_grabInteractable.firstInteractorSelecting is XRSocketInteractor);
 
         /// <summary>
         /// Force the shard out of whatever interactor holds it, so it can be pooled safely — never pool a

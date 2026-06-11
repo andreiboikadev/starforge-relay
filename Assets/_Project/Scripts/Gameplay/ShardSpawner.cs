@@ -64,6 +64,12 @@ namespace StarforgeRelay.Gameplay
         /// <summary>Raised when an active shard's lifetime runs out (T11b); the bool is whether it was held.</summary>
         public event Action<ShardView, bool> ShardLifetimeExpired;
 
+        /// <summary>Raised when a shard transitions to hand-held (T16 grab cue). No payload.</summary>
+        public event Action ShardGrabbed;
+
+        /// <summary>Raised when a hand releases a shard into empty space — not a hand→socket insert (T16 release cue).</summary>
+        public event Action ShardReleased;
+
         /// <summary>
         /// Receive the pool from the composition root (T12). Stores it and validates the scene refs; the planner
         /// build + fill happen on <see cref="BeginFill"/> at round start (T13), not here — so the round no longer
@@ -94,7 +100,25 @@ namespace StarforgeRelay.Gameplay
             {
                 ActiveShard active = entry.Value;
                 bool held = active.Motion != null && active.Motion.IsHeld;
+                bool heldByHand = active.Motion != null && active.Motion.IsHeldByHand;
+
                 active.Lifetime.Tick(deltaTime, held, heldFactor);
+
+                // Grab/release cue transitions (T16). Grab fires on hand-grab; release only when the hand let
+                // go into empty space (held by nothing now) — a hand→socket insert keeps `held` true, so no
+                // release cue fires there (the correct/wrong cue owns that moment). Handlers only play cues, so
+                // raising inline during the enumeration is safe (nothing mutates _shardPads here).
+                if (heldByHand && !active.WasHeldByHand)
+                {
+                    ShardGrabbed?.Invoke();
+                }
+                else if (!heldByHand && active.WasHeldByHand && !held)
+                {
+                    ShardReleased?.Invoke();
+                }
+
+                active.WasHeldByHand = heldByHand;
+
                 if (active.Lifetime.IsExpired)
                 {
                     _expiredBuffer.Add(entry.Key);
@@ -258,6 +282,9 @@ namespace StarforgeRelay.Gameplay
             public int PadId { get; }
             public ShardLifetime Lifetime { get; }
             public ShardMotion Motion { get; }
+
+            /// <summary>Whether a hand held this shard on the previous tick — drives the T16 grab/release cue edges.</summary>
+            public bool WasHeldByHand { get; set; }
         }
     }
 }

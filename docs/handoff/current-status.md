@@ -1,14 +1,18 @@
 # Current Status
 
-Last updated: 2026-06-10
-Updated by: Claude Code (T16 brief authored)
-Branch/context: **`T07`–`T15` ✅ merged to `dev`** (#6–#15; T15 = Settings + persistence, EditMode 103/103,
-human XR-sim smoke passed; best score **cut** → follow-up). **This session: T16 authoring (docs-only)** —
-the **`T16` brief is written and awaiting human validation** (workflow: draft → validate → commit →
-implement; nothing implemented yet). Acceptance criteria were cross-checked against GDD §12/§16/§18/§22/§27,
-guardrails §6–§8/§15–§17, **and the live code/scene** (round-loop events, `ShardSpawner.IsHeld` tick,
-`SettingsService` seam, the rig's 2 `HapticImpulsePlayer` + 4 `SimpleHapticFeedback`, `SendHapticImpulse`
-verified via reflection). Brief: [`../tasks/T16-audio-haptics.md`](../tasks/T16-audio-haptics.md).
+Last updated: 2026-06-11
+Updated by: Claude Code (T16 implemented — MCP-verified, awaiting human smoke)
+Branch/context: **`T07`–`T15` ✅ merged to `dev`** (#6–#15). **This session: `T16` (audio + haptics)
+implemented on `dev` (uncommitted), 🟡 awaiting the human XR-sim/device smoke + commit.** Built: `FeedbackCue`
++ `AudioCueConfig`/`HapticConfig` SOs + `AudioService` (central `AudioListener.volume` gate) + `HapticService`
+(both controllers + gates the rig's 4 `SimpleHapticFeedback`) + `FeedbackController`; event seams added
+(`AppFlowController.UiSelected`, `ShardSpawner` grab/release transitions via `ShardMotion.IsHeldByHand`,
+`RoundLoopController.IsPaused`); composition root wires + disposes both services. Scene: `Audio Source` +
+`Feedback` objects, 7 root refs resolved. Clips: 10 Kenney CC0 (`Assets/ThirdParty/…`) mapped in `AudioCueConfig`.
+**Verified this session (MCP):** compile clean, **EditMode 103/103**, restricted-API clean (XRI in C# now
+`PortSocket`/`ShardMotion`/`HapticService`/`StarforgeRelayCompositionRoot`), Play boot+teardown 0 errors.
+**Still human:** audible cue smoke (XR Device Simulator) + haptics feel (Quest Link). Brief:
+[`../tasks/T16-audio-haptics.md`](../tasks/T16-audio-haptics.md).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -22,8 +26,8 @@ verified via reflection). Brief: [`../tasks/T16-audio-haptics.md`](../tasks/T16-
 - **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out.
 - **M3 — wiring:** ✅ **complete** — **`T12`** (composition root) → **`T13`** (app state machine) →
   **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence). **Now: M4 —
-  `T16`** (AudioService + HapticService, reads `SettingsService`) — **brief authored 🟡, validation
-  pending**; M5–M6 after (art → device). Full matrix: [`../tasks/README.md`](../tasks/README.md).
+  `T16`** (AudioService + HapticService) — **implemented + MCP-verified 🟡, awaiting human smoke + commit**;
+  M5–M6 after (art → device). Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 103/103** (T15 added 7 `SettingsService`/`GameSettings` cases; no regression).
   XRI in C# stays confined to `PortSocket` + `ShardMotion` (API grep); new C# is IDE1006-clean (`dotnet format`).
 - **C# code style adopted & enforced:** `docs/architecture/csharp-style.md` (from the upstream package) + a
@@ -77,14 +81,14 @@ verified via reflection). Brief: [`../tasks/T16-audio-haptics.md`](../tasks/T16-
 
 ## Notes for next chat
 
-- **Next:** the **`T16` brief is authored** ([`../tasks/T16-audio-haptics.md`](../tasks/T16-audio-haptics.md))
-  — **human validates it, commits, and only then implementation starts** (branch `feature/audio-haptics`).
-  Key authoring decisions to confirm: `AudioListener.volume` as the central sound gate (single-writer);
-  haptics to **both** controllers + gating the rig's 4 `SimpleHapticFeedback`; grab/release cues from
-  `ShardSpawner` held-state transitions (`ShardMotion.IsHeldByHand`); ~10-clip Kenney CC0 subset → asset
-  ledger flips at import; **Git LFS fork** — T16 is the first binary-asset import (the `.gitattributes`
-  trigger), brief recommends **deferring LFS to T18** (history-rewrite cost) but it's a **human git
-  decision**. Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
+- **Next (T16 close):** human runs the **audible smoke** (XR Device Simulator — each cue fires at the right
+  moment; **no grab-cue on socket-snap / no release-cue on insert**; no cues while paused; Sound OFF silences
+  instantly + persists) and the **haptics-feel** pass (Quest Link — correct-insert pulses both controllers;
+  Haptics OFF stops the pulse **and** the rig select-buzz). On pass: flip the brief Status ✅ + fill *What was
+  actually done*, matrix row, this file. **Git LFS fork** — T16 is the first binary-asset import (the
+  `.gitattributes` trigger); recommend **deferring LFS to T18** (history-rewrite cost) but it's a **human git
+  decision** at commit time. Clip picks are first-pass (swappable in the `AudioCueConfig` Inspector; mix → T21).
+  Per-result RoundComplete timing (GDD §12: 2/1.5/1 s) → T17.
 - **T15 carry-forwards:** the Settings toggles **persist but mute/buzz nothing yet — by design** (no
   consumer until T16; don't mistake silent toggles for a bug). **Best score** was cut from T15 → a small
   follow-up on the persistence seam (GDD §13/§16: store the max, show it on Results).

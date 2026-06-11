@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c3d62426303de64c9f803f946c06e4d, type: 3}
+  m_Name: AudioCueConfig
+  m_EditorClassIdentifier: StarforgeRelay.Runtime::StarforgeRelay.Audio.AudioCueConfig
+  _entries:
+  - _cue: 0
+    _clip: {fileID: 8300000, guid: 648ca49c561342748bc767929caaef05, type: 3}
+    _volume: 0.7
+  - _cue: 1
+    _clip: {fileID: 8300000, guid: 5f3083f340ec62d47ac40261e44fb03c, type: 3}
+    _volume: 0.7
+  - _cue: 2
+    _clip: {fileID: 8300000, guid: ca4ef84868d673b4fbf7e9ef099d6dd4, type: 3}
+    _volume: 0.6
+  - _cue: 3
+    _clip: {fileID: 8300000, guid: c4309dad03ea17348b4ceef4ec66437d, type: 3}
+    _volume: 0.5
+  - _cue: 4
+    _clip: {fileID: 8300000, guid: fcc1814fc93308c41bf9d25fdee3aaae, type: 3}
+    _volume: 0.7
+  - _cue: 5
+    _clip: {fileID: 8300000, guid: 55e75950bf5270c4284f3c50acb42f87, type: 3}
+    _volume: 0.5
+  - _cue: 6
+    _clip: {fileID: 8300000, guid: f651d74a8d71bb54cbc99b15e782e54f, type: 3}
+    _volume: 0.6
+  - _cue: 7
+    _clip: {fileID: 8300000, guid: af4c4dd5c4a266546b34aa5b506d6a62, type: 3}
+    _volume: 0.8
+  - _cue: 8
+    _clip: {fileID: 8300000, guid: 240cb44f8df04054fb8b7739c6876765, type: 3}
+    _volume: 0.9
+  - _cue: 9
+    _clip: {fileID: 8300000, guid: 2c0a4fdda34dfc643842f022edb77d17, type: 3}
+    _volume: 0.8
