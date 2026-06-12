@@ -77,6 +77,10 @@ crashlytics-build.properties
 .claude/settings.local.json
 CLAUDE.local.md
 
+# Local debug screenshots (MCP / editor captures — not project content)
+/[Aa]ssets/[Ss]creenshots/
+/[Aa]ssets/[Ss]creenshots.meta
+
 # OS noise
 .DS_Store
 Thumbs.db

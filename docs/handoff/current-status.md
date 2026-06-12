@@ -1,9 +1,9 @@
 # Current Status
 
-Last updated: 2026-06-11
-Updated by: Claude Code (T17 ✅ — automated verification + human XR-sim smoke passed; awaiting commit)
-Branch/context: **`T07`–`T16` ✅ on `dev`** (#6–#15); **`T17` ✅ on `dev` (implemented + smoked, awaiting
-commit).** T17 (VFX pool + core state visuals) added the second feedback peer (sibling to T16 audio/
+Last updated: 2026-06-12
+Updated by: Claude Code (T18 🟡 — station bay art dressing + fake-glow kit; Quest-2 smoked)
+Branch/context: **`T07`–`T17` ✅** (#6–#17). **`T18` 🟡 in progress on `feature/art-dressing`** — dark-metal
+Station Bay + fake-glow kit (Quest-2 smoked; carry-forwards in "Notes for next chat"). _Historical T17 detail:_ T17 (VFX pool + core state visuals) added the second feedback peer (sibling to T16 audio/
 haptics): `StarforgeRelay.Vfx` = `PooledVfx`/`VfxPool<T>` (mirrors `ShardPool`) + `BeamVfx`/`SparkVfx`/
 `FizzleVfx` + `VfxController` (3 new **gated spatial companion events** on `RoundLoopController` —
 `CorrectInsertedAt`/`WrongInsertedAt`/`ShardExpiredAt`) + `CoreStatePresenter` (round events + `PhaseChanged`
@@ -27,10 +27,10 @@ overload glow, combo pulse, per-result RoundComplete beat). Brief: [`../tasks/T1
 - **M2 — VR slice:** ✅ complete & merged — **`T07`–`T11b`** (#6–#11): the slice is whole — grab → colour-validate → correct / wrong / **expired** → win / overload / time-out.
 - **M3 — wiring:** ✅ **complete** — **`T12`** (composition root) → **`T13`** (app state machine) →
   **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence).
-- **M4 — feedback:** ✅ **complete** — **`T16`** (AudioService + HapticService + configs, commit `086cbd5`,
-  device smoke on Quest 2) + **`T17`** (VFX pool + core state visuals + per-result RoundComplete timing;
-  XR-sim smoke passed, **awaiting commit**). Next: **M5 art** (`T18` import + dress → `T19` final glow), then
-  **M6 device** (`T20`–`T21`). Full matrix: [`../tasks/README.md`](../tasks/README.md).
+- **M4 — feedback:** ✅ **complete & merged** — **`T16`** (commit `086cbd5`) + **`T17`** (#17).
+- **M5 — art:** 🟡 **in progress** — **`T18`** (import Kenney + dress bay + fake-glow kit) substantially done &
+  **Quest-2 smoked**; remaining = carry-forwards (below). Then **`T19`** (final glow on core/shards/ports),
+  then **M6 device** (`T20`–`T21`). Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 105/105** (T17 added 2 per-result RoundComplete-timing cases to `AppStateMachineTests`;
   no regression). XRI in C# stays confined to `PortSocket`/`ShardMotion`/`HapticService`/`StarforgeRelayCompositionRoot`
   (API grep — the new `StarforgeRelay.Vfx` code is XRI-free); new C# is **`dotnet format`-clean** (IDE1006
@@ -58,7 +58,16 @@ overload glow, combo pulse, per-result RoundComplete beat). Brief: [`../tasks/T1
   for the same reason **never edit scripts while the Editor is in Play**. **T15 additions:** creating/
   duplicating UI **under the 0.001-scaled world-space canvas** corrupts the child RectTransform (scale
   ×1000, garbage pos/rot) — reset `localScale` / `anchoredPosition3D` / `localEulerAngles` after every
-  create/duplicate; `manage_components` `target` takes a **GameObject** id — a *component* id fails "not found".
+  create/duplicate; `manage_components` `target` takes a **GameObject** id — a *component* id fails "not found". **T18 additions
+  (materials/scene):** `manage_material set_material_color` reads RGB as **0–255** (÷255) — set 0–1 / HDR
+  colours via `set_material_shader_property _BaseColor [r,g,b,a]`; `manage_material` writes blend **floats**
+  but **can't flip the URP `_SURFACE_TYPE_TRANSPARENT` keyword / render-queue**, so additive/transparent
+  materials can't be authored via MCP (`execute_code` broken) — defer or use a 1-click human toggle (**this
+  blocks the T19 halo-billboard**); **XR preloaded assets** (`XRGeneralSettingsPerBuildTarget` +
+  `OpenXRPackageSettings`) can get **dropped from `ProjectSettings.preloadedAssets` during Play/test runs** —
+  re-check / `git checkout` before a device build; `manage_gameobject create` **ignores `is_static`** and
+  **adds a default collider** to primitives (strip it on dressing); `assign_material_to_renderer` resolves
+  `target` **by name** (a bare instance-id string fails).
 - **Env note (XR-sim smoke):** grabbing in the **XR Device Simulator** logs 2 benign XRI errors —
   `Failed to get haptic capabilities of XRSimulatedController … Continuing assuming a single haptic channel`
   (simulated controllers have no haptics; XRI falls back). Not a code defect; absent on real Touch
@@ -86,8 +95,15 @@ overload glow, combo pulse, per-result RoundComplete beat). Brief: [`../tasks/T1
 
 ## Notes for next chat
 
-- **Next: commit `T17`**, then **`T18`** (import Kenney + dress bay + fake-glow materials). T17's VFX are
-  **primitive emissive placeholders** — T18/T19 re-skin them (real glow/particles).
+- **T18 🟡 (this session):** Kenney imported & curated (Space Kit removed; SSK **FBX-only**), dark-metal
+  **Station Bay** (floor/walls + window framing the reactor) + HDR glow accents + space backdrop (planet +
+  stars); dark skybox, Directional Light shadows OFF, bloom kept. **Quest-2 smoked (device-approved).**
+  Interactables stay **primitive placeholders → T19**. **Deferred (with rationale):** halo-billboard prefab →
+  **T19** (additive-transparent material needs a render-queue/keyword the MCP material tool can't set +
+  `execute_code` broken — build it with the interactable glow); **Static flags → T21** (URP SRP Batcher
+  covers MVP batching; static pairs with the T21 bake/occlusion pass); accent intensity + starfield density →
+  **T21** look-tuning (device-approved as-is). **Git LFS migrate still pending** — T18 art committed plain;
+  run `git lfs install` + `git lfs migrate import` for the art globs when the art settles.
   **T17 carry-forwards:** wrong-insert "port red flash" is realised as the spark burst (dedicated `PortView`
   material-flash → T19); core has **no ring child** yet (ring spin is a no-op until T18/T19 adds one);
   AlmostStable/Heating thresholds + burst sizes/durations are **T21 tuning levers** (sensible defaults now).
