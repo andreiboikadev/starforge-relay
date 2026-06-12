@@ -66,8 +66,8 @@ namespace StarforgeRelay.Vfx
             _beamPool.Get().Play(port.transform, _core.CoreAnchor, ShardColorPalette.Resolve(port.PortColor));
         }
 
-        // Wrong insert: a spark at the rejected port (GDD §17). The dedicated port-material red flash is a T19
-        // polish (it would touch PortView/PortSocket, outside this task's edit set); the spark marks the moment.
+        // Wrong insert: a spark at the rejected port plus the port's own brief red flash (GDD §17). Both ride this
+        // gated path (not PortSocket's raw select event), so neither fires after the round ends or while paused.
         private void OnWrongInsertedAt(PortSocket port)
         {
             if (port == null)
@@ -76,6 +76,7 @@ namespace StarforgeRelay.Vfx
             }
 
             _sparkPool.Get().Play(port.transform.position, ShardColorPalette.Resolve(port.PortColor));
+            port.PortView?.FlashWrongInsert();
         }
 
         // Expired shard: a fizzle at the shard's last position — read synchronously, before the loop pools it.

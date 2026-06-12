@@ -8,7 +8,8 @@ namespace StarforgeRelay.Gameplay
     /// intensity, an idle ring spin, and short core-anchored bursts (combo pulse / victory / overload) — fake
     /// glow, no URP bloom (GDD §17/§26; guardrails §18). <b>View only</b>: <c>CoreStatePresenter</c> decides the
     /// state, this view decides the look; it subscribes to nothing and reads no heat/stabilization. Animations
-    /// run on scaled time, so they freeze while paused. Primitive placeholder — real glow/materials are T19.
+    /// run on scaled time, so they freeze while paused. Glow comes from the dedicated emissive core material
+    /// assigned at T19; palette/intensities are T21 device-tuning levers.
     /// </summary>
     public sealed class ReactorCoreView : MonoBehaviour
     {
@@ -18,10 +19,10 @@ namespace StarforgeRelay.Gameplay
 
         private static readonly int s_baseColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int s_emissionColorId = Shader.PropertyToID("_EmissionColor");
-        private static readonly Color s_dormantColor = new Color(0.30f, 0.35f, 0.50f);
-        private static readonly Color s_chargeColor = new Color(0.40f, 0.80f, 1.00f);
-        private static readonly Color s_heatColor = new Color(1.00f, 0.40f, 0.15f);
-        private static readonly Color s_stableColor = new Color(1.00f, 0.95f, 0.80f);
+        private static readonly Color s_dormantColor = new Color(0.25f, 0.32f, 0.55f);
+        private static readonly Color s_chargeColor = new Color(0.30f, 0.85f, 1.30f);
+        private static readonly Color s_heatColor = new Color(1.40f, 0.42f, 0.12f);
+        private static readonly Color s_stableColor = new Color(1.50f, 1.40f, 1.05f);
 
         [Tooltip("Point that beams / charge VFX aim at (T17). Falls back to this transform if unset.")]
         [SerializeField] private Transform _coreAnchor;
@@ -123,7 +124,7 @@ namespace StarforgeRelay.Gameplay
             }
         }
 
-        // Per-state placeholder palette + intensity + ring speed + heating pulse (T19 reskins; T21 tunes).
+        // Per-state palette + intensity + ring speed + heating pulse (final-ish; T21 tunes on device).
         private void ApplyStateTargets(CoreVisualState state)
         {
             switch (state)

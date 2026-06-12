@@ -33,6 +33,9 @@ namespace StarforgeRelay.Gameplay
         /// <summary>The colour this port accepts.</summary>
         public ShardColor PortColor => _portColor;
 
+        /// <summary>This port's view, for visual feedback such as the wrong-insert flash. May be null.</summary>
+        public PortView PortView => _portView;
+
         /// <summary>Raised after a shard is socketed and validated. Outcome is Correct or Wrong (never NoPenalty).</summary>
         public event Action<PortSocket, ShardView, InsertOutcome> InsertEvaluated;
 
