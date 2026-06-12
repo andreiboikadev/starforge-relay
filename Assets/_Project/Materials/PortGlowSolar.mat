@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CoreRing
+  m_Name: PortGlowSolar
   m_Shader: {fileID: 4800000, guid: 650dd9526735d5b46b79224bc6e94025, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -52,11 +52,11 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.3, g: 0.85, b: 1.3, a: 1}
-    - _Color: {r: 0.29999998, g: 0.85, b: 1.3, a: 1}
+    - _BaseColor: {r: 2.2, g: 1.716, b: 0.44, a: 1}
+    - _Color: {r: 2.2, g: 1.716, b: 0.43999997, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &7493060098764793274
+--- !u!114 &3086500741634848474
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
