@@ -256,7 +256,7 @@ human commits). Device smoke passed on a real **Quest 2** (standalone).
   smoke (Quest 2, standalone): audio cues fire + Sound-OFF silences; haptics pulse both controllers +
   Haptics-OFF stops the pulse and the rig select-buzz.**
 - **Deviations / notes:** clip picks are **first-pass** (chosen by filename, swappable in the
-  `AudioCueConfig` Inspector; final mix → T21). **Git LFS deferred to T18** (the `.gitattributes` plan) —
+  `AudioCueConfig` Inspector; final mix → T21). **Git LFS deferred** (the `.gitattributes` plan; still pending post-T18) —
   the `.ogg` committed as plain binary. **`dotnet format` not re-run this session** (no `.sln` on disk post-commit), but a field-naming grep over the
   touched files found **0** IDE1006 violations (private fields `_camelCase`, members `PascalCase`) and the code
   compiles clean; fold a full `dotnet format --verify-no-changes` into T18/T20 (project files regenerate then)

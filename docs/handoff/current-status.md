@@ -1,19 +1,14 @@
 # Current Status
 
 Last updated: 2026-06-12
-Updated by: Claude Code (T18 🟡 — station bay art dressing + fake-glow kit; Quest-2 smoked)
-Branch/context: **`T07`–`T17` ✅** (#6–#17). **`T18` 🟡 in progress on `feature/art-dressing`** — dark-metal
-Station Bay + fake-glow kit (Quest-2 smoked; carry-forwards in "Notes for next chat"). _Historical T17 detail:_ T17 (VFX pool + core state visuals) added the second feedback peer (sibling to T16 audio/
-haptics): `StarforgeRelay.Vfx` = `PooledVfx`/`VfxPool<T>` (mirrors `ShardPool`) + `BeamVfx`/`SparkVfx`/
-`FizzleVfx` + `VfxController` (3 new **gated spatial companion events** on `RoundLoopController` —
-`CorrectInsertedAt`/`WrongInsertedAt`/`ShardExpiredAt`) + `CoreStatePresenter` (round events + `PhaseChanged`
-→ `CoreVisualState`, reads live `Heat`/`Stabilization`); `ReactorCoreView` now state-driven (emissive glow +
-ring + bursts, default Dormant); **per-result RoundComplete timing** (GDD §12 2/1.5/1 s) via
-`RoundCompleteDelays` + `RoundConfig` fields. **No gameplay-rule change.** **Verified this session:** compile
-0 errors; **EditMode 105/105** (103 + 2 per-result-timing cases, no regression); MCP **Play boot clean** with
-the pools prewarming **16 instances** (4+6+6); restricted-API clean, XRI grep set **unchanged**. **Human
-XR-sim smoke passed** (beams in all 3 colours, spark on wrong, fizzle on expiry, core charge/heat/stabilized/
-overload glow, combo pulse, per-result RoundComplete beat). Brief: [`../tasks/T17-vfx-pool.md`](../tasks/T17-vfx-pool.md).
+Updated by: Claude Code (T18 closed; **T19 brief authored** — pending human validation before any coding)
+Branch/context: on **`dev`**, tree clean. **`T07`–`T18` ✅** (#6–#18). **M5 art:** **`T18`** (Kenney import +
+dark-metal Station Bay + fake-glow material kit; Quest-2 smoked) **done & merged** (`8bc32ef`); **next =
+`T19`** (final colours/glow on core/shards/ports), then **M6 device** (`T20`–`T21`). **No gameplay-rule
+change since M3.** **Verified this session (2026-06-12):** EditMode **105/105 green** (MCP `run_tests`,
+0 failed/0 skipped, 1.95 s — no regression); Console **0 errors/warnings**; active scene
+`StarforgeRelay.unity` clean with the `Station Bay` + space backdrop in place. Brief:
+[`../tasks/T18-art-dressing.md`](../tasks/T18-art-dressing.md).
 
 > **This file is a state snapshot, not a changelog.** Where-we-are / blockers / what's-next live here.
 > Per-task detail lives in the `Tnn` briefs ("What was actually done"); the full task map in
@@ -28,9 +23,10 @@ overload glow, combo pulse, per-result RoundComplete beat). Brief: [`../tasks/T1
 - **M3 — wiring:** ✅ **complete** — **`T12`** (composition root) → **`T13`** (app state machine) →
   **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence).
 - **M4 — feedback:** ✅ **complete & merged** — **`T16`** (commit `086cbd5`) + **`T17`** (#17).
-- **M5 — art:** 🟡 **in progress** — **`T18`** (import Kenney + dress bay + fake-glow kit) substantially done &
-  **Quest-2 smoked**; remaining = carry-forwards (below). Then **`T19`** (final glow on core/shards/ports),
-  then **M6 device** (`T20`–`T21`). Full matrix: [`../tasks/README.md`](../tasks/README.md).
+- **M5 — art:** 🟡 **in progress** — **`T18`** (Kenney import + dress bay + fake-glow kit) **✅ done & merged**
+  (#18, `8bc32ef`; Quest-2 smoked); **`T19`** (final glow on core/shards/ports) **brief authored 🟡 — pending
+  validation before coding** ([`../tasks/T19-final-glow.md`](../tasks/T19-final-glow.md)); then **M6 device**
+  (`T20`–`T21`). Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 105/105** (T17 added 2 per-result RoundComplete-timing cases to `AppStateMachineTests`;
   no regression). XRI in C# stays confined to `PortSocket`/`ShardMotion`/`HapticService`/`StarforgeRelayCompositionRoot`
   (API grep — the new `StarforgeRelay.Vfx` code is XRI-free); new C# is **`dotnet format`-clean** (IDE1006
@@ -44,7 +40,7 @@ overload glow, combo pulse, per-result RoundComplete beat). Brief: [`../tasks/T1
 - Scene runs the **complete M2 slice**: grab (T08) + 3 colour-validating sockets (T09) + reactor core /
   4 feeder pads / spawner with return-to-pad (T10) + round-loop wiring + consume/respawn + score finalization
   (T11) + shard **lifetime/expiry** (T11b) + the **T14–T15 UI** (5 screens + Settings overlay). Nothing
-  left in M2; **M3 wiring complete** (`T12`–`T15` ✅); **next `T16`** (M4 feedback).
+  left in M2; **`T12`–`T18` done** (M3–M4 complete, M5 in progress) — see *Where we are*; **next `T19`**.
 - **Env note (scene/rig tasks):** `execute_code` is broken on **both** dev machines (CodeDom `mono.exe`
   "filename or extension is too long"; no Roslyn) — re-verified on the work machine 2026-06-05; use
   structural MCP tools. Prefab **unpack** is a manual 1-click editor step; the MCP asset-rename tool reports
@@ -95,21 +91,20 @@ overload glow, combo pulse, per-result RoundComplete beat). Brief: [`../tasks/T1
 
 ## Notes for next chat
 
-- **T18 🟡 (this session):** Kenney imported & curated (Space Kit removed; SSK **FBX-only**), dark-metal
-  **Station Bay** (floor/walls + window framing the reactor) + HDR glow accents + space backdrop (planet +
-  stars); dark skybox, Directional Light shadows OFF, bloom kept. **Quest-2 smoked (device-approved).**
-  Interactables stay **primitive placeholders → T19**. **Deferred (with rationale):** halo-billboard prefab →
-  **T19** (additive-transparent material needs a render-queue/keyword the MCP material tool can't set +
-  `execute_code` broken — build it with the interactable glow); **Static flags → T21** (URP SRP Batcher
-  covers MVP batching; static pairs with the T21 bake/occlusion pass); accent intensity + starfield density →
-  **T21** look-tuning (device-approved as-is). **Git LFS migrate still pending** — T18 art committed plain;
-  run `git lfs install` + `git lfs migrate import` for the art globs when the art settles.
+- **T18 ✅ (merged #18) — carry-forwards** (full as-built in the [T18 brief](../tasks/T18-art-dressing.md)):
+  halo-billboard prefab → **T19** (additive-transparent material needs a render-queue/keyword the MCP material
+  tool can't set + `execute_code` broken — build it alongside the interactable glow); **Static flags → T21**
+  (URP SRP Batcher covers MVP batching; static pairs with the T21 bake/occlusion pass); **bloom-off** (Decision
+  4 not flipped — `Global Volume` still has Bloom/Tonemapping/Vignette) + accent intensity + starfield density
+  → **T21** look-tuning (device-approved as-is). **Git LFS still pending** — T18 art committed plain **and the
+  `.gitattributes` LFS `track` lines are not in yet**; the human runs `git lfs install` + `git lfs migrate
+  import` for the art/audio globs (adding the `.gitattributes` lines) when the art settles.
   **T17 carry-forwards:** wrong-insert "port red flash" is realised as the spark burst (dedicated `PortView`
   material-flash → T19); core has **no ring child** yet (ring spin is a no-op until T18/T19 adds one);
   AlmostStable/Heating thresholds + burst sizes/durations are **T21 tuning levers** (sensible defaults now).
 - **T16 carry-forwards:** clip picks are **first-pass** (swappable in the `AudioCueConfig` Inspector; final
-  mix/levels → T21). **Git LFS still deferred to T18** — the T16 `.ogg` are committed as plain binary; the
-  T18 `git lfs migrate` (when the bulk art lands) sweeps them in (the `.gitattributes` plan). On the **Quest 2
+  mix/levels → T21). **Git LFS still pending** (see the T18 carry-forward above) — the T16 `.ogg` are committed
+  as plain binary and get swept in by the same still-unrun `git lfs migrate` as the T18 art. On the **Quest 2
   device run the sim haptic-capability warnings were absent**, as expected (resolves the §"Env note" T20 recheck).
 - **Device finding → T20 (confirmed 2026-06-11):** the **first standalone build of the full game runs
   immersive on Quest 2** (OpenXR `XR_SESSION_STATE_FOCUSED`, no crashes). An initial "empty scene" was

@@ -39,7 +39,7 @@ Fill in Download date / Local path / Modifications when each is actually importe
   under `Assets/ThirdParty/…`; only the 10 clips above are referenced by `AudioCueConfig` (unreferenced
   clips are stripped from the build). Clip picks are first-pass — swappable in the `AudioCueConfig`
   Inspector; final mix/levels are a T21 tuning pass. Keep each pack's `License.txt` alongside the audio.
-  **Git LFS stays deferred to T18** (the `.gitattributes` plan) — these `.ogg` commit as plain binary.
+  **Git LFS — still pending** (the `.gitattributes` plan; T18 closed without running it) — these `.ogg` commit as plain binary.
 - **T18 visual imports (2026-06-12):** Space Station Kit + Particle Pack imported under `Assets/ThirdParty/…`
   (both CC0, `License.txt` kept). SSK trimmed to **FBX only** (OBJ/GLB/Previews removed) and re-skinned dark
   via `BayMetalDark` for the GDD's dark-station look. **Space Kit removed** (see its row). **Git LFS migrate

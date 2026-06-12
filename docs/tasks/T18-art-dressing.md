@@ -7,7 +7,7 @@
 | Design ref | GDD §4, §9, §10 (Station Bay), §17, §19, §20, §22, §26, §32 (steps 9–10); guardrails §4, §10, §12, §18; [ADR 0001](../architecture/adr/0001-tech-baseline.md) |
 | Depends on | T11 (playable slice we dress around); builds on **T17** (scene/VFX + state-driven core it dresses — already merged on `dev`) |
 | Touches scenes/prefabs | yes — new `Station Bay` subtree in `StarforgeRelay.unity`; new materials/prefabs under `Assets/_Project/`; Kenney visual packs under `Assets/ThirdParty/`; skybox material; `.gitattributes` (LFS) |
-| Status | 🟡 in progress |
+| Status | ✅ done |
 
 ## Goal
 
@@ -178,4 +178,37 @@ and lands the deferred **Git LFS** migration now that bulk binary art arrives. *
 
 ## What was actually done
 
-— (filled on close: what shipped, deviations, packs/versions imported, commit/PR, date)
+**Shipped — PR #18, commit `8bc32ef`, 2026-06-12, branch `feature/art-dressing`.** Turned the bare scene
+into a readable VR diorama; **no gameplay-rule change**. Quest-2 smoked (device-approved).
+
+- **Assets imported & ledgered** ([asset-ledger.md](../assets/asset-ledger.md), 2026-06-12): Kenney **Space
+  Station Kit** (CC0) trimmed to **FBX-only** (redundant OBJ/GLB + `Previews/` removed) and re-skinned dark
+  via `BayMetalDark`; Kenney **Particle Pack** (CC0, full PNG sets — referenced by the T19 fake-glow, not yet
+  at T18). Each pack kept its `License.txt` under `Assets/ThirdParty/<pack>/`.
+- **Station Bay built & dressed.** New `Station Bay` scene root (19 children: dark-metal floor/walls + a
+  window framing the reactor + HDR glow accents) plus a space backdrop (`Space Planet` + `Star A–D`) on a
+  dark star-dome skybox. Reactor / 3 ports / 4 pads / UI / feedback / vfx roots unchanged; the interaction
+  zone (reactor pose, ±50° pad arc, floor at y≈0) is preserved; interactables stay primitive placeholders.
+- **Lighting (Decision 6 → OFF).** Directional Light **realtime shadows turned OFF** for the MVP (look
+  carried on emissive/ambient + fake glow); not baked.
+- **Fake-glow material kit.** Shared emissive URP convention under `Assets/_Project/Materials/` on the
+  `_BaseColor` / `_EmissionColor` property names the views already drive — the T19 reskin seam.
+
+**Deviations from the plan (deferred, each with a home):**
+- **Space Kit dropped** — imported then **removed**: all 13 FBX threw identifier-uniqueness import errors and
+  the pack is irrelevant to a single bay; backdrop uses the star-dome + Particle stars instead (ledger row
+  `❌ REMOVED`).
+- **`.gitattributes` LFS lines NOT added; Git LFS migration deferred wholesale** (not the partial split
+  Decision 5 framed) — `.gitattributes` still carries LFS only as a deferred NOTE. Human runs `git lfs
+  install` + `git lfs migrate import` for the art/audio globs when the art settles.
+- **Static flags → T21** — `Station Bay` is **not** marked Static yet (URP SRP Batcher covers MVP batching;
+  static pairs with the T21 bake/occlusion pass). The "all bay objects static" criterion was intentionally
+  pushed to T21.
+- **Bloom kept ON (Decision 4 not flipped)** — `Global Volume` still has Bloom/Tonemapping/Vignette; the
+  fake-glow look doesn't depend on it. Bloom-off vs a Quest-3 polish lever is a **T21** profiling call.
+- Halo-billboard prefab, accent intensity, starfield density → **T19/T21** (per the T18↔T19 cut line).
+
+**Verification (this session, 2026-06-12):** EditMode **105/105 green** (`run_tests` MCP, 0 failed/0 skipped,
+1.95 s) — no regression; **no new EditMode tests** (art/scene task, per the §17 gate); Console **0 errors /
+0 warnings**; `Station Bay` + backdrop confirmed in-scene via MCP hierarchy. No runtime C# added →
+restricted-API scan N/A. Real Quest-2 perf is the **T20/T21** bar.

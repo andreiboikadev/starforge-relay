@@ -84,8 +84,8 @@ Legend: `▫` not started · `🟡` in progress · `🔴` blocked · `✅` done.
 | T15 | Settings (sound/haptics) + persistence | `feature/settings-persistence` | M3 wiring | T14 | yes | ✓ | ✅ |
 | T16 | AudioService + HapticService + configs | `feature/audio-haptics` | M4 feedback | T11, T13, T15 | minor | ✓ | ✅ |
 | T17 | VFX pool + core state visuals | `feature/vfx-pool` | M4 feedback | T11 | yes | ✓ | ✅ |
-| T18 | Import Kenney + dress bay + fake-glow materials | `feature/art-dressing` | M5 art | T11 | yes | ✓ | 🟡 |
-| T19 | Final-ish colors / glow on core / shards / ports | `feature/final-glow` | M5 art | T18 | yes | · | ▫ |
+| T18 | Import Kenney + dress bay + fake-glow materials | `feature/art-dressing` | M5 art | T11 | yes | ✓ | ✅ |
+| T19 | Final-ish colors / glow on core / shards / ports | `feature/final-glow` | M5 art | T18 | yes | ✓ | 🟡 |
 | T20 | Quest 2 build + on-device smoke (3 end states) | `chore/device-smoke` | M6 device | T14 | no | · | ▫ |
 | T21 | Profiling + tuning (FPS floor, FFR, reach/size) | `perf/quest2-tuning` | M6 device | T20 | yes | · | ▫ |
 
