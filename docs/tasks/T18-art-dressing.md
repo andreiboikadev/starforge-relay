@@ -7,7 +7,7 @@
 | Design ref | GDD §4, §9, §10 (Station Bay), §17, §19, §20, §22, §26, §32 (steps 9–10); guardrails §4, §10, §12, §18; [ADR 0001](../architecture/adr/0001-tech-baseline.md) |
 | Depends on | T11 (playable slice we dress around); builds on **T17** (scene/VFX + state-driven core it dresses — already merged on `dev`) |
 | Touches scenes/prefabs | yes — new `Station Bay` subtree in `StarforgeRelay.unity`; new materials/prefabs under `Assets/_Project/`; Kenney visual packs under `Assets/ThirdParty/`; skybox material; `.gitattributes` (LFS) |
-| Status | ▫ not started |
+| Status | 🟡 in progress |
 
 ## Goal
 

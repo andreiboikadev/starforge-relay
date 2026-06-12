@@ -15,9 +15,9 @@ Fill in Download date / Local path / Modifications when each is actually importe
 
 | Asset | Use | Source | Author | License | Download date | Local path | Modifications | Status |
 |---|---|---|---|---|---|---|---|---|
-| Kenney Space Station Kit | Station bay walls, floor, sci-fi interior props | https://kenney.nl/assets/space-station-kit | Kenney | CC0 | — | — | — | PLANNED |
-| Kenney Space Kit | Background planets, asteroids, small ships | https://kenney.nl/assets/space-kit | Kenney | CC0 | — | — | — | PLANNED |
-| Kenney Particle Pack | Glow sprites, sparkles, beam / fizzle textures | https://kenney.nl/assets/particle-pack | Kenney | CC0 | — | — | — | PLANNED |
+| Kenney Space Station Kit | Station bay walls, floor, sci-fi interior props | https://kenney.nl/assets/space-station-kit | Kenney | CC0 | 2026-06-12 | `Assets/ThirdParty/Kenney Space Station Kit/` | **FBX format only** (redundant OBJ/GLB formats + `Previews/` removed); bay meshes overridden with the dark `BayMetalDark` material | ✅ IMPORTED |
+| Kenney Space Kit | Background props (evaluated, not used) | https://kenney.nl/assets/space-kit | Kenney | CC0 | 2026-06-12 | — (removed) | Imported then **removed** (T18): all 13 FBX *identifier-uniqueness* import errors originated here, and its content is irrelevant to a single reactor bay. Background uses a dark star-dome + Particle stars (GDD §19); re-add a curated few props only if a future task needs them | ❌ REMOVED |
+| Kenney Particle Pack | Glow / halo / star sprites | https://kenney.nl/assets/particle-pack | Kenney | CC0 | 2026-06-12 | `Assets/ThirdParty/Kenney Particle Pack/` | Full PNG sets imported; the fake-glow halo/VFX that reference them land at **T19** (not yet referenced at T18) | ✅ IMPORTED |
 | Kenney Sci-fi Sounds | Reactor / energy / laser SFX | https://kenney.nl/assets/sci-fi-sounds | Kenney | CC0 | 2026-06-11 | `Assets/ThirdParty/Kenney Sci-fi Sounds/` | None; full Audio pack imported, **3** clips referenced (RoundStart / ShardExpired / Overload) | ✅ IMPORTED |
 | Kenney Interface Sounds | UI clicks / menu feedback | https://kenney.nl/assets/interface-sounds | Kenney | CC0 | 2026-06-11 | `Assets/ThirdParty/Kenney Interface Sounds/` | None; full Audio pack imported, **7** clips referenced (UiSelect / Grab / Release / Correct / Wrong / ComboMilestone / Victory) | ✅ IMPORTED |
 | Kenney Modular Space Kit | Extra modular station pieces, rails, panels | https://kenney.nl/assets/modular-space-kit | Kenney | CC0 | — | — | — | OPTIONAL |
@@ -40,3 +40,8 @@ Fill in Download date / Local path / Modifications when each is actually importe
   clips are stripped from the build). Clip picks are first-pass — swappable in the `AudioCueConfig`
   Inspector; final mix/levels are a T21 tuning pass. Keep each pack's `License.txt` alongside the audio.
   **Git LFS stays deferred to T18** (the `.gitattributes` plan) — these `.ogg` commit as plain binary.
+- **T18 visual imports (2026-06-12):** Space Station Kit + Particle Pack imported under `Assets/ThirdParty/…`
+  (both CC0, `License.txt` kept). SSK trimmed to **FBX only** (OBJ/GLB/Previews removed) and re-skinned dark
+  via `BayMetalDark` for the GDD's dark-station look. **Space Kit removed** (see its row). **Git LFS migrate
+  still pending** — the T18 art committed as plain binary; run the migrate when the art settles (recipe in
+  the handoff). Final glow/halo on the interactables + the halo-billboard prefab are **T19**.
