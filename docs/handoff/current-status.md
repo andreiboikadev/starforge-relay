@@ -1,7 +1,7 @@
 # Current Status
 
 Last updated: 2026-06-12
-Updated by: Claude Code (T18 closed; **T19 brief authored** — pending human validation before any coding)
+Updated by: Claude Code (T19 🟡 mid-build — reactor rings/ports/markers/crystals/halos built; full next-chat handoff written into the T19 brief)
 Branch/context: on **`dev`**, tree clean. **`T07`–`T18` ✅** (#6–#18). **M5 art:** **`T18`** (Kenney import +
 dark-metal Station Bay + fake-glow material kit; Quest-2 smoked) **done & merged** (`8bc32ef`); **next =
 `T19`** (final colours/glow on core/shards/ports), then **M6 device** (`T20`–`T21`). **No gameplay-rule
@@ -24,9 +24,13 @@ change since M3.** **Verified this session (2026-06-12):** EditMode **105/105 gr
   **`T14`** (world-space UI on ray+Trigger, #14) → **`T15`** (Settings + persistence).
 - **M4 — feedback:** ✅ **complete & merged** — **`T16`** (commit `086cbd5`) + **`T17`** (#17).
 - **M5 — art:** 🟡 **in progress** — **`T18`** (Kenney import + dress bay + fake-glow kit) **✅ done & merged**
-  (#18, `8bc32ef`; Quest-2 smoked); **`T19`** (final glow on core/shards/ports) **brief authored 🟡 — pending
-  validation before coding** ([`../tasks/T19-final-glow.md`](../tasks/T19-final-glow.md)); then **M6 device**
-  (`T20`–`T21`). Full matrix: [`../tasks/README.md`](../tasks/README.md).
+  (#18, `8bc32ef`); **`T19`** (final glow on core/shards/ports) **🟡 mid-build, NOT closed** — core + 3 orbit
+  rings (rotating) + `crystal_16` shards + colour-coded port markers (circle/triangle/diamond) + additive halos
+  built & committed (EditMode 105/105, Console clean), **but not "дорого" yet**: ports are still white primitive
+  spheres, feeder pads grey, over-bloom. **Next chat → read the T19 brief's "🔻 Session Handoff" +
+  [`../../reactor-build-recipe.md`](../../reactor-build-recipe.md)** (what's done / where / what's left to make
+  it dear+rich+interactive + the full MCP/ProBuilder/permissions playbook). Then **M6 device** (`T20`–`T21`).
+  Full matrix: [`../tasks/README.md`](../tasks/README.md).
 - EditMode suite **green 105/105** (T17 added 2 per-result RoundComplete-timing cases to `AppStateMachineTests`;
   no regression). XRI in C# stays confined to `PortSocket`/`ShardMotion`/`HapticService`/`StarforgeRelayCompositionRoot`
   (API grep — the new `StarforgeRelay.Vfx` code is XRI-free); new C# is **`dotnet format`-clean** (IDE1006

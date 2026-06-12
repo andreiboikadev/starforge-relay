@@ -207,6 +207,136 @@ only; the pure rules and the 105 EditMode tests are untouched.
 - Done = full suite green + no Console errors + core/shards/ports reskinned with glow + shape markers + wrong
   flash + VFX reskinned + Particle Pack ledger updated (see [build-and-test.md](../development/build-and-test.md)).
 
+## 🔻 SESSION HANDOFF — T19 STILL IN PROGRESS (next chat: read THIS + `../../reactor-build-recipe.md` first)
+
+> Context ran out mid-task. T19 is **not closed**. This section is the full picture: **what's built, where it
+> is, what's left to make it "дорого / богато / красиво / интерактивно", and exactly how to do it.** The
+> companion `reactor-build-recipe.md` (repo root) has the exact MCP/ProBuilder steps + a verified ground-truth
+> appendix — read it, then **extend it** for the remaining work below.
+
+### A. What's DONE and committed (as-built)
+All committed across several `feat(art)`/`build`/`chore` commits this session (see `git log`). No C#/gameplay
+rule change anywhere; **EditMode stays 105/105**, Console clean, Play boots clean.
+
+- **C# (committed earlier):** `ShardColorPalette` → HDR ×2.2 (Solar/Ion/Pulse); `PortView.FlashWrongInsert()`
+  (MPB red flash, restores palette tint); `PortSocket.PortView` getter; `VfxController.OnWrongInsertedAt`
+  fires the flash (null-guarded); `ReactorCoreView` state-palette retune. Stale "T19" comments dropped.
+- **Materials (`Assets/_Project/Materials/`):** `ReactorCore.mat` (URP **Lit**, `_EMISSION` enabled **via
+  hand-edited `.mat` YAML** — `m_ValidKeywords:[_EMISSION]` + `m_LightmapFlags:1` + non-black `_EmissionColor`;
+  driven by the `ReactorCoreView` emission ramp). `CoreRing.mat`, `Shard.mat`, `Port.mat`, `BeamGlow/SparkGlow/
+  FizzleGlow.mat`, `HaloGlow.mat`, `ShardHalo.mat`, `PortGlowSolar/Ion/Pulse.mat` — all **URP Unlit + HDR
+  `_BaseColor`** (no keyword needed). `HaloGlow`/`ShardHalo` are **additive-transparent, also set via YAML**
+  (the keyword/blend/queue edited in the `.mat` directly — Unity kept it on import). **KEY TRICK:** MCP can't
+  toggle `_EMISSION` or the transparent surface keyword, but **editing the `.mat` YAML directly works** for
+  both (verified twice this session). Use this.
+- **Core:** sphere (0.25 scale, world (0,1.2,1.05)) with `ReactorCore.mat`; **`CoreRings` spin-node** (child of
+  the core, `localScale (4,4,4)` to cancel the 0.25 → world-metric authoring) **assigned to
+  `ReactorCoreView._ring`** → **the rings already ROTATE** (the view spins `_ring` about local Z: 10°/s Dormant
+  → 140°/s Stabilized). Under it: **3 cyan ProBuilder tori** `Ring_0/1/2` (`outerRadius 0.18`, `tubeRadius
+  0.012`, 8×24) in a **60° rosette** (local Euler 90/0, 90/60, 90/120), `CoreRing.mat`, collider-free.
+  **`CoreHalo`** = ParticleSystem billboard (`HaloGlow.mat`, `light_01` sprite, additive, 1 looping particle).
+- **Ports ×3** (white primitive spheres, 0.16): each has a **neon outline ring** (torus 0.6/0.06) + a
+  **shape marker** — Solar **circle** (ProBuilder Pipe ring), Ion **triangle** (`create_poly_shape` 3-pt),
+  Pulse **diamond** (4-pt) — palette-tinted `PortGlow{Solar,Ion,Pulse}.mat`, collider-free, facing the player
+  (ports carry a 180° Y rotation — handled).
+- **Shards:** `Shard.prefab` mesh → **`crystal_16`** (iPoly3D Crystal Pack, 28 FBX, CC0); grab collider /
+  `XRGrabInteractable throwOnDetach=0` / kinematic Rigidbody preserved; `Shard.mat` Unlit-HDR (MPB-tinted at
+  runtime); `ShardHalo` PS billboard child (`ShardHalo.mat`).
+- **VFX** beam/spark/fizzle prefabs re-pointed off the shared URP default onto owned `*Glow.mat`.
+- **Decor-collider audit clean** (no collider on the Default layer on any ring/marker/halo).
+- Screenshots of the result: `Assets/Screenshots/` (`core_rosette_top.png`, `port_*_marker*.png`,
+  `shard_crystal16_close.png`, `play_*`). The real **tinted+bloom** look only shows in a **Playing round**;
+  Scene view shows MPB-driven things (ports/shards/core) white/untinted.
+
+### B. Honest visual verdict right now (the gap to close)
+The **core + 3 orbit rings + crystal shards + colour-coded shape markers** read well — a real reactor, not
+primitives. **But it is NOT "дорого" yet**, for three concrete reasons:
+1. **Ports are still plain white primitive SPHERES** with markers/rings glued on → read as "white blobs with
+   dashes," not dear neon sockets. **The port BODY was never reshaped** (T19 only added glow+markers).
+2. **Feeder pads are plain grey primitive DISCS** — never reskinned (deferred), look cheap.
+3. **Over-bloom** — Global Volume Bloom (threshold 1, intensity 0.25) washes the scene hazy-white and blows
+   the core out. Needs tuning **down** (GDD §17/§26: "fake glow over bloom").
+
+### C. What's LEFT to make it дорого / богато / красиво / интерактивно (the next-chat work)
+The user's bar: **MVP must look beautiful by the demo** (hard acceptance — GDD §25 demo bar: "shards, ports,
+reactor use final-ish colours and glow" + "station bay has dressed art"). Concrete work + techniques (all
+Quest-safe — keep fake-glow primary, low-poly, no transparent-overdraw stacks):
+
+1. **Port bodies (biggest win).** Replace the white spheres with a real form: a **recessed glowing socket** (a
+   dark ProBuilder Pipe/ring frame with an inner emissive disc), or mount the port on a **Kenney SSK console
+   panel** (`Assets/ThirdParty/Kenney Space Station Kit/Models/FBX format/` has `computer*`, `display-wall`,
+   `table-display*`). Keep the `XRSocketInteractor` trigger volume + `PortView` renderer wiring intact; just
+   swap/augment the visible mesh. Tint from the palette.
+2. **Feeder pads reskin + interactivity (GDD §10).** Dark-metal base + an **emissive rim ring** that **lights
+   up to the spawning shard's colour before spawn** (GDD: "Pad lights up before spawning; pad colour can match
+   the current shard"). `FeederPadView` is currently anchor-only (no glow) — this is both a *look* and an
+   *interactivity* upgrade. May need a tiny `FeederPadView` glow method (pure adapter; if you add C#, add no
+   pure-rule logic so the 105 tests are untouched — or drive it from the existing spawn event via VfxController).
+3. **Bloom / brightness tuning.** Lower Global Volume Bloom intensity (≈0.25 → ~0.1) and/or raise threshold, and
+   trim the hottest HDR values, so it reads crisp not washed. (`Assets/Settings/StarforgeRelayProfile.asset`,
+   editable via YAML.) This is the GDD-§26 "bloom is T21 polish" lever — do a pass for the demo look.
+4. **"Illusion of emitted light" shaders (the user explicitly wants this).** Options, cheapest first:
+   - **Fresnel/rim emissive** on core + ports (a small custom URP shader or Shader Graph: `emission =
+     baseHDR + fresnel * rimHDR`) → edges "bleed light." *Shader Graph authoring via MCP is hard — likely a
+     hand-written `.shader` file or a human Shader-Graph pass; flag it.*
+   - **Pulsing/breathing emission** (animate `_EmissionColor` intensity) — the core ramp already does
+     per-state; add a subtle idle sine-pulse for "alive" energy.
+   - **Scrolling energy texture** (UV-scroll an emissive mask on rings/core) for plasma flow.
+   - **Additive halo layers** already on core/shard — **add one to each port** for the neon bloom.
+5. **Ring motion polish.** Rings already rotate as a group (the `_ring` node). For a livelier atom, give each
+   `Ring_i` its **own** independent spin (a tiny rotate script, or animate) on a different axis/speed.
+6. **VFX reskin (T17 placeholders).** Beam (port→core), spark (wrong), fizzle (expire), combo-pulse, victory
+   burst — wired but placeholder. Reskin with Kenney Particle Pack sprites (additive) for richer feedback
+   (= the "интерактивно").
+7. **(Optional) Crystal variety / core facet.** Try other crystals of the 28; consider a faceted gem core.
+
+### D. HOW to do it — the proven workflow + technical playbook (reuse this)
+- **Workflow that worked:** author/extend a precise MD recipe → run a **build subagent** with full MCP in its
+  own context → it verifies + screenshots + cleans up → review. Keeps the main chat's context lean. **Extend
+  `reactor-build-recipe.md`** with §C's port/pad/bloom/shader steps, then run the build subagent on it.
+- **MCP gotchas (verified — do not relearn the hard way):**
+  - **Instance IDs churn on every recompile/domain reload** → re-find via `find_gameobjects` (by_component/
+    by_name) immediately before each op; never reuse an ID across a reload.
+  - **`manage_material` CANNOT toggle `_EMISSION` / transparent keywords** → **edit the `.mat` YAML directly**
+    (emission: add `_EMISSION` + `m_LightmapFlags:1`; transparent/additive: set the surface keyword + blend +
+    render queue) → `refresh_unity` → it sticks. Proven for both this session.
+  - HDR colour: `manage_material set_material_shader_property _BaseColor [r,g,b,a]` (0–1/HDR);
+    `set_material_color` is **0–255**.
+  - Mesh swap: `manage_prefabs modify_contents component_properties={"MeshFilter":{"m_Mesh":{"path":"<fbx>"}}}`
+    auto-resolves the FBX main mesh.
+  - **ProBuilder 6.0.9 installed.** Torus: `outerRadius`=major ring, `innerRadius`/`tubeRadius`=tube; flat in
+    local XZ (normal +Y) → tilt for orbit. `create_poly_shape` (points + extrudeHeight) for triangle/diamond.
+  - **All decor must be collider-free** on the Default layer (no custom layer exists) — a stray collider
+    intercepts grab / the UI ray. Audit at the end.
+  - **`execute_code` is broken.** Real tinted+bloom look only in a **Playing round** (re-Play past the benign
+    first-Play `routine is null`/AABB cascade). Never edit scripts in Play.
+- **Assets on hand:** iPoly3D Crystal Pack (crystals), Kenney Particle Pack (`light_*`/`flare_01`/`star_*`/
+  `circle_*` sprites for halos/decals), Kenney SSK (consoles/panels for port housings/pads). **Need a dedicated
+  pad/socket mesh?** Source CC0 from Quaternius / Poly Pizza (needs web) — record in `asset-ledger.md`.
+- **⚠ PERMISSIONS (important):** a build **subagent** gets **denied** any MCP tool not in
+  `.claude/settings.local.json` `permissions.allow` (subagents can't answer interactive prompts). This file is
+  **gitignored** (the user can't see it — be transparent in chat about every add). For a build pass, ADD:
+  `mcp__UnityMCP__find_gameobjects, manage_probuilder, manage_prefabs, manage_scene, manage_asset,
+  refresh_unity, run_tests, get_test_job, manage_editor, manage_vfx`, and `ReadMcpResourceTool` (+ `WebSearch`/
+  `WebFetch` if sourcing assets). **The baseline to restore afterward is exactly these 5:**
+  `mcp__UnityMCP__read_console, manage_material, manage_components, manage_camera, manage_gameobject`.
+  Revert to that baseline when done and show the user the file.
+
+### E. Verification gate (non-negotiable — run before claiming done)
+`refresh_unity(scope=all,force)` + Console 0 errors · **EditMode `run_tests` = 105/105** (no rule code should
+change) · Play boots clean on a re-Play · decor-collider audit (no collider on Default) · `ReactorCoreView._ring`
+still assigned · scene-view + in-Play screenshots · **no C#/gameplay/round/scoring/XR-logic change** · propose a
+Conventional Commit, **human commits** (read-only git only).
+
+### F. Scope note — TRACK the gap so it can't slip
+Port-body reshape + pad reskin are currently a **scope gap**: T19's cut line deferred pads, and T21 is named
+"profiling + tuning" (perf), not art. Decide explicitly: **widen T19** to "full reactor art incl. port
+bodies + pads" (T19 is the art task — natural home) **or** add a short art-polish task. Either way it **must**
+be a tracked task with the GDD-§25 demo bar as its acceptance, or the demo ships with white-sphere ports.
+
+---
+
 ## What was actually done
 
-— (filled on close: what shipped, deviations, materials/prefabs/sprites used, commit/PR, date)
+— **T19 not closed (in progress).** As-built state, deviations, materials/prefabs/sprites, and the remaining
+work are in **🔻 Session Handoff** above + `../../reactor-build-recipe.md`. Fill this section on final close.
