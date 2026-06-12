@@ -1,0 +1,21 @@
+iPoly3D Crystal Pack
+====================
+
+Use in Starforge Relay: energy crystal / shard meshes (grabbable pickups).
+
+Author:     iPoly3D
+Source:     https://poly.pizza/bundle/Crystal-Pack-AywAG7aywi
+Format:     FBX (28 low-poly faceted crystals)
+Downloaded: 2026-06-12
+
+License: Creative Commons CC0 1.0 Universal (Public Domain Dedication)
+Canonical URL: https://creativecommons.org/publicdomain/zero/1.0/
+
+No Copyright. This work has been dedicated to the public domain. You may copy,
+modify, distribute and perform the work, even for commercial purposes, all
+without asking permission. No attribution is required.
+
+Note: the downloaded pack did NOT ship a license file. CC0 1.0 is the license
+shown on the Poly Pizza listing above and confirmed against the Creative
+Commons CC0 1.0 deed (verified 2026-06-12). This file is added by the project
+to satisfy the asset-ledger requirement (docs/assets/asset-ledger.md).
